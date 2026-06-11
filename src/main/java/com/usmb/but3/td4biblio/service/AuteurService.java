@@ -1,5 +1,7 @@
 package com.usmb.but3.td4biblio.service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.data.domain.Sort;
@@ -17,9 +19,7 @@ public class AuteurService {
     private final AuteurRepo auteurRepo;
 
     public List<Auteur> getAllAuteurs() {
-        //return auteurRepo.findAll();
-        // To specify a sort order, use:
-        return auteurRepo.findAll(Sort.by(Sort.Direction.ASC, "id"));
+        return auteurRepo.findAll(Sort.by(Sort.Direction.ASC, "nom", "prenom"));
     }
 
     public Auteur getAuteurById(Integer id) {
@@ -27,33 +27,39 @@ public class AuteurService {
     }
 
     public Auteur saveAuteur(Auteur auteur) {
+        if (auteur.getCreatedAt() == null) {
+            auteur.setCreatedAt(LocalDateTime.now());
+        }
+        auteur.setUpdatedAt(LocalDateTime.now());
         return auteurRepo.save(auteur);
     }
 
     public Auteur updateAuteur(Auteur auteur) {
+        auteur.setUpdatedAt(LocalDateTime.now());
         return auteurRepo.save(auteur);
     }
 
     public void deleteAuteurById(Integer id) {
         auteurRepo.deleteById(id);
     }
+
     public List<Auteur> getAuteursByNom(String nom) {
         return auteurRepo.findByNom(nom);
     }
+
     public List<Auteur> getAuteursByNomAndPrenom(String nom, String prenom) {
         return auteurRepo.findByNomAndPrenom(nom, prenom);
     }
+
     public List<Auteur> getAuteursByNomLikeAndPrenomLike(String nom, String prenom) {
-        //return auteurRepo.findByNomLikeAndPrenomLike("%" + nom + "%", "%" + prenom + "%");
-        return auteurRepo.findByNomLikeAndPrenomLike(nom,prenom);
-    }  
+        return auteurRepo.findByNomLikeAndPrenomLike(nom, prenom);
+    }
 
     public List<Auteur> getAuteursByNomStartWithIgnoreCase(String filter) {
         return auteurRepo.findByNomStartsWithIgnoreCase(filter);
-    }  
-
-    public List<Auteur> getByNomContainingIgnoreCase(String filter) {
-       return auteurRepo.findByNomContainingIgnoreCase(filter);
     }
 
+    public List<Auteur> getByNomContainingIgnoreCase(String filter) {
+        return auteurRepo.findByNomContainingIgnoreCase(filter);
+    }
 }

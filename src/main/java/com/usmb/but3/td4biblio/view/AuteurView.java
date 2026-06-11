@@ -17,77 +17,67 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-// MS added for UI unit test : @Component and @Scope("prototype") are needed for the view to be instantiated correctly
 @Component
 @Scope("prototype")
-@Route (value="auteur") 
+@Route(value = "auteur")
 @PageTitle("Les Auteurs")
 @Menu(title = "Les Auteurs", order = 0, icon = "vaadin:clipboard-check")
 public class AuteurView extends VerticalLayout {
 
-	private final AuteurService auteurService;
+    private final AuteurService auteurService;
+    final Grid<Auteur> grid;
+    final TextField filter;
+    private final Button addNewBtn;
+    final AuteurEditor editor;
 
-	final Grid<Auteur> grid;
+    public Button getAddNewBtn() {
+        return addNewBtn;
+    }
 
-	final TextField filter;
+    public AuteurView(AuteurService auteurService, AuteurEditor editor) {
+        this.auteurService = auteurService;
+        this.editor = editor;
+        this.grid = new Grid<>(Auteur.class);
+        this.filter = new TextField();
+        this.addNewBtn = new Button("Ajouter un auteur", VaadinIcon.PLUS.create());
 
-	private final Button addNewBtn;
+        // build layout
+        HorizontalLayout actions = new HorizontalLayout(filter, addNewBtn);
+        add(actions, grid, editor);
 
-	public Button getAddNewBtn() {
-		return addNewBtn;
-	}
+        grid.setHeight("300px");
+        grid.setColumns("id", "nom", "prenom", "nationalite", "paysAuteur", "dateNaissance", "dateDeces");
+        grid.getColumnByKey("id").setWidth("50px").setFlexGrow(0);
 
-	final AuteurEditor editor;
+        filter.setPlaceholder("Filtrer par nom ou prénom");
 
-	public AuteurView(AuteurService auteurService, AuteurEditor editor) {
-		this.auteurService = auteurService;
-		this.editor = editor;
-		this.grid = new Grid<>(Auteur.class);
-		this.filter = new TextField();
-		this.addNewBtn = new Button("Ajouter un auteur", VaadinIcon.PLUS.create());
+        // Replace listing with filtered content when user changes filter
+        filter.setValueChangeMode(ValueChangeMode.LAZY);
+        filter.addValueChangeListener(e -> listAuteurs(e.getValue()));
 
-		// build layout
-		HorizontalLayout actions = new HorizontalLayout(filter, addNewBtn);
-		add(actions, grid, editor);
+        // Connect selected Auteur to editor or hide if none is selected
+        grid.asSingleSelect().addValueChangeListener(e -> {
+            editor.editAuteur(e.getValue());
+        });
 
-		grid.setHeight("300px");
-		grid.setColumns("id", "nom", "prenom", "nationalite", "dateNaissance", "dateDeces");
-		grid.getColumnByKey("id").setWidth("50px").setFlexGrow(0);
+        // Instantiate and edit new Auteur when the new button is clicked
+        addNewBtn.addClickListener(e -> editor.editAuteur(new Auteur(null, "", "", null, null, "", "", "", "", null, null)));
 
-		filter.setPlaceholder("Filtrer par nom");
+        // Listen changes made by the editor, refresh data from backend
+        editor.setChangeHandler(() -> {
+            editor.setVisible(false);
+            listAuteurs(filter.getValue());
+        });
 
-		// Hook logic to components
+        // Initialize listing
+        listAuteurs(null);
+    }
 
-		// Replace listing with filtered content when user changes filter
-		filter.setValueChangeMode(ValueChangeMode.LAZY);
-		filter.addValueChangeListener(e -> listAuteurs(e.getValue()));
-
-		// Connect selected Customer to editor or hide if none is selected
-		grid.asSingleSelect().addValueChangeListener(e -> {
-			editor.editAuteur(e.getValue());
-		});
-
-		// Instantiate and edit new Customer the new button is clicked
-		addNewBtn.addClickListener(e -> editor.editAuteur(new Auteur(null, "", "", "", null, null)));
-
-		// Listen changes made by the editor, refresh data from backend
-		editor.setChangeHandler(() -> {
-			editor.setVisible(false);
-			listAuteurs(filter.getValue());
-		});
-
-		// Initialize listing
-		listAuteurs(null);
-	}
-
-	// tag::listAuteurs[]
-	void listAuteurs(String filterText) {
-		if (StringUtils.hasText(filterText)) {
-			grid.setItems(auteurService.getByNomContainingIgnoreCase(filterText));
-		} else {
-			grid.setItems(auteurService.getAllAuteurs());
-		}
-	}
-	// end::listCustomers[]
-
+    void listAuteurs(String filterText) {
+        if (StringUtils.hasText(filterText)) {
+            grid.setItems(auteurService.getByNomContainingIgnoreCase(filterText));
+        } else {
+            grid.setItems(auteurService.getAllAuteurs());
+        }
+    }
 }

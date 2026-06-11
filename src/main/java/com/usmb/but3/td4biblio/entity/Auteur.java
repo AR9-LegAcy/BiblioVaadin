@@ -5,31 +5,58 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 /**
- * Une classe entité qui représente une table de la base de données
- */
+ * Une classe entité qui représente la table AUTEUR de la base de données
+ */
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
 @Entity
-@Table(name = "auteur")
-
+@Table(name = "auteur", schema = "biblio")
 public class Auteur {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_auteur")
     private Integer id;
+
+    @Column(name = "nom_auteur", nullable = false, length = 100)
     private String nom;
+
+    @Column(name = "prenom_auteur", nullable = false, length = 100)
     private String prenom;
-    private String nationalite;
+
+    @Column(name = "date_naissance")
     private LocalDate dateNaissance;
+
+    @Column(name = "date_mort")
     private LocalDate dateDeces;
+
+    @Column(name = "pays_auteur", length = 100)
+    private String paysAuteur;
+
+    @Column(name = "ville_auteur", length = 100)
+    private String villeAuteur;
+
+    @Column(name = "nationnalite_auteur", length = 100)
+    private String nationalite;
+
+    @Column(name = "wikipedia_auteur", length = 150)
+    private String wikipediaAuteur;
+
+    @Column(name = "created_at_auteur")
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at_auteur")
+    private LocalDateTime updatedAt;
 
     public boolean isEqualTo(Auteur auteur) {
         if (this == auteur) return true;
@@ -69,6 +96,7 @@ public class Auteur {
     }
 
     public String getDesc() {
-        return prenom + " " + nom + " (" + dateNaissance.getYear() + "-" + (dateDeces != null ? dateDeces.getYear() : "en vie") + ")";
+        return prenom + " " + nom + " (" + (dateNaissance != null ? dateNaissance.getYear() : "?") + 
+               "-" + (dateDeces != null ? dateDeces.getYear() : "en vie") + ")";
     }
 }

@@ -10,4 +10,5 @@ public interface AuteurRepo extends JpaRepository<Auteur, Integer> {
     List<Auteur> findByNomLikeAndPrenomLike(String nom, String prenom);
     List<Auteur> findByNomStartsWithIgnoreCase(String filterText);
     List<Auteur> findByNomContainingIgnoreCase(String filter);
+    List<Auteur> findByPrenomContainingIgnoreCase(String filter);
 }
