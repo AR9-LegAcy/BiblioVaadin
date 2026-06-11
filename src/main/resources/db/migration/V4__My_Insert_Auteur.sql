@@ -1,0 +1,6 @@
+INSERT INTO biblio.AUTEUR
+(NOM_AUTEUR, PRENOM_AUTEUR, DATE_NAISSANCE, PAYS_AUTEUR, CREATED_AT_AUTEUR)
+VALUES
+('Hugo', 'Victor', '1802-02-26', 'France', CURRENT_DATE),
+('Camus', 'Albert', '1913-11-07', 'France', CURRENT_DATE),
+('Orwell', 'George', '1903-06-25', 'Royaume-Uni', CURRENT_DATE);
