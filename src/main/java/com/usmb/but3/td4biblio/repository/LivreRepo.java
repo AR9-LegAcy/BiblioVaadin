@@ -1,18 +1,17 @@
 package com.usmb.but3.td4biblio.repository;
 
 import java.util.List;
-
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
-
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import com.usmb.but3.td4biblio.entity.Livre;
 
-/**
- * Repository is an interface that provides access to data in a database
- */
 public interface LivreRepo extends JpaRepository<Livre, Integer> {
-
-    List<Livre> findByAuteurId(Integer auteurId);
-    List<Livre> findByTitreContainingIgnoreCase(String titre);
-    List<Livre> findByAuteurId(Integer auteurId, Sort sort); 
+    List<Livre> findByTitreLivreContainingIgnoreCase(String titre);
+    
+    @Query("SELECT l FROM Livre l WHERE l.idEditeur = :idEditeur")
+    List<Livre> findByIdEditeur(@Param("idEditeur") Integer idEditeur);
+    
+    @Query("SELECT l FROM Livre l WHERE l.idTypeDocument = :idTypeDocument")
+    List<Livre> findByIdTypeDocument(@Param("idTypeDocument") Integer idTypeDocument);
 }

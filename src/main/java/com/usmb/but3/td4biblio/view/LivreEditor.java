@@ -1,13 +1,13 @@
 package com.usmb.but3.td4biblio.view;
 
-import com.usmb.but3.td4biblio.entity.Auteur;
+import org.springframework.context.annotation.Scope;
+
 import com.usmb.but3.td4biblio.entity.Livre;
-import com.usmb.but3.td4biblio.service.AuteurService;
 import com.usmb.but3.td4biblio.service.LivreService;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.KeyNotifier;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -18,136 +18,107 @@ import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
 
-
 /**
- * A simple example to introduce building forms. As your real application is probably much
- * more complicated than this example, you could re-use this form in multiple places. This
- * example component is only used in MainView.
- * <p>
- * In a real world application you'll most likely using a common super class for all your
- * forms - less code, better UX.
+ * Form editor for Livre entity
  */
+@Scope("prototype")
 @SpringComponent
 @UIScope
 public class LivreEditor extends VerticalLayout implements KeyNotifier {
 
     private final LivreService livreService;
-	private final AuteurService auteurService;
-	
+    private Livre livre;
 
-	/**
-	 * The currently edited livre
-	 */
-	private Livre livre;
-
-	/* Fields to edit properties in Livre entity */
-	TextField titre = new TextField("Titre");
-	TextField editeur = new TextField("Editeur");
-    DatePicker datePublication = new DatePicker("Date de publication");
+    /* Fields to edit properties in Livre entity */
+    TextField titreLivre = new TextField("Titre");
+    TextField codeIsbn = new TextField("Code ISBN");
+    IntegerField idEditeur = new IntegerField("ID Éditeur");
+    IntegerField idTypeDocument = new IntegerField("ID Type Document");
     IntegerField nbPages = new IntegerField("Nombre de pages");
-    {
-        nbPages.setMin(1);
-        nbPages.setMax(10000);
-        nbPages.setStep(1);
-        nbPages.setPlaceholder("Nombre de pages");
-        nbPages.setClearButtonVisible(true);
+    DatePicker datePublication = new DatePicker("Date de publication");
+    DatePicker dateAcquisition = new DatePicker("Date d'acquisition");
+    TextField formatTaille = new TextField("Format/Taille");
+    TextField codeEmplacement = new TextField("Code emplacement");
+    TextField descriptionDocument = new TextField("Description");
+    TextField gifDocument = new TextField("Image (GIF)");
+    TextField etatDocument = new TextField("État du document");
+
+    HorizontalLayout fields1 = new HorizontalLayout(titreLivre, codeIsbn);
+    HorizontalLayout fields2 = new HorizontalLayout(idEditeur, idTypeDocument);
+    HorizontalLayout fields3 = new HorizontalLayout(nbPages, datePublication, dateAcquisition);
+    HorizontalLayout fields4 = new HorizontalLayout(formatTaille, codeEmplacement);
+    HorizontalLayout fields5 = new HorizontalLayout(descriptionDocument, etatDocument);
+    HorizontalLayout fields6 = new HorizontalLayout(gifDocument);
+
+    /* Action buttons */
+    Button save = new Button("Sauvegarder", VaadinIcon.CHECK.create());
+    Button cancel = new Button("Annuler");
+    Button delete = new Button("Supprimer", VaadinIcon.TRASH.create());
+    HorizontalLayout actions = new HorizontalLayout(save, cancel, delete);
+
+    Binder<Livre> binder = new Binder<>(Livre.class);
+    private ChangeHandler changeHandler;
+
+    public LivreEditor(LivreService service) {
+        this.livreService = service;
+
+        add(fields1, fields2, fields3, fields4, fields5, fields6, actions);
+
+        // bind using naming convention
+        binder.bindInstanceFields(this);
+
+        // Configure and style components
+        setSpacing(true);
+
+        save.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        delete.addThemeVariants(ButtonVariant.LUMO_ERROR);
+
+        addKeyPressListener(Key.ENTER, e -> save());
+
+        // wire action buttons to save, delete and reset
+        save.addClickListener(e -> save());
+        delete.addClickListener(e -> delete());
+        cancel.addClickListener(e -> editLivre(livre));
+        setVisible(false);
     }
 
-	ComboBox<Auteur> auteurComboBox = new ComboBox<>("Auteur");
-
-	/* Action buttons */
-	Button save = new Button("Sauvegarder", VaadinIcon.CHECK.create());
-	Button cancel = new Button("Annuler");
-	Button delete = new Button("Supprimer", VaadinIcon.TRASH.create());
-	HorizontalLayout actions = new HorizontalLayout(save, cancel, delete);
-
-	Binder<Livre> binder = new Binder<>(Livre.class);
-	private ChangeHandler changeHandler;
-
-	public LivreEditor(AuteurService auteurService, LivreService livreService) {
-
-		this.livreService = livreService;
-		this.auteurService = auteurService;
-
-		auteurComboBox.setPlaceholder("Sélectionner un auteur");
-		auteurComboBox.setClearButtonVisible(true);
-		// do it after :
-		//auteurComboBox.setItems(auteurService.getAllAuteurs());
-		auteurComboBox.setItemLabelGenerator(Auteur::getDesc);
-
-		add(titre, auteurComboBox, datePublication, editeur, nbPages , actions);
-
-		// bind using naming convention
-		binder.bindInstanceFields(this);
-        binder.forField(auteurComboBox)
-            .asRequired("Auteur est obligatoire")
-            .bind(Livre::getAuteur, Livre::setAuteur);
-
-		addKeyPressListener(Key.ENTER, e -> save());
-
-		// wire action buttons to save, delete and reset
-		save.addClickListener(e -> save());
-		delete.addClickListener(e -> delete());
-		cancel.addClickListener(e -> editLivre(livre));
-		setVisible(false);
-	}
-
-	void delete() {
-		livreService.deleteLivreById(livre.getId());
-		changeHandler.onChange();
-	}
-
-	void save() {
-        if (livre.getId() == null) {
-            // If the livre is new, we save it
-            livreService.saveLivre(livre);
-        } else {
-            // If the livre already exists, we update it
-            livreService.updateLivre(livre);
-        }
+    void delete() {
+        livreService.deleteLivreById(livre.getIdDocument());
         changeHandler.onChange();
-	}
+    }
 
-	public interface ChangeHandler {
-		void onChange();
-	}
+    void save() {
+        livreService.saveLivre(livre);
+        changeHandler.onChange();
+    }
 
-	public final void editLivre(Livre l) {
-		if (l == null) {
-			setVisible(false);
-			return;
-		}
+    public interface ChangeHandler {
+        void onChange();
+    }
 
-		auteurComboBox.setItems(auteurService.getAllAuteurs());
+    public final void editLivre(Livre l) {
+        if (l == null) {
+            setVisible(false);
+            return;
+        }
+        final boolean persisted = l.getIdDocument() != null;
+        if (persisted) {
+            livre = livreService.getLivreById(l.getIdDocument());
+        } else {
+            livre = l;
+        }
+        cancel.setVisible(persisted);
 
-		final boolean persisted = l.getId() != null;
-		if (persisted) {
-			// Find fresh entity for editing
-			// In a more complex app, you might want to load
-			// the entity/DTO with lazy loaded relations for editing
-			livre = livreService.getLivreById(l.getId());
-		}
-		else {
-			livre = l;
-		}
-		cancel.setVisible(persisted);
+        // Bind livre properties to similarly named fields
+        binder.setBean(livre);
 
-		// Bind livre properties to similarly named fields
-		// Could also use annotation or "manual binding" or programmatically
-		// moving values from fields to entities before saving
-		binder.setBean(livre);
+        setVisible(true);
 
-		setVisible(true);
+        // Focus title initially
+        titreLivre.focus();
+    }
 
-		// Focus first name initially
-		titre.focus();
-	}
-
-	public void setChangeHandler(ChangeHandler h) {
-		// ChangeHandler is notified when either save or delete
-		// is clicked
-		changeHandler = h;
-	}
-
+    public void setChangeHandler(ChangeHandler h) {
+        changeHandler = h;
+    }
 }
-
