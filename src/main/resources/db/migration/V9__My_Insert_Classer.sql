@@ -1,0 +1,5 @@
+INSERT INTO biblio.CLASSER (ID_TYPE_AUTEUR, ID_AUTEUR)
+VALUES
+(1, 1),
+(1, 2),
+(2, 3);
