@@ -55,7 +55,7 @@ public class EditeurView extends VerticalLayout {
         filter.setValueChangeMode(ValueChangeMode.LAZY);
         filter.addValueChangeListener(e -> listEditeurs(e.getValue()));
 
-        // Connect selected Editeur to editor or hide if none is selected
+        // Connect selected Livre to editor or hide if none is selected
         grid.asSingleSelect().addValueChangeListener(e -> {
             editor.editEditeur(e.getValue());
         });
