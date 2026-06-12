@@ -4,6 +4,9 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
@@ -11,6 +14,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -22,9 +26,6 @@ public class Document {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_document")
     private Integer idDocument;
-
-    @Column(name = "id_type_document", nullable = false)
-    private Integer idTypeDocument;
 
     @Column(name = "gif_document", length = 300)
     private String gifDocument;
@@ -55,6 +56,16 @@ public class Document {
 
     @Column(name = "updated_at_document")
     private LocalDateTime updatedAt;
+
+    @ManyToOne
+    @JoinColumn(name = "id_type_document")
+    private TypeDocument typeDocument;
+
+    @OneToMany(mappedBy = "idDocument")
+    private List<Livre> livres;
+
+    @OneToMany(mappedBy = "idDocument")
+    private List<Emprunter> emprunters;
 
     public boolean isEqualTo(Document document) {
         if (this == document) return true;
@@ -91,5 +102,9 @@ public class Document {
         result = 31 * result + (codeEmpruntable != null ? codeEmpruntable.hashCode() : 0);
         result = 31 * result + (etatDocument != null ? etatDocument.hashCode() : 0);
         return result;
+    }
+    @Override
+    public String toString() {
+        return codeIsbn;
     }
 }

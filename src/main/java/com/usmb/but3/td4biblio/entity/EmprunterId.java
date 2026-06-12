@@ -10,8 +10,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class EmprunterId implements Serializable{
-    private Integer idDocument;
-    private Integer carteEmprunteur;
+    private Document idDocument;
+    private Emprunteur carteEmprunteur;
 
     @Override
     public boolean equals(Object obj) {

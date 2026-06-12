@@ -4,6 +4,9 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
@@ -11,6 +14,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * Une classe entité qui représente la table Bibliotheque de la base de données
@@ -48,6 +52,12 @@ public class Bibliotheque {
 
     @Column(name = "updated_at_bibliotheque")
     private LocalDateTime updatedAt;
+
+    @OneToMany(mappedBy = "bibliotheque")
+    private List<Bibliothecaire> bibliothecaires;
+
+    @OneToMany(mappedBy = "bibliotheque")
+    private List<Evenement> evenements;
 
     public boolean isEqualTo(Bibliotheque bibliotheque) {
         if (this == bibliotheque)
@@ -94,4 +104,8 @@ public class Bibliotheque {
         return result;
     }
 
+    @Override
+    public String toString() {
+        return nom;
+    }
 }

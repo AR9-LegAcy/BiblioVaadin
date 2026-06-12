@@ -17,20 +17,10 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "livre", schema = "biblio")
 public class Livre {
-
-    @Column(name = "id_document")
-    private Integer idDocument;
-
     @Id
     @Column(name = "id_livre")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer idLivre;
-
-    @Column(name = "id_editeur", nullable = false)
-    private Integer idEditeur;
-
-    @Column(name = "id_type_document", nullable = false)
-    private Integer idTypeDocument;
 
     @Column(name = "gif_document", length = 200)
     private String gifDocument;
@@ -70,6 +60,18 @@ public class Livre {
 
     @Column(name = "updated_at_document")
     private LocalDateTime updatedAt;
+
+    @ManyToOne
+    @JoinColumn(name = "id_document")
+    private Document idDocument;
+    
+    @ManyToOne
+    @JoinColumn(name = "id_editeur")
+    private Editeur idEditeur;
+    
+    @ManyToOne
+    @JoinColumn(name = "id_type_document")
+    private TypeDocument idTypeDocument;
 
     public boolean isEqualTo(Livre livre) {
         if (this == livre) return true;
