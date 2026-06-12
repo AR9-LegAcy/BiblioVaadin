@@ -34,7 +34,7 @@ public class Emprunteur {
     @Column(name = "adresse_ville_emprunteur", length = 100, nullable = false)
     private String adresseVille;
 
-    @Column(name = "adresse_code_postal_emprunteur", length = 5, nullable = false)
+    @Column(name = "adresse_codepostal_emprunteur", length = 5, nullable = false)
     private String adresseCodePostal;
 
     @Column(name = "email_emprunteur", length = 250, nullable = false)
