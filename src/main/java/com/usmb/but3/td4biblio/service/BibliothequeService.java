@@ -18,7 +18,7 @@ public class BibliothequeService {
     private final BibliothequeRepo bibliothequeRepo;
 
     public List<Bibliotheque> getAllBibliotheques() {
-        return bibliothequeRepo.findAll(Sort.by(Sort.Direction.ASC, "nom", "prenom"));
+        return bibliothequeRepo.findAll(Sort.by(Sort.Direction.ASC, "nom"));
     }
 
     public Bibliotheque getBibliothequeById(Integer id) {
