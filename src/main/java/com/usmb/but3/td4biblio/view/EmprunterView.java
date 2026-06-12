@@ -60,7 +60,7 @@ public class EmprunterView extends VerticalLayout {
         });
 
         // Instantiate and edit new Auteur when the new button is clicked
-        addNewBtn.addClickListener(e -> editor.editEmprunter(new Emprunter(null, null, null, null, null, 0, null, null)));
+        addNewBtn.addClickListener(e -> editor.editEmprunter(new Emprunter()));
 
         // Listen changes made by the editor, refresh data from backend
         editor.setChangeHandler(() -> {

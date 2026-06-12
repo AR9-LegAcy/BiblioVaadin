@@ -46,9 +46,8 @@ public class BibliothecaireView extends VerticalLayout {
         add(actions, grid, editor);
 
         grid.setHeight("300px");
-        grid.setColumns("pseudo", "id", "nom", "prenom", "adresseRue", "adresseVille", "adresseCP", "email",
+        grid.setColumns("pseudo", "bibliotheque", "nom", "prenom", "adresseRue", "adresseVille", "adresseCP", "email",
                 "dateNaissance");
-        grid.getColumnByKey("id").setWidth("50px").setFlexGrow(0);
 
         filter.setPlaceholder("Filtrer par nom ou prénom");
 

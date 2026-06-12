@@ -40,7 +40,7 @@ public class EvenementEditor extends VerticalLayout implements KeyNotifier {
 
     DatePicker dateFin = new DatePicker("Date fin");
 
-    ComboBox<Bibliotheque> bibliotheque =
+    ComboBox<Bibliotheque> idBibliotheque =
             new ComboBox<>("Bibliothèque");
 
     ComboBox<TypeEvenement> typeEvenement =
@@ -69,10 +69,10 @@ public class EvenementEditor extends VerticalLayout implements KeyNotifier {
 
         this.evenementService = evenementService;
 
-        bibliotheque.setItems(
+        idBibliotheque.setItems(
                 bibliothequeService.getAllBibliotheques());
 
-        bibliotheque.setItemLabelGenerator(
+                idBibliotheque.setItemLabelGenerator(
                 Bibliotheque::getNom);
 
         typeEvenement.setItems(
@@ -85,7 +85,7 @@ public class EvenementEditor extends VerticalLayout implements KeyNotifier {
                 titre,
                 description,
                 new HorizontalLayout(dateDebut, dateFin),
-                new HorizontalLayout(typeEvenement, bibliotheque),
+                new HorizontalLayout(typeEvenement, idBibliotheque),
                 actions
         );
 

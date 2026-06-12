@@ -61,7 +61,7 @@ public class LivreView extends VerticalLayout {
         });
 
         // Instantiate and edit new Livre when the new button is clicked
-        addNewBtn.addClickListener(e -> editor.editLivre(new Livre(null, null, null, null, "", "", null, null, "", "", null, "", "", false, "", null, null)));
+        addNewBtn.addClickListener(e -> editor.editLivre(new Livre()));
 
         // Listen changes made by the editor, refresh data from backend
         editor.setChangeHandler(() -> {

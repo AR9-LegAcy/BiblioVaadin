@@ -58,6 +58,8 @@ public class Auteur {
     @Column(name = "updated_at_auteur")
     private LocalDateTime updatedAt;
 
+    
+
     public boolean isEqualTo(Auteur auteur) {
         if (this == auteur) return true;
         if (auteur == null) return false;
@@ -98,5 +100,10 @@ public class Auteur {
     public String getDesc() {
         return prenom + " " + nom + " (" + (dateNaissance != null ? dateNaissance.getYear() : "?") + 
                "-" + (dateDeces != null ? dateDeces.getYear() : "en vie") + ")";
+    }
+
+    @Override
+    public String toString() {
+        return nom;
     }
 }

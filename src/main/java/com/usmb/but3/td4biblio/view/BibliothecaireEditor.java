@@ -3,11 +3,13 @@ package com.usmb.but3.td4biblio.view;
 import org.springframework.context.annotation.Scope;
 
 import com.usmb.but3.td4biblio.entity.Bibliothecaire;
+import com.usmb.but3.td4biblio.entity.Bibliotheque;
 import com.usmb.but3.td4biblio.service.BibliothecaireService;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.KeyNotifier;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -33,15 +35,18 @@ public class BibliothecaireEditor extends VerticalLayout implements KeyNotifier 
     TextField pseudo = new TextField("Pseudo");
     TextField nom = new TextField("Nom");
     TextField prenom = new TextField("Prénom");
-    IntegerField id = new IntegerField("Id de la bibliothèque");
+    ComboBox<Bibliotheque> bibliothequeField = new ComboBox<>("Bibliothèque");
+    {
+        bibliothequeField.setItemLabelGenerator(Bibliotheque::getNom);
+    }
     TextField adresseRue = new TextField("Rue");
     TextField adresseVille = new TextField("Ville");
     TextField adresseCP = new TextField("Code Postal");
     TextField email = new TextField("Email");
     DatePicker dateNaissance = new DatePicker("Date de naissance");
     TextField motDePasse = new TextField("Mot de passe");
-    
-    HorizontalLayout fields1 = new HorizontalLayout(pseudo, prenom, nom, id);
+
+    HorizontalLayout fields1 = new HorizontalLayout(pseudo, prenom, nom, bibliothequeField);
     HorizontalLayout fields2 = new HorizontalLayout(adresseRue, adresseVille, adresseCP);
     HorizontalLayout fields3 = new HorizontalLayout(email);
     HorizontalLayout fields4 = new HorizontalLayout(dateNaissance);
@@ -98,7 +103,7 @@ public class BibliothecaireEditor extends VerticalLayout implements KeyNotifier 
             setVisible(false);
             return;
         }
-        final boolean persisted = a.getId() != null;
+        final boolean persisted = a.getNom() != null;
         if (persisted) {
             bibliothecaire = bibliothecaireService.getBibliothecaireByPseudo(a.getPseudo());
         } else {

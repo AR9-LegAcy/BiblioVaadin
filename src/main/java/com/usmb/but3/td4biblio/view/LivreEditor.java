@@ -2,12 +2,16 @@ package com.usmb.but3.td4biblio.view;
 
 import org.springframework.context.annotation.Scope;
 
+import com.usmb.but3.td4biblio.entity.Editeur;
+import com.usmb.but3.td4biblio.entity.Emprunteur;
 import com.usmb.but3.td4biblio.entity.Livre;
+import com.usmb.but3.td4biblio.entity.TypeDocument;
 import com.usmb.but3.td4biblio.service.LivreService;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.KeyNotifier;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -32,8 +36,14 @@ public class LivreEditor extends VerticalLayout implements KeyNotifier {
     /* Fields to edit properties in Livre entity */
     TextField titreLivre = new TextField("Titre");
     TextField codeIsbn = new TextField("Code ISBN");
-    IntegerField idEditeur = new IntegerField("ID Éditeur");
-    IntegerField idTypeDocument = new IntegerField("ID Type Document");
+    ComboBox<Editeur> editeurField = new ComboBox<>("Éditeur");
+    {
+        editeurField.setItemLabelGenerator(Editeur::getNom);
+    }
+    ComboBox<TypeDocument> typeDocumentField = new ComboBox<>("Type document");
+    {
+        typeDocumentField.setItemLabelGenerator(TypeDocument::getNomTypeDocument);
+    }
     IntegerField nbPages = new IntegerField("Nombre de pages");
     DatePicker datePublication = new DatePicker("Date de publication");
     DatePicker dateAcquisition = new DatePicker("Date d'acquisition");
@@ -44,7 +54,7 @@ public class LivreEditor extends VerticalLayout implements KeyNotifier {
     TextField etatDocument = new TextField("État du document");
 
     HorizontalLayout fields1 = new HorizontalLayout(titreLivre, codeIsbn);
-    HorizontalLayout fields2 = new HorizontalLayout(idEditeur, idTypeDocument);
+    HorizontalLayout fields2 = new HorizontalLayout(editeurField, typeDocumentField);
     HorizontalLayout fields3 = new HorizontalLayout(nbPages, datePublication, dateAcquisition);
     HorizontalLayout fields4 = new HorizontalLayout(formatTaille, codeEmplacement);
     HorizontalLayout fields5 = new HorizontalLayout(descriptionDocument, etatDocument);
@@ -83,7 +93,7 @@ public class LivreEditor extends VerticalLayout implements KeyNotifier {
     }
 
     void delete() {
-        livreService.deleteLivreById(livre.getIdDocument());
+        livreService.deleteLivreById(livre.getIdLivre());
         changeHandler.onChange();
     }
 
@@ -103,7 +113,7 @@ public class LivreEditor extends VerticalLayout implements KeyNotifier {
         }
         final boolean persisted = l.getIdDocument() != null;
         if (persisted) {
-            livre = livreService.getLivreById(l.getIdDocument());
+            livre = livreService.getLivreById(l.getIdLivre());
         } else {
             livre = l;
         }

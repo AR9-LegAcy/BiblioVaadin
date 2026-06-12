@@ -1,12 +1,14 @@
 package com.usmb.but3.td4biblio.entity;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -32,6 +34,9 @@ public class TypeEvenement {
 
     @Column(name = "updated_at_type_evenement")
     private LocalDateTime updatedAt;
+
+    @OneToMany(mappedBy = "typeEvenement")
+    private List<Evenement> evenements;
 
     public boolean isEqualTo(TypeEvenement typeEvenement) {
         if (this == typeEvenement) return true;
@@ -59,5 +64,9 @@ public class TypeEvenement {
         result = 31 * result + (createdAt != null ? createdAt.hashCode() : 0);
         result = 31 * result + (updatedAt != null ? updatedAt.hashCode() : 0);
         return result;
+    }
+    @Override
+    public String toString() {
+        return nom;
     }
 }

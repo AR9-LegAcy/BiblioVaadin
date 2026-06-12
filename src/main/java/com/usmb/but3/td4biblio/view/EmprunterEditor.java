@@ -2,13 +2,17 @@ package com.usmb.but3.td4biblio.view;
 
 import org.springframework.context.annotation.Scope;
 
+import com.usmb.but3.td4biblio.entity.Bibliotheque;
+import com.usmb.but3.td4biblio.entity.Document;
 import com.usmb.but3.td4biblio.entity.Emprunter;
 import com.usmb.but3.td4biblio.entity.EmprunterId;
+import com.usmb.but3.td4biblio.entity.Emprunteur;
 import com.usmb.but3.td4biblio.service.EmprunterService;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.KeyNotifier;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -30,14 +34,20 @@ public class EmprunterEditor extends VerticalLayout implements KeyNotifier {
     private Emprunter emprunter;
 
     /* Fields to edit properties in Emprunter entity */
-    TextField carteEmprunteur = new TextField("Carte Emprunteur");
-    TextField idDocument = new TextField("ID Document");
+    ComboBox<Emprunteur> emprunteurField = new ComboBox<>("Emprunteur");
+    {
+        emprunteurField.setItemLabelGenerator(Emprunteur::getNom);
+    }
+    ComboBox<Document> documentField = new ComboBox<>("ID Document");
+    {
+        documentField.setItemLabelGenerator(Document::getCodeIsbn);
+    }
     DatePicker dateEmprunt = new DatePicker("Date d'emprunt");
     DatePicker dateRetourPrevue = new DatePicker("Date de retour prévue");
     DatePicker dateRetourReelle = new DatePicker("Date de retour réelle");
     TextField prolongationEmprunt = new TextField("Prolongation d'emprunt");
 
-    HorizontalLayout fields1 = new HorizontalLayout(carteEmprunteur, idDocument);
+    HorizontalLayout fields1 = new HorizontalLayout(emprunteurField, documentField);
     HorizontalLayout fields2 = new HorizontalLayout(dateEmprunt, dateRetourPrevue, dateRetourReelle);
     HorizontalLayout fields3 = new HorizontalLayout(prolongationEmprunt);
 
@@ -96,7 +106,7 @@ public class EmprunterEditor extends VerticalLayout implements KeyNotifier {
         this.emprunter = emprunter;
         binder.readBean(emprunter);
         setVisible(true);
-        carteEmprunteur.focus();
+        emprunteurField.focus();
     }
 
     public void setChangeHandler(ChangeHandler h) {
