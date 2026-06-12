@@ -4,6 +4,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.IdClass;
 import jakarta.persistence.Table;
 import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
@@ -21,6 +22,7 @@ import java.time.LocalDateTime;
 @Data
 @Entity
 @Table(name = "emprunter", schema = "biblio")
+@IdClass(EmprunterId.class)
 public class Emprunter {
     @Id
     @Column(name = "id_document", nullable = false)
