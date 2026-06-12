@@ -8,6 +8,7 @@ import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.KeyNotifier;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -16,6 +17,9 @@ import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
 
+/**
+ * Form editor for Bibliotheque entity
+ */
 @Scope("prototype")
 @SpringComponent
 @UIScope
@@ -24,14 +28,18 @@ public class BibliothequeEditor extends VerticalLayout implements KeyNotifier {
     private final BibliothequeService bibliothequeService;
     private Bibliotheque bibliotheque;
 
-    TextField nom = new TextField("Nom");
-    TextField adresseRue = new TextField("Adresse");
-    TextField adresseVille = new TextField("Ville");
-    TextField codePostal = new TextField("Code postal");
-    TextField horaires = new TextField("Horaires");
+    /* Fields to edit properties in Bibliotheque entity */
+    TextField nom = new TextField("nom");
+    TextField adresse_rue = new TextField("rue");
+    TextField adresse_ville = new TextField("ville");
+    TextField adresse_cp = new TextField("code postal");
+    TextField horaires = new TextField("horaires");
 
-    HorizontalLayout fields = new HorizontalLayout(nom, adresseRue, adresseVille, codePostal, horaires);
+    HorizontalLayout fields1 = new HorizontalLayout(nom);
+    HorizontalLayout fields2 = new HorizontalLayout(adresse_rue, adresse_ville, adresse_cp);
+    HorizontalLayout fields3 = new HorizontalLayout(horaires);
 
+    /* Action buttons */
     Button save = new Button("Sauvegarder", VaadinIcon.CHECK.create());
     Button cancel = new Button("Annuler");
     Button delete = new Button("Supprimer", VaadinIcon.TRASH.create());
@@ -40,13 +48,15 @@ public class BibliothequeEditor extends VerticalLayout implements KeyNotifier {
     Binder<Bibliotheque> binder = new Binder<>(Bibliotheque.class);
     private ChangeHandler changeHandler;
 
-    public BibliothequeEditor(BibliothequeService bibliothequeService) {
-        this.bibliothequeService = bibliothequeService;
+    public BibliothequeEditor(BibliothequeService service) {
+        this.bibliothequeService = service;
 
-        add(fields, actions);
+        add(fields1, fields2, fields3, actions);
 
+        // bind using naming convention
         binder.bindInstanceFields(this);
 
+        // Configure and style components
         setSpacing(true);
 
         save.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
@@ -54,6 +64,7 @@ public class BibliothequeEditor extends VerticalLayout implements KeyNotifier {
 
         addKeyPressListener(Key.ENTER, e -> save());
 
+        // wire action buttons to save, delete and reset
         save.addClickListener(e -> save());
         delete.addClickListener(e -> delete());
         cancel.addClickListener(e -> editBibliotheque(bibliotheque));
@@ -74,23 +85,25 @@ public class BibliothequeEditor extends VerticalLayout implements KeyNotifier {
         void onChange();
     }
 
-    public final void editBibliotheque(Bibliotheque b) {
-        if (b == null) {
+    public final void editBibliotheque(Bibliotheque a) {
+        if (a == null) {
             setVisible(false);
             return;
         }
-        final boolean persisted = b.getId() != null;
+        final boolean persisted = a.getId() != null;
         if (persisted) {
-            bibliotheque = bibliothequeService.getBibliothequeById(b.getId());
+            bibliotheque = bibliothequeService.getBibliothequeById(a.getId());
         } else {
-            bibliotheque = b;
+            bibliotheque = a;
         }
         cancel.setVisible(persisted);
 
+        // Bind bibliotheque properties to similarly named fields
         binder.setBean(bibliotheque);
 
         setVisible(true);
 
+        // Focus first name initially
         nom.focus();
     }
 

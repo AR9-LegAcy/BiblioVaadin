@@ -1,5 +1,6 @@
 package com.usmb.but3.td4biblio.service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -46,35 +47,11 @@ public class BibliothequeService {
         return bibliothequeRepo.findByNom(nom);
     }
 
-    public List<Bibliotheque> getBibliothequesByAdresseRue(String adresseRue) {
-        return bibliothequeRepo.findByAdresseRue(adresseRue);
+    public List<Bibliotheque> getBibliothequesByNomStartWithIgnoreCase(String filter) {
+        return bibliothequeRepo.findByNomStartsWithIgnoreCase(filter);
     }
 
-    public List<Bibliotheque> getBibliothequesByAdresseVille(String adresseVille) {
-        return bibliothequeRepo.findByAdresseVille(adresseVille);
-    }
-
-    public List<Bibliotheque> getBibliothequesByCodePostal(String codePostal) {
-        return bibliothequeRepo.findByCodePostal(codePostal);
-    }
-
-    public List<Bibliotheque> getByHoraires(String horaires) {
-        return bibliothequeRepo.findByHoraires(horaires);
-    }
-
-    public List<Bibliotheque> getBibliothequesByNomAndAdresseRue(String nom, String adresseRue) {
-        return bibliothequeRepo.findByNomAndAdresseRue(nom, adresseRue);
-    }
-
-    public List<Bibliotheque> getBibliothequesByNomLikeAndAdresseVille(String nom, String adresseVille) {
-        return bibliothequeRepo.findByNomLikeAndAdresseVille(nom, adresseVille);
-    }
-
-    public List<Bibliotheque> getBibliothequesByNomLikeAndCodePostal(String nom, String codePostal) {
-        return bibliothequeRepo.findByNomLikeAndCodePostal(nom, codePostal);
-    }
-
-    public List<Bibliotheque> getByNomLikeAndHoraires(String nom, String horaires) {
-        return bibliothequeRepo.findByNomLikeAndHoraires(nom, horaires);
+    public List<Bibliotheque> getByNomContainingIgnoreCase(String filter) {
+        return bibliothequeRepo.findByNomContainingIgnoreCase(filter);
     }
 }

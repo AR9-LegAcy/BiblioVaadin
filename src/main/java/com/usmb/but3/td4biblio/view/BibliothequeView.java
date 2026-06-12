@@ -20,14 +20,14 @@ import org.springframework.util.StringUtils;
 @Component
 @Scope("prototype")
 @Route(value = "bibliotheque")
-@PageTitle("Les Bibliothèques")
-@Menu(title = "Les Bibliothèques", order = 1, icon = "vaadin:building")
+@PageTitle("Les Bibliotheques")
+@Menu(title = "Les Bibliotheques", order = 0, icon = "vaadin:clipboard-check")
 public class BibliothequeView extends VerticalLayout {
 
     private final BibliothequeService bibliothequeService;
     final Grid<Bibliotheque> grid;
     final TextField filter;
-    final Button addNewBtn;
+    private final Button addNewBtn;
     final BibliothequeEditor editor;
 
     public Button getAddNewBtn() {
@@ -39,35 +39,43 @@ public class BibliothequeView extends VerticalLayout {
         this.editor = editor;
         this.grid = new Grid<>(Bibliotheque.class);
         this.filter = new TextField();
-        this.addNewBtn = new Button("Ajouter une bibliothèque", VaadinIcon.PLUS.create());
+        this.addNewBtn = new Button("Ajouter une bibliotheque", VaadinIcon.PLUS.create());
 
+        // build layout
         HorizontalLayout actions = new HorizontalLayout(filter, addNewBtn);
         add(actions, grid, editor);
 
         grid.setHeight("300px");
-        grid.setColumns("id", "nom", "adresseRue", "adresseVille", "codePostal", "horaires");
-        grid.getColumnByKey("id").setWidth("60px").setFlexGrow(0);
+        grid.setColumns("id", "nom", "adresseRue", "adresseVille", "adresseCP", "horaires");
+        grid.getColumnByKey("id").setWidth("50px").setFlexGrow(0);
 
         filter.setPlaceholder("Filtrer par nom");
 
+        // Replace listing with filtered content when user changes filter
         filter.setValueChangeMode(ValueChangeMode.LAZY);
         filter.addValueChangeListener(e -> listBibliotheques(e.getValue()));
 
-        grid.asSingleSelect().addValueChangeListener(e -> editor.editBibliotheque(e.getValue()));
+        // Connect selected Livre to editor or hide if none is selected
+        grid.asSingleSelect().addValueChangeListener(e -> {
+            editor.editBibliotheque(e.getValue());
+        });
 
+        // Instantiate and edit new Bibliotheque when the new button is clicked
         addNewBtn.addClickListener(e -> editor.editBibliotheque(new Bibliotheque()));
 
+        // Listen changes made by the editor, refresh data from backend
         editor.setChangeHandler(() -> {
             editor.setVisible(false);
             listBibliotheques(filter.getValue());
         });
 
+        // Initialize listing
         listBibliotheques(null);
     }
 
     void listBibliotheques(String filterText) {
         if (StringUtils.hasText(filterText)) {
-            grid.setItems(bibliothequeService.getBibliothequesByNom(filterText));
+            grid.setItems(bibliothequeService.getByNomContainingIgnoreCase(filterText));
         } else {
             grid.setItems(bibliothequeService.getAllBibliotheques());
         }
