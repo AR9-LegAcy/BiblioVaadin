@@ -1,7 +1,9 @@
 package com.usmb.but3.td4biblio.view;
 
 import com.usmb.but3.td4biblio.entity.Livre;
+import com.usmb.but3.td4biblio.service.EditeurService;
 import com.usmb.but3.td4biblio.service.LivreService;
+import com.usmb.but3.td4biblio.service.TypeDocumentService;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -12,7 +14,6 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.Menu;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -25,18 +26,24 @@ import org.springframework.util.StringUtils;
 public class LivreView extends VerticalLayout {
 
     private final LivreService livreService;
+    private final EditeurService editeurService;
+    private final TypeDocumentService typeDocumentService;
+
     final Grid<Livre> grid;
     final TextField filter;
     private final Button addNewBtn;
     final LivreEditor editor;
 
-    public Button getAddNewBtn() {
-        return addNewBtn;
-    }
-
-    public LivreView(LivreService livreService, LivreEditor editor) {
+    public LivreView(LivreService livreService,
+                     EditeurService editeurService,
+                     TypeDocumentService typeDocumentService) {
         this.livreService = livreService;
-        this.editor = editor;
+        this.editeurService = editeurService;
+        this.typeDocumentService = typeDocumentService;
+
+        // Passe les services à l'éditeur
+        this.editor = new LivreEditor(livreService, editeurService, typeDocumentService);
+
         this.grid = new Grid<>(Livre.class);
         this.filter = new TextField();
         this.addNewBtn = new Button("Ajouter un livre", VaadinIcon.PLUS.create());
@@ -51,25 +58,18 @@ public class LivreView extends VerticalLayout {
 
         filter.setPlaceholder("Filtrer par titre");
 
-        // Replace listing with filtered content when user changes filter
         filter.setValueChangeMode(ValueChangeMode.LAZY);
         filter.addValueChangeListener(e -> listLivres(e.getValue()));
 
-        // Connect selected Livre to editor or hide if none is selected
-        grid.asSingleSelect().addValueChangeListener(e -> {
-            editor.editLivre(e.getValue());
-        });
+        grid.asSingleSelect().addValueChangeListener(e -> editor.editLivre(e.getValue()));
 
-        // Instantiate and edit new Livre when the new button is clicked
         addNewBtn.addClickListener(e -> editor.editLivre(new Livre()));
 
-        // Listen changes made by the editor, refresh data from backend
         editor.setChangeHandler(() -> {
             editor.setVisible(false);
             listLivres(filter.getValue());
         });
 
-        // Initialize listing
         listLivres(null);
     }
 
@@ -79,5 +79,9 @@ public class LivreView extends VerticalLayout {
         } else {
             grid.setItems(livreService.getAllLivres());
         }
+    }
+
+    public Button getAddNewBtn() {
+        return addNewBtn;
     }
 }
