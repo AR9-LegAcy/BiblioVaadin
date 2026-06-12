@@ -3,6 +3,7 @@ package com.usmb.but3.td4biblio.view;
 import org.springframework.context.annotation.Scope;
 
 import com.usmb.but3.td4biblio.entity.Emprunter;
+import com.usmb.but3.td4biblio.entity.EmprunterId;
 import com.usmb.but3.td4biblio.service.EmprunterService;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.KeyNotifier;
@@ -73,7 +74,8 @@ public class EmprunterEditor extends VerticalLayout implements KeyNotifier {
     }
 
     void delete() {
-        emprunterService.deleteEmpruntById(emprunter.getIdDocument());
+        EmprunterId id = new EmprunterId(emprunter.getIdDocument(), emprunter.getCarteEmprunteur());
+        emprunterService.deleteEmpruntById(id);
         changeHandler.onChange();
     }
 
