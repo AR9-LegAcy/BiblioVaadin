@@ -10,8 +10,5 @@ VALUES
 
 ('admin_lyon', 2, 'Durand', 'Paul',
  '10 rue Bellecour', 'Lyon', '69002',
- 'paul.lyon@biblio.fr', '1985-11-20', 'admin123', CURRENT_DATE),
+ 'paul.lyon@biblio.fr', '1985-11-20', 'admin123', CURRENT_DATE);
 
-('admin_grenoble', 3, 'Bernard', 'Luc',
- '5 rue Centrale', 'Grenoble', '38000',
- 'luc.grenoble@biblio.fr', '1992-03-15', 'admin123', CURRENT_DATE);
