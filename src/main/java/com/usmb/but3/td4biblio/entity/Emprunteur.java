@@ -19,7 +19,6 @@ import java.time.LocalDateTime;
 @Table(name = "emprunteur", schema = "biblio")
 public class Emprunteur {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "carte_emprunteur", nullable = false)
     private Integer carteEmprunteur;
 

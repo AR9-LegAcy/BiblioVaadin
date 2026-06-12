@@ -23,12 +23,10 @@ import java.time.LocalDateTime;
 @Table(name = "emprunter", schema = "biblio")
 public class Emprunter {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_document", nullable = false)
     private Integer idDocument;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "carte_emprunteur", nullable = false)
     private Integer carteEmprunteur;
 
