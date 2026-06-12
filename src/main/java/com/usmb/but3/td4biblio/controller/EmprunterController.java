@@ -6,6 +6,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import com.usmb.but3.td4biblio.entity.Emprunter;
+import com.usmb.but3.td4biblio.entity.EmprunterId;
 import com.usmb.but3.td4biblio.service.EmprunterService;
 
 import java.util.List;
@@ -25,8 +26,10 @@ public class EmprunterController {
         return ResponseEntity.ok().body(emprunterService.getAllEmprunts());
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Emprunter> getEmpruntById(@PathVariable("id") Integer id) {
+    @GetMapping("/{idDocument}/{carteEmprunteur}")
+    public ResponseEntity<Emprunter> getEmpruntById(@PathVariable("idDocument") Integer idDocument, 
+                                                     @PathVariable("carteEmprunteur") Integer carteEmprunteur) {
+        EmprunterId id = new EmprunterId(idDocument, carteEmprunteur);
         Emprunter emprunt = emprunterService.getEmpruntById(id);
         return emprunt != null ? ResponseEntity.ok().body(emprunt) : ResponseEntity.notFound().build();
     }
@@ -37,19 +40,25 @@ public class EmprunterController {
         return ResponseEntity.ok().body(savedEmprunt);
     }   
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Emprunter> updateEmprunt(@PathVariable("id") Integer id, @RequestBody Emprunter emprunt) {
+    @PutMapping("/{idDocument}/{carteEmprunteur}")
+    public ResponseEntity<Emprunter> updateEmprunt(@PathVariable("idDocument") Integer idDocument,
+                                                    @PathVariable("carteEmprunteur") Integer carteEmprunteur,
+                                                    @RequestBody Emprunter emprunt) {
+        EmprunterId id = new EmprunterId(idDocument, carteEmprunteur);
         Emprunter existingEmprunt = emprunterService.getEmpruntById(id);
         if (existingEmprunt == null) {
             return ResponseEntity.notFound().build();
         }
-        emprunt.setIdDocument(id); // Ensure the ID is set for update
+        emprunt.setIdDocument(idDocument);
+        emprunt.setCarteEmprunteur(carteEmprunteur);
         Emprunter updatedEmprunt = emprunterService.updateEmprunt(emprunt);
         return ResponseEntity.ok().body(updatedEmprunt);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteEmprunt(@PathVariable("id") Integer id) {
+    @DeleteMapping("/{idDocument}/{carteEmprunteur}")
+    public ResponseEntity<Void> deleteEmprunt(@PathVariable("idDocument") Integer idDocument,
+                                              @PathVariable("carteEmprunteur") Integer carteEmprunteur) {
+        EmprunterId id = new EmprunterId(idDocument, carteEmprunteur);
         Emprunter existingEmprunt = emprunterService.getEmpruntById(id);
         if (existingEmprunt == null) {
             return ResponseEntity.notFound().build();

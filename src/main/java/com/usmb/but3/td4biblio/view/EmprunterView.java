@@ -1,6 +1,5 @@
 package com.usmb.but3.td4biblio.view;
 
-import com.usmb.but3.td4biblio.entity.Auteur;
 import com.usmb.but3.td4biblio.entity.Emprunter;
 import com.usmb.but3.td4biblio.service.EmprunterService;
 import com.vaadin.flow.component.button.Button;
@@ -46,8 +45,8 @@ public class EmprunterView extends VerticalLayout {
         add(actions, grid, editor);
 
         grid.setHeight("300px");
-        grid.setColumns("id", "nom", "prenom", "nationalite", "paysAuteur", "dateNaissance", "dateDeces");
-        grid.getColumnByKey("id").setWidth("50px").setFlexGrow(0);
+        grid.setColumns("idDocument", "carteEmprunteur", "dateEmprunt", "dateRetourPrevue", "dateRetourReelle", "prolongationEmprunt");
+        grid.getColumnByKey("idDocument").setWidth("50px").setFlexGrow(0);
 
         filter.setPlaceholder("Filtrer par nom ou prénom");
 
@@ -75,7 +74,7 @@ public class EmprunterView extends VerticalLayout {
 
     void listEmprunts(String filterText) {
         if (StringUtils.hasText(filterText)) {
-            grid.setItems(emprunterService.getEmpruntsByCarteEmprunteur(null));
+            grid.setItems(emprunterService.getEmpruntsByCarteEmprunteur(Integer.parseInt(filterText)));
         } else {
             grid.setItems(emprunterService.getAllEmprunts());
         }

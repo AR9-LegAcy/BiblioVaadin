@@ -42,7 +42,7 @@ public class Emprunter {
     private LocalDate dateRetourReelle;
 
     @Column(name = "prolongation_emprunt")
-    private int prolongationEmprunt;
+    private Integer prolongationEmprunt;
 
     @Column(name = "created_at_emprunter")
     private LocalDateTime createdAt;

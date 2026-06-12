@@ -8,6 +8,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.usmb.but3.td4biblio.entity.Emprunter;
+import com.usmb.but3.td4biblio.entity.EmprunterId;
 import com.usmb.but3.td4biblio.repository.EmprunterRepo;
 
 import lombok.RequiredArgsConstructor;
@@ -21,7 +22,7 @@ public class EmprunterService {
         return emprunterRepo.findAll(Sort.by(Sort.Direction.ASC, "dateEmprunt"));
     }
 
-    public Emprunter getEmpruntById(Integer id) {
+    public Emprunter getEmpruntById(EmprunterId id) {
         return emprunterRepo.findById(id).orElse(null);
     }
 
@@ -38,7 +39,7 @@ public class EmprunterService {
         return emprunterRepo.save(emprunt);
     }
 
-    public void deleteEmpruntById(Integer id) {
+    public void deleteEmpruntById(EmprunterId id) {
         emprunterRepo.deleteById(id);
     }
 
