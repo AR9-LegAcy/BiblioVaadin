@@ -1,14 +1,22 @@
 package com.usmb.but3.td4biblio.controller;
 
-import lombok.RequiredArgsConstructor;
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.usmb.but3.td4biblio.entity.Bibliotheque;
 import com.usmb.but3.td4biblio.service.BibliothequeService;
 
-import java.util.List;
+import lombok.RequiredArgsConstructor;
 
 /**
  * Controller for handling Bibliotheque-related HTTP requests.
@@ -53,23 +61,27 @@ public class BibliothequeController {
      * GET bibliotheques by nom and prenom as Request Parameters.
      * URL: localhost:8080/biblio/bibliotheque/search?nom={nom}&prenom={prenom}
      */
+    /*
     @GetMapping("/search")
     public ResponseEntity<List<Bibliotheque>> getBibliothequesByNomAndAdresseRue(
             @RequestParam(name = "nom") String nom, 
             @RequestParam(name = "prenom") String adresseRue) {
         return ResponseEntity.ok().body(bibliothequeService.getBibliothequesByNomAndAdresseRue(nom, adresseRue));
     }
+    */
 
     /**
      * GET bibliotheques by nom and prenom (--like--) as Request Parameters.
      * URL: localhost:8080/biblio/bibliotheque/searchLike?nom=Hug&prenom=Vict
      */
+    /* 
     @GetMapping("/searchLike")
     public ResponseEntity<List<Bibliotheque>> getBibliothequesByNomLikeAndAdresseVille(
             @RequestParam(name = "nom") String nom, 
             @RequestParam(name = "prenom") String adresseVille) {
         return ResponseEntity.ok().body(bibliothequeService.getBibliothequesByNomLikeAndAdresseVille(nom, adresseVille));
     }
+    */
 
     /**
      * POST a new bibliotheque.
