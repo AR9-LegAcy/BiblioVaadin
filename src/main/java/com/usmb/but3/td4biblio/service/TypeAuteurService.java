@@ -18,7 +18,7 @@ public class TypeAuteurService {
     private final TypeAuteurRepo typeAuteurRepo;
 
     public List<TypeAuteur> getAllTypeAuteurs() {
-        return typeAuteurRepo.findAll(Sort.by(Sort.Direction.ASC, "nom", "prenom"));
+        return typeAuteurRepo.findAll(Sort.by(Sort.Direction.ASC, "nom"));
     }
 
     public TypeAuteur getTypeAuteurById(Integer id) {
