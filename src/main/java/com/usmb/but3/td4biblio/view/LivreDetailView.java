@@ -161,6 +161,7 @@ public class LivreDetailView extends Main implements HasUrlParameter<Integer> {
             }
         }
 
+        
         body.add(metaGrid);
 
         // ── Description ──────────────────────────────────────────────────
