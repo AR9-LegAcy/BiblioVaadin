@@ -5,6 +5,9 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.IdClass;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
@@ -24,14 +27,6 @@ import java.time.LocalDateTime;
 @Table(name = "emprunter", schema = "biblio")
 @IdClass(EmprunterId.class)
 public class Emprunter {
-    @Id
-    @Column(name = "id_document", nullable = false)
-    private Integer idDocument;
-
-    @Id
-    @Column(name = "carte_emprunteur", nullable = false)
-    private Integer carteEmprunteur;
-
     @Column(name = "date_emprunt", nullable = false)
     private LocalDate dateEmprunt;
 
@@ -49,6 +44,16 @@ public class Emprunter {
 
     @Column(name = "updated_at_emprunter")
     private LocalDateTime updatedAt;
+
+    @Id
+    @ManyToOne
+    @JoinColumn(name = "id_document")
+    private Document idDocument;
+
+    @Id
+    @ManyToOne
+    @JoinColumn(name = "carte_emprunteur")
+    private Emprunteur carteEmprunteur;
 
     public boolean isEqualTo(Emprunter emprunter) {
         if (emprunter == null) return false;

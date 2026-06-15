@@ -34,15 +34,15 @@ public class EmprunteurEditor extends VerticalLayout implements KeyNotifier {
     TextField nom = new TextField("Nom");
     TextField email = new TextField("Email");
     TextField adresseRue = new TextField("Adresse");
-    TextField villeEmprunteur = new TextField("Ville");
-    TextField codePostalEmprunteur = new TextField("Code Postal");
-    TextField dateNaissance = new TextField("Date de naissance");
-    TextField dateDebutAbonnement = new TextField("Date début d'abonnement");
-    TextField dateFinAbonnement = new TextField("Date fin d'abonnement");
+    TextField adresseVille = new TextField("Ville de l'emprunteur");
+    TextField adresseCodePostal = new TextField("Code Postal");
+    DatePicker dateNaissance = new DatePicker("Date de naissance");
+    DatePicker debutAbonnement = new DatePicker("Date début d'abonnement");
+    DatePicker expirationAbonnement = new DatePicker("Date fin d'abonnement");
 
     HorizontalLayout fields1 = new HorizontalLayout(prenom, nom, email, dateNaissance);
-    HorizontalLayout fields2 = new HorizontalLayout(adresseRue, villeEmprunteur, codePostalEmprunteur);
-    HorizontalLayout fields3 = new HorizontalLayout(dateDebutAbonnement, dateFinAbonnement);
+    HorizontalLayout fields2 = new HorizontalLayout(adresseRue, adresseVille, adresseCodePostal);
+    HorizontalLayout fields3 = new HorizontalLayout(debutAbonnement, expirationAbonnement);
 
     /* Action buttons */
     Button save = new Button("Sauvegarder", VaadinIcon.CHECK.create());

@@ -4,6 +4,9 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
@@ -11,6 +14,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * Une classe entité qui représente la table Bibliothecaire de la base de données
@@ -26,9 +30,6 @@ public class Bibliothecaire {
     @Id
     @Column(name = "pseudo_bibliothecaire")
     private String pseudo;
-
-    @Column(name = "id_bibliotheque", nullable = false, length = 100)
-    private Integer id;
 
     @Column(name = "nom_bibliothecaire", nullable = false, length = 100)
     private String nom;
@@ -60,6 +61,11 @@ public class Bibliothecaire {
     @Column(name = "updated_at_bibliothecaire")
     private LocalDateTime updatedAt;
 
+    @ManyToOne
+    @JoinColumn(name = "id_bibliotheque")
+    private Bibliotheque bibliotheque;
+
+    
     public boolean isEqualTo(Bibliothecaire bibliothecaire) {
         if (this == bibliothecaire)
             return true;
@@ -67,7 +73,7 @@ public class Bibliothecaire {
             return false;
         if (pseudo != null ? !pseudo.equals(bibliothecaire.pseudo) : bibliothecaire.pseudo != null)
             return false;
-        if (id != null ? !id.equals(bibliothecaire.id) : bibliothecaire.id != null)
+        if (bibliotheque != null ? !bibliotheque.equals(bibliothecaire.bibliotheque) : bibliothecaire.bibliotheque != null)
             return false;
         if (nom != null ? !nom.equals(bibliothecaire.nom) : bibliothecaire.nom != null)
             return false;
@@ -103,7 +109,7 @@ public class Bibliothecaire {
         final int prime = 31;
         int result = 1;
         result = prime * result + ((pseudo == null) ? 0 : pseudo.hashCode());
-        result = prime * result + ((id == null) ? 0 : id.hashCode());
+        result = prime * result + ((bibliotheque == null) ? 0 : bibliotheque.hashCode());
         result = prime * result + ((nom == null) ? 0 : nom.hashCode());
         result = prime * result + ((prenom == null) ? 0 : prenom.hashCode());
         result = prime * result + ((adresseRue == null) ? 0 : adresseRue.hashCode());
@@ -116,5 +122,8 @@ public class Bibliothecaire {
         result = prime * result + ((updatedAt == null) ? 0 : updatedAt.hashCode());
         return result;
     }
-
+    @Override
+    public String toString() {
+        return nom;
+    }
 }

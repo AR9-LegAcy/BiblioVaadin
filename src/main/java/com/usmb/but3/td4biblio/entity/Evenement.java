@@ -2,6 +2,7 @@ package com.usmb.but3.td4biblio.entity;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -10,6 +11,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -26,14 +28,6 @@ public class Evenement {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_evenement")
     private Integer id;
-
-    @ManyToOne
-    @JoinColumn(name = "id_type_evenement", nullable = false)
-    private TypeEvenement typeEvenement;
-
-    @ManyToOne
-    @JoinColumn(name = "id_bibliotheque", nullable = false)
-    private Bibliotheque bibliotheque;
 
     @Column(name = "titre_evenement")
     private String titre;
@@ -52,6 +46,14 @@ public class Evenement {
 
     @Column(name = "updated_at_evenement")
     private LocalDateTime updatedAt;
+
+    @ManyToOne
+    @JoinColumn(name = "id_type_evenement")
+    private TypeEvenement typeEvenement;
+
+    @ManyToOne
+    @JoinColumn(name = "id_bibliotheque")
+    private Bibliotheque bibliotheque;
 
     public boolean isEqualTo(Evenement evenement) {
         if (this == evenement) return true;
@@ -85,5 +87,9 @@ public class Evenement {
         result = 31 * result + (createdAt != null ? createdAt.hashCode() : 0);
         result = 31 * result + (updatedAt != null ? updatedAt.hashCode() : 0);
         return result;
+    }
+    @Override
+    public String toString() {
+        return titre;
     }
 }

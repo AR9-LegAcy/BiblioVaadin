@@ -4,6 +4,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
@@ -11,6 +12,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * Une classe entité qui représente la table Editeur de la base de données
@@ -45,6 +47,9 @@ public class Editeur {
 
     @Column(name = "updated_at_editeur")
     private LocalDateTime updatedAt;
+
+    @OneToMany(mappedBy = "idEditeur")
+    private List<Livre> livres;
 
     public boolean isEqualTo(Editeur editeur) {
         if (this == editeur) return true;
@@ -87,4 +92,8 @@ public class Editeur {
     //     return prenom + " " + nom + " (" + (dateNaissance != null ? dateNaissance.getYear() : "?") + 
     //            "-" + (dateDeces != null ? dateDeces.getYear() : "en vie") + ")";
     // }
+    @Override
+    public String toString() {
+        return nom;
+    }
 }

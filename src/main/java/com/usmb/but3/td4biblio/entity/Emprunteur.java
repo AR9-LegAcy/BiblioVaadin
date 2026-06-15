@@ -4,6 +4,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
@@ -11,6 +12,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -34,7 +36,7 @@ public class Emprunteur {
     @Column(name = "adresse_ville_emprunteur", length = 100, nullable = false)
     private String adresseVille;
 
-    @Column(name = "adresse_code_postal_emprunteur", length = 5, nullable = false)
+    @Column(name = "adresse_codepostal_emprunteur", length = 5, nullable = false)
     private String adresseCodePostal;
 
     @Column(name = "email_emprunteur", length = 250, nullable = false)
@@ -57,6 +59,9 @@ public class Emprunteur {
 
     @Column(name = "updated_at_emprunteur")
     private LocalDateTime updatedAt;
+
+    @OneToMany(mappedBy = "carteEmprunteur")
+    private List<Emprunter> emprunters;
 
     public boolean isEqualTo(Emprunteur emprunteur) {
         if (this == emprunteur) return true;
@@ -106,5 +111,9 @@ public class Emprunteur {
         result = 31 * result + (expirationAbonnement != null ? expirationAbonnement.hashCode() : 0);
         result = 31 * result + motDePasse.hashCode();
         return result;
+    }
+    @Override
+    public String toString() {
+        return nom;
     }
 }
