@@ -1,5 +1,5 @@
-INSERT INTO biblio.ECRIRE (ID_DOCUMENT, ID_LIVRE, ID_AUTEUR)
+INSERT INTO biblio.ECRIRE (ID_DOCUMENT, ID_AUTEUR)
 VALUES
-(1, 1, 1),
-(2, 2, 2),
-(3, 3, 3);
+(1, 1),
+(2, 2),
+(3, 3);
