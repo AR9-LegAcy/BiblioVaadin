@@ -38,9 +38,6 @@ public class TypeDocument {
     @OneToMany(mappedBy = "typeDocument")
     private List<Document> documents;
 
-    @OneToMany(mappedBy = "idTypeDocument")
-    private List<Livre> livres;
-
     public boolean isEqualTo(TypeDocument typeDocument) {
         if (typeDocument == null) {
             return false;

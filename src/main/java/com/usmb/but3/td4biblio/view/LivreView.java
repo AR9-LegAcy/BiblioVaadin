@@ -3,7 +3,6 @@ package com.usmb.but3.td4biblio.view;
 import com.usmb.but3.td4biblio.entity.Livre;
 import com.usmb.but3.td4biblio.service.EditeurService;
 import com.usmb.but3.td4biblio.service.LivreService;
-import com.usmb.but3.td4biblio.service.TypeDocumentService;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -27,37 +26,35 @@ public class LivreView extends VerticalLayout {
 
     private final LivreService livreService;
     private final EditeurService editeurService;
-    private final TypeDocumentService typeDocumentService;
 
     final Grid<Livre> grid;
     final TextField filter;
     private final Button addNewBtn;
     final LivreEditor editor;
 
-    public LivreView(LivreService livreService,
-                     EditeurService editeurService,
-                     TypeDocumentService typeDocumentService) {
+    public LivreView(LivreService livreService, EditeurService editeurService) {
         this.livreService = livreService;
         this.editeurService = editeurService;
-        this.typeDocumentService = typeDocumentService;
 
         // Passe les services à l'éditeur
-        this.editor = new LivreEditor(livreService, editeurService, typeDocumentService);
+        this.editor = new LivreEditor(livreService, editeurService);
 
         this.grid = new Grid<>(Livre.class);
         this.filter = new TextField();
         this.addNewBtn = new Button("Ajouter un livre", VaadinIcon.PLUS.create());
 
-        // build layout
+        // Construction de la mise en page
         HorizontalLayout actions = new HorizontalLayout(filter, addNewBtn);
         add(actions, grid, editor);
 
         grid.setHeight("300px");
-        grid.setColumns("idDocument", "titreLivre", "codeIsbn", "nbPages", "datePublication", "dateAcquisition", "codeEmplacement");
+        grid.setColumns("idDocument", "titreLivre", "nbPages", "datePublication");
+        grid.addColumn(livre -> livre.getIdEditeur() != null ? livre.getIdEditeur().getNom() : "Aucun")
+            .setHeader("Éditeur");
+
         grid.getColumnByKey("idDocument").setWidth("50px").setFlexGrow(0);
 
         filter.setPlaceholder("Filtrer par titre");
-
         filter.setValueChangeMode(ValueChangeMode.LAZY);
         filter.addValueChangeListener(e -> listLivres(e.getValue()));
 

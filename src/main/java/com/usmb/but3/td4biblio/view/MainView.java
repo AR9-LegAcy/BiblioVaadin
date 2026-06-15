@@ -314,7 +314,7 @@ public final class MainView extends Main {
             e -> card.getStyle().set("background", "#F0FDF4"));
         card.getElement().addEventListener("mouseout",
             e -> card.getStyle().set("background", "transparent"));
-        card.addClickListener(e -> UI.getCurrent().navigate("livre/detail/" + livre.getIdLivre()));
+        card.addClickListener(e -> UI.getCurrent().navigate("livre/detail/" + livre.getIdDocument()));
 
         var ico = new Icon(VaadinIcon.BOOK);
         ico.getStyle()
@@ -344,24 +344,6 @@ public final class MainView extends Main {
             var dateSpan = new Span("· " + livre.getDatePublication().format(DATE_FMT));
             dateSpan.getStyle().set("font-size", "0.75rem").set("color", "var(--muted)");
             meta.add(dateSpan);
-        }
-
-        if (livre.getCodeIsbn() != null) {
-            var isbn = new Span("ISBN " + livre.getCodeIsbn());
-            isbn.getStyle()
-                .set("font-size", "0.7rem").set("color", "#0F766E")
-                .set("background", "#0F766E12").set("padding", "0.1rem 0.35rem")
-                .set("border-radius", "4px");
-            meta.add(isbn);
-        }
-
-        if (Boolean.FALSE.equals(livre.getCodeEmpruntable())) {
-            var nonEmp = new Span("Non empruntable");
-            nonEmp.getStyle()
-                .set("font-size", "0.7rem").set("color", "#B91C1C")
-                .set("background", "#FEE2E2").set("padding", "0.1rem 0.35rem")
-                .set("border-radius", "4px");
-            meta.add(nonEmp);
         }
 
         info.add(titre, meta);

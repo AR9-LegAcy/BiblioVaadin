@@ -58,19 +58,7 @@ public class LivreDetailView extends Main implements HasUrlParameter<Integer> {
             .set("background",    "linear-gradient(135deg,#0F766E 0%,#14B8A6 100%)")
             .set("color",         "#fff")
             .set("padding",       "2.5rem 2.5rem 2rem")
-            .set("box-sizing",    "border-box");
-
-        // Badge type document
-        if (livre.getIdTypeDocument() != null && livre.getIdTypeDocument().getNomTypeDocument() != null) {
-            var badge = new Span(livre.getIdTypeDocument().getNomTypeDocument());
-            badge.getStyle()
-                .set("font-size", "0.72rem").set("font-weight", "600")
-                .set("background", "rgba(255,255,255,0.25)")
-                .set("padding", "0.2rem 0.6rem").set("border-radius", "999px")
-                .set("display", "inline-block").set("margin-bottom", "0.75rem");
-            hero.add(badge);
-        } else {
-        }
+            .set("box-sizing",    "border-box");        
 
         var titre = new H1(livre.getTitreLivre() != null ? livre.getTitreLivre() : "Sans titre");
         titre.getStyle()
@@ -86,17 +74,6 @@ public class LivreDetailView extends Main implements HasUrlParameter<Integer> {
             hero.add(titre, editeur);
         } else {
             hero.add(titre);
-        }
-
-        // Badge empruntable
-        if (Boolean.FALSE.equals(livre.getCodeEmpruntable())) {
-            var nonEmp = new Span("⚠ Non empruntable");
-            nonEmp.getStyle()
-                .set("font-size", "0.75rem").set("font-weight", "600")
-                .set("background", "rgba(239,68,68,0.85)")
-                .set("padding", "0.2rem 0.7rem").set("border-radius", "999px")
-                .set("display", "inline-block").set("margin-top", "0.6rem");
-            hero.add(nonEmp);
         }
 
         layout.add(hero);
@@ -117,40 +94,15 @@ public class LivreDetailView extends Main implements HasUrlParameter<Integer> {
             .set("gap",                   "1rem")
             .set("margin-bottom",         "2rem");
 
-        // ISBN
-        if (livre.getCodeIsbn() != null) {
-            metaGrid.add(metaCard(VaadinIcon.BARCODE, "ISBN",
-                    livre.getCodeIsbn(), ACCENT));
-        }
         // Date publication
         if (livre.getDatePublication() != null) {
             metaGrid.add(metaCard(VaadinIcon.CALENDAR, "Date de publication",
                     livre.getDatePublication().format(DATE_FMT), ACCENT));
         }
-        // Date acquisition
-        if (livre.getDateAcquisition() != null) {
-            metaGrid.add(metaCard(VaadinIcon.PLUS_CIRCLE, "Acquis le",
-                    livre.getDateAcquisition().format(DATE_FMT), ACCENT));
-        }
         // Nombre de pages
         if (livre.getNbPages() != null) {
             metaGrid.add(metaCard(VaadinIcon.FILE_TEXT, "Pages",
                     livre.getNbPages() + " pages", ACCENT));
-        }
-        // Format / taille
-        if (livre.getFormatTaille() != null && !livre.getFormatTaille().isBlank()) {
-            metaGrid.add(metaCard(VaadinIcon.EXPAND_SQUARE, "Format",
-                    livre.getFormatTaille(), ACCENT));
-        }
-        // Emplacement
-        if (livre.getCodeEmplacement() != null && !livre.getCodeEmplacement().isBlank()) {
-            metaGrid.add(metaCard(VaadinIcon.MAP_MARKER, "Emplacement",
-                    livre.getCodeEmplacement(), ACCENT));
-        }
-        // État
-        if (livre.getEtatDocument() != null && !livre.getEtatDocument().isBlank()) {
-            metaGrid.add(metaCard(VaadinIcon.INFO_CIRCLE, "État",
-                    livre.getEtatDocument(), ACCENT));
         }
         // Éditeur (site web & wikipedia)
         if (livre.getIdEditeur() != null) {
@@ -163,31 +115,6 @@ public class LivreDetailView extends Main implements HasUrlParameter<Integer> {
 
         
         body.add(metaGrid);
-
-        // ── Description ──────────────────────────────────────────────────
-        if (livre.getDescriptionDocument() != null && !livre.getDescriptionDocument().isBlank()) {
-            var descSection = new Div();
-            descSection.getStyle()
-                .set("background",    "#F0FDF4")
-                .set("border",        "1px solid #BBF7D0")
-                .set("border-radius", "0.75rem")
-                .set("padding",       "1.5rem")
-                .set("margin-bottom", "2rem");
-
-            var descTitle = new H2("Description");
-            descTitle.getStyle()
-                .set("margin", "0 0 0.75rem 0")
-                .set("font-size", "1rem").set("font-weight", "700")
-                .set("color", "#1E293B");
-
-            var descText = new Paragraph(livre.getDescriptionDocument());
-            descText.getStyle()
-                .set("margin", "0").set("line-height", "1.7")
-                .set("color", "#334155");
-
-            descSection.add(descTitle, descText);
-            body.add(descSection);
-        }
 
         // ── Infos éditeur ────────────────────────────────────────────────
         if (livre.getIdEditeur() != null) {

@@ -1,6 +1,5 @@
 package com.usmb.but3.td4biblio.service;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -45,13 +44,5 @@ public class LivreService {
 
     public List<Livre> getByTitreContainingIgnoreCase(String titre) {
         return livreRepo.findByTitreLivreContainingIgnoreCase(titre);
-    }
-
-    public List<Livre> getByIdEditeur(Integer idEditeur) {
-        return livreRepo.findByIdEditeur(idEditeur);
-    }
-
-    public List<Livre> getByIdTypeDocument(Integer idTypeDocument) {
-        return livreRepo.findByIdTypeDocument(idTypeDocument);
     }
 }

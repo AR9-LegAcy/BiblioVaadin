@@ -11,7 +11,4 @@ public interface LivreRepo extends JpaRepository<Livre, Integer> {
     
     @Query("SELECT l FROM Livre l WHERE l.idEditeur = :idEditeur")
     List<Livre> findByIdEditeur(@Param("idEditeur") Integer idEditeur);
-    
-    @Query("SELECT l FROM Livre l WHERE l.idTypeDocument = :idTypeDocument")
-    List<Livre> findByIdTypeDocument(@Param("idTypeDocument") Integer idTypeDocument);
 }
