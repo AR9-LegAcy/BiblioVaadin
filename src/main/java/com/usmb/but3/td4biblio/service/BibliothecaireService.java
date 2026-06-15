@@ -2,12 +2,15 @@ package com.usmb.but3.td4biblio.service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import org.springframework.data.domain.Sort;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.usmb.but3.td4biblio.entity.Bibliothecaire;
+import com.usmb.but3.td4biblio.entity.Emprunteur;
 import com.usmb.but3.td4biblio.repository.BibliothecaireRepo;
 
 import lombok.RequiredArgsConstructor;
@@ -16,6 +19,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class BibliothecaireService {
 
+    private final PasswordEncoder passwordEncoder;
     private final BibliothecaireRepo bibliothecaireRepo;
 
     public List<Bibliothecaire> getAllBibliothecaires() {
@@ -31,11 +35,23 @@ public class BibliothecaireService {
             bibliothecaire.setCreatedAt(LocalDateTime.now());
         }
         bibliothecaire.setUpdatedAt(LocalDateTime.now());
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("ddMMyyyy");
+
+        String mdp = bibliothecaire.getDateNaissance().format(formatter);
+
+        bibliothecaire.setMotDePasse(
+                passwordEncoder.encode(mdp));
         return bibliothecaireRepo.save(bibliothecaire);
     }
 
     public Bibliothecaire updateBibliothecaire(Bibliothecaire bibliothecaire) {
         bibliothecaire.setUpdatedAt(LocalDateTime.now());
+        if (bibliothecaire.getMotDePasse() == null ||
+                bibliothecaire.getMotDePasse().isBlank()) {
+
+            Bibliothecaire ancien = bibliothecaireRepo.findByPseudo(bibliothecaire.getPseudo()).getFirst();
+            bibliothecaire.setMotDePasse(ancien.getMotDePasse());
+        }
         return bibliothecaireRepo.save(bibliothecaire);
     }
 

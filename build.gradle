@@ -47,6 +47,7 @@ dependencies {
     // out : 19/06 testImplementation 'org.mockito:mockito-core:5.2.0' // or your version
     // out : 19/06 mockitoAgent 'org.mockito:mockito-core:5.2.0' // or your version
 	// MS added for Hibernate schema generation
+    implementation 'org.springframework.boot:spring-boot-starter-security'
 }
 
 dependencyManagement {

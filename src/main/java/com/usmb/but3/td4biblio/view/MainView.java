@@ -435,4 +435,4 @@ public final class MainView extends Main {
     public static void showMainView() {
         UI.getCurrent().navigate(MainView.class);
     }
-}
+}   
