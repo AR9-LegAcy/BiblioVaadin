@@ -30,7 +30,7 @@ public class EcrireEditor extends VerticalLayout implements KeyNotifier {
     private Ecrire ecrire;
 
     ComboBox<Auteur> idAuteur = new ComboBox<>("Auteur");
-    ComboBox<Livre> idLivre = new ComboBox<>("Type d'auteur");
+    ComboBox<Livre> idDocument = new ComboBox<>("Type d'auteur");
 
     Button save = new Button("Sauvegarder", VaadinIcon.CHECK.create());
     Button cancel = new Button("Annuler");
@@ -48,10 +48,10 @@ public class EcrireEditor extends VerticalLayout implements KeyNotifier {
         idAuteur.setItems(auteurService.getAllAuteurs());
         idAuteur.setItemLabelGenerator(a -> a.getPrenom() + " " + a.getNom());
 
-        idLivre.setItems(livreService.getAllLivres());
-        idLivre.setItemLabelGenerator(Livre::getTitreLivre);
+        idDocument.setItems(livreService.getAllLivres());
+        idDocument.setItemLabelGenerator(Livre::getTitreLivre);
 
-        add(idAuteur, idLivre, actions);
+        add(idAuteur, idDocument, actions);
 
         binder.bindInstanceFields(this);
 
@@ -73,7 +73,7 @@ public class EcrireEditor extends VerticalLayout implements KeyNotifier {
     }
 
     void delete() {
-        ecrireService.deleteEcrireById(new com.usmb.but3.td4biblio.entity.EcrireId(ecrire.getIdAuteur().getId(), ecrire.getIdLivre().getIdDocument()));
+        ecrireService.deleteEcrireById(new com.usmb.but3.td4biblio.entity.EcrireId(ecrire.getIdAuteur().getId(), ecrire.getIdDocument().getIdDocument()));
         changeHandler.onChange();
     }
 

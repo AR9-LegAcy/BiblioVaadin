@@ -14,7 +14,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * Une classe entité qui représente la table CLASSER de la base de données
+ * Une classe entité qui représente la table ECRIRE de la base de données
  */
 
 @Entity
@@ -38,7 +38,7 @@ public class Ecrire {
 
     @Id
     @ManyToOne
-    @JoinColumn(name = "id_livre")
+    @JoinColumn(name = "id_document")
     private Livre idLivre;
 
     public boolean isEqualTo(Ecrire ecrire) {

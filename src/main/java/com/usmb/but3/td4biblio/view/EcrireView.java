@@ -45,7 +45,7 @@ public class EcrireView extends VerticalLayout {
 
         grid.addColumn(c -> c.getIdAuteur().getPrenom() + " " + c.getIdAuteur().getNom()).setHeader("Auteur");
 
-        grid.addColumn(c -> c.getIdLivre().getTitreLivre()).setHeader("livre");
+        grid.addColumn(c -> c.getIdDocument().getIdgetTitreLivre()).setHeader("livre");
 
         grid.asSingleSelect().addValueChangeListener(e -> editor.editEcrire(e.getValue()));
 

@@ -10,9 +10,10 @@ import com.usmb.but3.td4biblio.entity.Auteur;
 import com.usmb.but3.td4biblio.entity.Ecrire;
 import com.usmb.but3.td4biblio.entity.EcrireId;
 import com.usmb.but3.td4biblio.entity.Livre;
+import com.usmb.but3.td4biblio.entity.Document;
 import com.usmb.but3.td4biblio.repository.AuteurRepo;
 import com.usmb.but3.td4biblio.repository.EcrireRepo;
-import com.usmb.but3.td4biblio.repository.LivreRepo;
+import com.usmb.but3.td4biblio.repository.DocumentRepo;
 
 import lombok.RequiredArgsConstructor;
 
@@ -20,7 +21,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class EcrireService {
     private final EcrireRepo ecrireRepo;
-    private final LivreRepo livreRepo;
+    private final DocumentRepo documentRepo;
     private final AuteurRepo auteurRepo;
 
     // --- CRUD Ecrire ---
@@ -50,8 +51,8 @@ public class EcrireService {
     }
 
     // --- Helper methods pour controller ---
-    public Livre getLivreById(Integer idLivre) {
-        return livreRepo.findById(idLivre).orElse(null);
+    public Document getDocumentById(Integer idLivre) {
+        return documentRepo.findById(idLivre).orElse(null);
     }
 
     public Auteur getAuteurById(Integer carteAuteur) {
@@ -63,8 +64,8 @@ public class EcrireService {
         return e == null ? List.of() : ecrireRepo.findByIdAuteur(e);
     }
     
-    public List<Ecrire> getEcriresByIdLivre(Integer idLivre) {
-        Livre d = livreRepo.findById(idLivre).orElse(null);
+    public List<Ecrire> getEcriresByIdDocument(Integer idLivre) {
+        Livre d = documentRepo.findById(idLivre).orElse(null);
         return d == null ? List.of() : ecrireRepo.findByIdLivre(d);
     }
 }
