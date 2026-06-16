@@ -1,26 +1,25 @@
 package com.usmb.but3.td4biblio.view;
 
+import com.usmb.but3.td4biblio.security.SessionManager;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.applayout.AppLayout;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.NotificationVariant;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.Scroller;
 import com.vaadin.flow.component.sidenav.SideNav;
 import com.vaadin.flow.component.sidenav.SideNavItem;
 import com.vaadin.flow.router.Layout;
+import com.vaadin.flow.router.RouteConfiguration;
 import com.vaadin.flow.server.menu.MenuConfiguration;
 import com.vaadin.flow.server.menu.MenuEntry;
-import com.vaadin.flow.theme.lumo.LumoUtility.AlignItems;
-import com.vaadin.flow.theme.lumo.LumoUtility.Display;
-import com.vaadin.flow.theme.lumo.LumoUtility.FontSize;
-import com.vaadin.flow.theme.lumo.LumoUtility.FontWeight;
-import com.vaadin.flow.theme.lumo.LumoUtility.Gap;
-import com.vaadin.flow.theme.lumo.LumoUtility.IconSize;
-import com.vaadin.flow.theme.lumo.LumoUtility.Margin;
-import com.vaadin.flow.theme.lumo.LumoUtility.Padding;
-import com.vaadin.flow.theme.lumo.LumoUtility.TextColor;
 
 import static com.vaadin.flow.theme.lumo.LumoUtility.*;
 
@@ -30,7 +29,10 @@ public final class MainLayout extends AppLayout {
     MainLayout() {
         setPrimarySection(Section.DRAWER);
         addToDrawer(createHeader(), new Scroller(createSideNav()));
+
     }
+
+    // ── Drawer : logo cliquable ───────────────────────────────────────────
 
     private Div createHeader() {
         var appLogo = VaadinIcon.CUBES.create();
@@ -41,48 +43,46 @@ public final class MainLayout extends AppLayout {
 
         var header = new Div(appLogo, appName);
         header.addClassNames(Display.FLEX, Padding.MEDIUM, Gap.MEDIUM, AlignItems.CENTER);
-
-        // ← AJOUT : clic sur le header → page d'accueil
         header.getStyle().set("cursor", "pointer");
         header.addClickListener(e -> UI.getCurrent().navigate(MainView.class));
-
         return header;
     }
+
+    // ── Drawer : nav filtrée selon le rôle ───────────────────────────────
 
     private SideNav createSideNav() {
         var nav = new SideNav();
         nav.addClassNames(Margin.Horizontal.MEDIUM);
-        MenuConfiguration.getMenuEntries().forEach(entry -> nav.addItem(createSideNavItem(entry)));
+
+        boolean isBib = SessionManager.isBibliothecaire();
+
+        // Toujours visibles
+        nav.addItem(new SideNavItem("Accueil",    "",           new Icon(VaadinIcon.HOME)));
+        nav.addItem(new SideNavItem("Livres",     "livre",      new Icon(VaadinIcon.BOOK)));
+        nav.addItem(new SideNavItem("Événements", "evenement",  new Icon(VaadinIcon.CALENDAR)));
+
+        // Uniquement bibliothécaire
+        if (isBib) {
+            MenuConfiguration.getMenuEntries().forEach(entry -> {
+                String path = entry.path();
+                // Exclure les pages déjà ajoutées et les pages réservées
+                if (!path.equals("") && !path.equals("livre")
+                        && !path.equals("evenement") && !path.equals("login")) {
+                    nav.addItem(createSideNavItem(entry));
+                }
+            });
+        }
+
         return nav;
     }
 
     private SideNavItem createSideNavItem(MenuEntry menuEntry) {
         if (menuEntry.icon() != null) {
-            return new SideNavItem(menuEntry.title(), menuEntry.path(), new Icon(menuEntry.icon()));
-        } else {
-            return new SideNavItem(menuEntry.title(), menuEntry.path());
+            return new SideNavItem(menuEntry.title(), menuEntry.path(),
+                    new Icon(menuEntry.icon()));
         }
+        return new SideNavItem(menuEntry.title(), menuEntry.path());
     }
 
-    /* 
-    private Component createUserMenu() {
-        // TODO Replace with real user information and actions
-        var avatar = new Avatar("John Smith");
-        avatar.addThemeVariants(AvatarVariant.LUMO_XSMALL);
-        avatar.addClassNames(Margin.Right.SMALL);
-        avatar.setColorIndex(5);
-
-        var userMenu = new MenuBar();
-        userMenu.addThemeVariants(MenuBarVariant.LUMO_TERTIARY_INLINE);
-        userMenu.addClassNames(Margin.MEDIUM);
-
-        var userMenuItem = userMenu.addItem(avatar);
-        userMenuItem.add("John Smith");
-        userMenuItem.getSubMenu().addItem("View Profile").setEnabled(false);
-        userMenuItem.getSubMenu().addItem("Manage Settings").setEnabled(false);
-        userMenuItem.getSubMenu().addItem("Logout").setEnabled(false);
-
-        return userMenu;
-    }*/
-
+   
 }
