@@ -18,15 +18,31 @@
 // @RequiredArgsConstructor
 // public class DataMigration implements CommandLineRunner {
 
-//     private final BibliothecaireRepo emprunteurRepo;
+//     private final BibliothecaireRepo bibliothecaireRepo;
+//     private final EmprunteurRepo emprunteurRepo;
 //     private final PasswordEncoder passwordEncoder;
 
 //     @Override
 //     public void run(String... args) {
 
-//         List<Bibliothecaire> emprunteurs = emprunteurRepo.findAll();
+//         List<Bibliothecaire> bibliothecaires = bibliothecaireRepo.findAll();
 
-//         for (Bibliothecaire e : emprunteurs) {
+//         for (Bibliothecaire e : bibliothecaires) {
+
+//             if (e.getMotDePasse() == null || e.getMotDePasse().isBlank()) {
+
+//                 String mdp = e.getDateNaissance()
+//                         .format(DateTimeFormatter.ofPattern("ddMMyyyy"));
+
+//                 e.setMotDePasse(passwordEncoder.encode(mdp));
+//             }
+//         }
+
+//         bibliothecaireRepo.saveAll(bibliothecaires);
+
+//         List<Emprunteur> emprunteurs = emprunteurRepo.findAll();
+
+//         for (Emprunteur e : emprunteurs) {
 
 //             if (e.getMotDePasse() == null || e.getMotDePasse().isBlank()) {
 

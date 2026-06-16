@@ -14,7 +14,7 @@ public class EcrireId implements Serializable {
 
     private Integer idAuteur;
 
-    private Integer idDocument;
+    private Integer idLivre;
 
     // equals et hashCode personnalisés (optionnels si Lombok gère @Data)
     @Override
@@ -26,7 +26,7 @@ public class EcrireId implements Serializable {
         EcrireId other = (EcrireId) obj;
         if (idAuteur == null ? other.idAuteur != null : !idAuteur.equals(other.idAuteur))
             return false;
-        if (idDocument == null ? other.idDocument != null : !idDocument.equals(other.idDocument))
+        if (idLivre == null ? other.idLivre != null : !idLivre.equals(other.idLivre))
             return false;
         return true;
     }
@@ -36,7 +36,7 @@ public class EcrireId implements Serializable {
         final int prime = 31;
         int result = 1;
         result = prime * result + (idAuteur == null ? 0 : idAuteur.hashCode());
-        result = prime * result + (idDocument == null ? 0 : idDocument.hashCode());
+        result = prime * result + (idLivre == null ? 0 : idLivre.hashCode());
         return result;
     }
 }
