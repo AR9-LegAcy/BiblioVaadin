@@ -20,6 +20,15 @@ import com.vaadin.flow.router.Layout;
 import com.vaadin.flow.router.RouteConfiguration;
 import com.vaadin.flow.server.menu.MenuConfiguration;
 import com.vaadin.flow.server.menu.MenuEntry;
+import com.vaadin.flow.theme.lumo.LumoUtility.AlignItems;
+import com.vaadin.flow.theme.lumo.LumoUtility.Display;
+import com.vaadin.flow.theme.lumo.LumoUtility.FontSize;
+import com.vaadin.flow.theme.lumo.LumoUtility.FontWeight;
+import com.vaadin.flow.theme.lumo.LumoUtility.Gap;
+import com.vaadin.flow.theme.lumo.LumoUtility.IconSize;
+import com.vaadin.flow.theme.lumo.LumoUtility.Margin;
+import com.vaadin.flow.theme.lumo.LumoUtility.Padding;
+import com.vaadin.flow.theme.lumo.LumoUtility.TextColor;
 
 import static com.vaadin.flow.theme.lumo.LumoUtility.*;
 
@@ -57,9 +66,9 @@ public final class MainLayout extends AppLayout {
         boolean isBib = SessionManager.isBibliothecaire();
 
         // Toujours visibles
-        nav.addItem(new SideNavItem("Accueil",    "",           new Icon(VaadinIcon.HOME)));
-        nav.addItem(new SideNavItem("Livres",     "livre",      new Icon(VaadinIcon.BOOK)));
-        nav.addItem(new SideNavItem("Événements", "evenement",  new Icon(VaadinIcon.CALENDAR)));
+        nav.addItem(new SideNavItem("Accueil", "", new Icon(VaadinIcon.HOME)));
+        nav.addItem(new SideNavItem("Livres", "livre", new Icon(VaadinIcon.BOOK)));
+        nav.addItem(new SideNavItem("Événements", "evenement", new Icon(VaadinIcon.CALENDAR)));
 
         // Uniquement bibliothécaire
         if (isBib) {
@@ -84,5 +93,4 @@ public final class MainLayout extends AppLayout {
         return new SideNavItem(menuEntry.title(), menuEntry.path());
     }
 
-   
 }

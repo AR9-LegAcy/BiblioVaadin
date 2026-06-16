@@ -114,7 +114,7 @@ public class LoginView extends VerticalLayout {
                 Bibliothecaire bib = bibs.get(0);
                 if (passwordEncoder.matches(password, bib.getMotDePasse())) {
                     SessionManager.loginBibliothecaire(bib);
-                    UI.getCurrent().navigate(MainView.class);
+                    UI.getCurrent().getPage().setLocation("/");
                     return;
                 } else {
                     showError("Mot de passe incorrect.");
