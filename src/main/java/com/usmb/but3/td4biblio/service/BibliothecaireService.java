@@ -68,7 +68,7 @@ public class BibliothecaireService {
     }
 
     public List<Bibliothecaire> getBibliothecairesByNomLikeAndPrenomLike(String nom, String prenom) {
-        return bibliothecaireRepo.findByNomLikeAndPrenomLike(nom, prenom);
+        return bibliothecaireRepo.findByNomLikeAndPrenomLike("%" + nom + "%", "%" + prenom + "%");
     }
 
     public List<Bibliothecaire> getBibliothecairesByNomStartWithIgnoreCase(String filter) {
