@@ -1,20 +1,17 @@
 package com.usmb.but3.td4biblio.entity;
 
+import java.time.LocalDateTime;
+
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.IdClass;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 /**
  * Une classe entité qui représente la table CLASSER de la base de données
@@ -41,14 +38,14 @@ public class Ecrire {
 
     @Id
     @ManyToOne
-    @JoinColumn(name = "id_document")
-    private Document idDocument;
+    @JoinColumn(name = "id_livre")
+    private Livre idLivre;
 
     public boolean isEqualTo(Ecrire ecrire) {
         if (ecrire == null) return false;
 
         return idAuteur.equals(ecrire.idAuteur)
-                && idDocument.equals(ecrire.idDocument);
+                && idLivre.equals(ecrire.idLivre);
     }
 
     @Override
@@ -67,7 +64,7 @@ public class Ecrire {
                 + (idAuteur != null ? idAuteur.hashCode() : 0);
 
         result = 31 * result
-                + (idDocument != null ? idDocument.hashCode() : 0);
+                + (idLivre != null ? idLivre.hashCode() : 0);
 
         return result;
     }
