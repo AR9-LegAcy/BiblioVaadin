@@ -6,13 +6,13 @@ import java.util.List;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import com.usmb.but3.td4biblio.entity.TypeAuteur;
+import com.usmb.but3.td4biblio.entity.Auteur;
 import com.usmb.but3.td4biblio.entity.Classer;
 import com.usmb.but3.td4biblio.entity.ClasserId;
-import com.usmb.but3.td4biblio.entity.Auteur;
-import com.usmb.but3.td4biblio.repository.TypeAuteurRepo;
+import com.usmb.but3.td4biblio.entity.TypeAuteur;
 import com.usmb.but3.td4biblio.repository.AuteurRepo;
 import com.usmb.but3.td4biblio.repository.ClasserRepo;
+import com.usmb.but3.td4biblio.repository.TypeAuteurRepo;
 
 import lombok.RequiredArgsConstructor;
 
@@ -26,7 +26,7 @@ public class ClasserService {
 
     // --- CRUD Classer ---
     public List<Classer> getAllClassements() {
-        return classerRepo.findAll(Sort.by(Sort.Direction.ASC, "dateClassement"));
+        return classerRepo.findAll(Sort.by(Sort.Direction.ASC, "idAuteur"));
     }
 
     public Classer getClassementById(ClasserId id) {
