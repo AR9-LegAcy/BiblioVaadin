@@ -1,6 +1,8 @@
 package com.usmb.but3.td4biblio.view;
 
 import com.usmb.but3.td4biblio.entity.Document;
+import com.usmb.but3.td4biblio.entity.Livre;
+import com.usmb.but3.td4biblio.security.SessionManager;
 import com.usmb.but3.td4biblio.service.DocumentService;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
@@ -28,10 +30,7 @@ public class DocumentView extends VerticalLayout {
     final TextField filter;
     private final Button addNewBtn;
     final DocumentEditor editor;
-
-    public Button getAddNewBtn() {
-        return addNewBtn;
-    }
+    boolean isBib = SessionManager.isBibliothecaire();
 
     public DocumentView(DocumentService documentService, DocumentEditor editor) {
         this.documentService = documentService;
@@ -39,6 +38,7 @@ public class DocumentView extends VerticalLayout {
         this.grid = new Grid<>(Document.class);
         this.filter = new TextField();
         this.addNewBtn = new Button("Ajouter un document", VaadinIcon.PLUS.create());
+        addNewBtn.getStyle().set("visibility", "hidden");
 
         // build layout
         HorizontalLayout actions = new HorizontalLayout(filter, addNewBtn);
@@ -46,24 +46,29 @@ public class DocumentView extends VerticalLayout {
 
         grid.setHeight("300px");
         grid.setColumns(
-            "idDocument","codeIsbn","descriptionDocument","codeEmpruntable","etatDocument","dateAcquisition","formatTaille","codeEmplacement"
-        );
-        
+                "idDocument", "codeIsbn", "descriptionDocument", "codeEmpruntable", "etatDocument", "dateAcquisition",
+                "formatTaille", "codeEmplacement");
+
         grid.getColumnByKey("idDocument")
-            .setWidth("50px")
-            .setFlexGrow(0);
+                .setWidth("50px")
+                .setFlexGrow(0);
 
         filter.setPlaceholder("Filtrer par code ISBN ou description");
 
         // Replace listing with filtered content when user changes filter
         filter.setValueChangeMode(ValueChangeMode.LAZY);
         filter.addValueChangeListener(e -> listDocuments(e.getValue()));
+        if (isBib) {
+            addNewBtn.getStyle().set("visibility", "visible");
+            grid.asSingleSelect().addValueChangeListener(e -> editor.editDocument(e.getValue()));
 
-        // Connect selected Document to editor or hide if none is selected
-        grid.asSingleSelect().addValueChangeListener(e -> {
-            editor.editDocument(e.getValue());
-        });
+            addNewBtn.addClickListener(e -> editor.editDocument(new Document()));
 
+            editor.setChangeHandler(() -> {
+                editor.setVisible(false);
+                listDocuments(filter.getValue());
+            });
+        }
         // Initialize listing
         listDocuments(null);
     }
@@ -74,5 +79,9 @@ public class DocumentView extends VerticalLayout {
         } else {
             grid.setItems(documentService.getAllDocuments());
         }
+    }
+
+    public Button getAddNewBtn() {
+        return addNewBtn;
     }
 }
