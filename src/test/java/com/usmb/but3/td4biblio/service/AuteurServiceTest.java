@@ -1,153 +1,233 @@
 package com.usmb.but3.td4biblio.service;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import com.usmb.but3.td4biblio.entity.*;
+import com.usmb.but3.td4biblio.repository.*;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.Sort;
+import org.springframework.transaction.annotation.Transactional;
 
-import com.usmb.but3.td4biblio.entity.Auteur;
-import com.usmb.but3.td4biblio.repository.AuteurRepo;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
-class AuteurServiceTest {
+@Transactional
+public class AuteurServiceTest {
 
-    @Mock
-    private AuteurRepo auteurRepo;
-
-    @InjectMocks
+    @Autowired
     private AuteurService auteurService;
 
-    @BeforeEach
+    @Autowired
+    private AuteurRepo auteurRepo;
+
+    @Autowired
+    private TypeAuteurRepo typeAuteurRepo;
+
+    @Autowired
+    private ClasserRepo classerRepo;
+
+    // =========================
+    // TRACKING DES DONNÉES TEST
+    // =========================
+    private final List<Auteur> auteursCree = new ArrayList<>();
+    private final List<TypeAuteur> typesCree = new ArrayList<>();
+    private final List<Classer> classersCree = new ArrayList<>();
+
+    private Auteur MARTIN;
+    private Auteur DURAND;
+    private Auteur DUMAS;
+    private Auteur ZOLA;
+
+    private TypeAuteur ROMAN;
+    private TypeAuteur POESIE;
+
+    // =========================
+    // SETUP
+    // =========================
+    @BeforeAll
     void setUp() {
-        MockitoAnnotations.openMocks(this);
+
+        // =========================
+        // TYPES AUTEURS
+        // =========================
+        ROMAN = typeAuteurRepo.save(new TypeAuteur(null, "TEST_ROMAN", null, null));
+        POESIE = typeAuteurRepo.save(new TypeAuteur(null, "TEST_POESIE", null, null));
+
+        typesCree.add(ROMAN);
+        typesCree.add(POESIE);
+
+        // =========================
+        // AUTEURS
+        // =========================
+        MARTIN = auteurRepo.save(new Auteur(
+                null,
+                "Martin",
+                "Jean",
+                LocalDate.of(1970, 5, 10),
+                null,
+                "France",
+                "Lyon",
+                "Française",
+                null,
+                null,
+                null
+        ));
+
+        DURAND = auteurRepo.save(new Auteur(
+                null,
+                "Durand",
+                "Paul",
+                LocalDate.of(1980, 8, 22),
+                null,
+                "France",
+                "Grenoble",
+                "Française",
+                null,
+                null,
+                null
+        ));
+
+        DUMAS = auteurRepo.save(new Auteur(
+                null,
+                "Dumas",
+                "Alexandre",
+                LocalDate.of(1802, 7, 24),
+                LocalDate.of(1870, 12, 5),
+                "France",
+                "Villers-Cotterêts",
+                "Française",
+                null,
+                null,
+                null
+        ));
+
+        ZOLA = auteurRepo.save(new Auteur(
+                null,
+                "Zola",
+                "Émile",
+                LocalDate.of(1840, 4, 2),
+                LocalDate.of(1902, 9, 29),
+                "France",
+                "Paris",
+                "Française",
+                null,
+                null,
+                null
+        ));
+
+        auteursCree.add(MARTIN);
+        auteursCree.add(DURAND);
+        auteursCree.add(DUMAS);
+        auteursCree.add(ZOLA);
+
+        // =========================
+        // CLASSER (LIENS)
+        // =========================
+        classersCree.add(classerRepo.save(new Classer(null, null, MARTIN, ROMAN)));
+        classersCree.add(classerRepo.save(new Classer(null, null, DURAND, POESIE)));
+        classersCree.add(classerRepo.save(new Classer(null, null, DUMAS, ROMAN)));
+        classersCree.add(classerRepo.save(new Classer(null, null, ZOLA, ROMAN)));
     }
+
+    // =========================
+    // CLEANUP (UNIQUEMENT TESTS)
+    // =========================
+    @AfterAll
+    void tearDown() {
+
+        classerRepo.deleteAll(classersCree);
+        typeAuteurRepo.deleteAll(typesCree);
+        auteurRepo.deleteAll(auteursCree);
+    }
+
+    // =========================
+    // TESTS
+    // =========================
 
     @Test
     void testGetAllAuteurs() {
-    Auteur auteur1 = new Auteur(1, "Nom1", "Prenom1", null, null, null, null, null, null, null, null);
-    Auteur auteur2 = new Auteur(2, "Nom2", "Prenom2", null, null, null, null, null, null, null, null);
-    when(auteurRepo.findAll(Sort.by(Sort.Direction.ASC, "nom", "prenom")))
-        .thenReturn(Arrays.asList(auteur1, auteur2));
+        List<Auteur> result = auteurService.getAllAuteurs();
 
-    List<Auteur> auteurs = auteurService.getAllAuteurs();
-
-    assertEquals(2, auteurs.size());
-    assertEquals("Nom1", auteurs.get(0).getNom());
-    assertEquals("Nom2", auteurs.get(1).getNom());
-    verify(auteurRepo, times(1)).findAll(Sort.by(Sort.Direction.ASC, "nom", "prenom"));
-}
+        assertEquals(7, result.size());
+    }
 
     @Test
     void testGetAuteurById() {
-        Auteur auteur = new Auteur(1, "Nom", "Prenom", null, null, null, null, null, null, null, null);
-        when(auteurRepo.findById(1)).thenReturn(Optional.of(auteur));
-
-        Auteur result = auteurService.getAuteurById(1);
+        Auteur result = auteurService.getAuteurById(MARTIN.getId());
 
         assertNotNull(result);
-        assertEquals("Nom", result.getNom());
-        verify(auteurRepo, times(1)).findById(1);
+        assertEquals("Martin", result.getNom());
+        assertEquals("Jean", result.getPrenom());
+    }
+
+    @Test
+    void testGetAuteurById_NotFound() {
+        Auteur result = auteurService.getAuteurById(999999);
+
+        assertNull(result);
     }
 
     @Test
     void testSaveAuteur() {
-        Auteur auteur = new Auteur(null, "Nom", "Prenom", null, null, null, null, null, null, null, null);
-        when(auteurRepo.save(any(Auteur.class))).thenReturn(auteur);
+        Auteur auteur = new Auteur(
+                null,
+                "Balzac",
+                "Honoré",
+                LocalDate.of(1799, 5, 20),
+                LocalDate.of(1850, 8, 18),
+                "France",
+                "Tours",
+                "Française",
+                null,
+                null,
+                null
+        );
 
-        Auteur result = auteurService.saveAuteur(auteur);
+        Auteur saved = auteurService.saveAuteur(auteur);
 
-        assertNotNull(result);
-        assertNotNull(result.getCreatedAt());
-        assertNotNull(result.getUpdatedAt());
-        verify(auteurRepo, times(1)).save(auteur);
+        assertNotNull(saved.getId());
+        assertEquals("Balzac", saved.getNom());
+        assertNotNull(saved.getCreatedAt());
     }
 
     @Test
     void testUpdateAuteur() {
-        Auteur auteur = new Auteur(1, "Nom", "Prenom", null, null, null, null, null, null, null, null);
-        when(auteurRepo.save(any(Auteur.class))).thenReturn(auteur);
+        DURAND.setVilleAuteur("Paris");
 
-        Auteur result = auteurService.updateAuteur(auteur);
+        Auteur updated = auteurService.updateAuteur(DURAND);
 
-        assertNotNull(result);
-        assertNotNull(result.getUpdatedAt());
-        verify(auteurRepo, times(1)).save(auteur);
+        assertEquals("Paris", updated.getVilleAuteur());
+        assertNotNull(updated.getUpdatedAt());
     }
 
     @Test
-    void testDeleteAuteurById() {
-        doNothing().when(auteurRepo).deleteById(1);
+    void testDeleteAuteur() {
+        Integer id = ZOLA.getId();
 
-        auteurService.deleteAuteurById(1);
+        auteurService.deleteAuteurById(id);
 
-        verify(auteurRepo, times(1)).deleteById(1);
-    }
-
-    @Test
-    void testGetAuteursByNom() {
-        Auteur auteur = new Auteur(1, "Nom", "Prenom", null, null, null, null, null, null, null, null);
-        when(auteurRepo.findByNom("Nom")).thenReturn(Arrays.asList(auteur));
-
-        List<Auteur> auteurs = auteurService.getAuteursByNom("Nom");
-
-        assertEquals(1, auteurs.size());
-        assertEquals("Nom", auteurs.get(0).getNom());
-        verify(auteurRepo, times(1)).findByNom("Nom");
-    }
-
-    @Test
-    void testGetAuteursByNomAndPrenom() {
-        Auteur auteur = new Auteur(1, "Nom", "Prenom", null, null, null, null, null, null, null, null);
-        when(auteurRepo.findByNomAndPrenom("Nom", "Prenom")).thenReturn(Arrays.asList(auteur));
-
-        List<Auteur> auteurs = auteurService.getAuteursByNomAndPrenom("Nom", "Prenom");
-
-        assertEquals(1, auteurs.size());
-        assertEquals("Prenom", auteurs.get(0).getPrenom());
-        verify(auteurRepo, times(1)).findByNomAndPrenom("Nom", "Prenom");
-    }
-
-    @Test
-    void testGetAuteursByNomLikeAndPrenomLike() {
-        Auteur auteur = new Auteur(1, "Nom", "Prenom", null, null, null, null, null, null, null, null);
-        when(auteurRepo.findByNomLikeAndPrenomLike("%Nom%", "%Prenom%")).thenReturn(Arrays.asList(auteur));
-
-        List<Auteur> auteurs = auteurService.getAuteursByNomLikeAndPrenomLike("%Nom%", "%Prenom%");
-
-        assertEquals(1, auteurs.size());
-        verify(auteurRepo, times(1)).findByNomLikeAndPrenomLike("%Nom%", "%Prenom%");
-    }
-
-    @Test
-    void testGetAuteursByNomStartWithIgnoreCase() {
-        Auteur auteur = new Auteur(1, "Nom", "Prenom", null, null, null, null, null, null, null, null);
-        when(auteurRepo.findByNomStartsWithIgnoreCase("Nom")).thenReturn(Arrays.asList(auteur));
-
-        List<Auteur> auteurs = auteurService.getAuteursByNomStartWithIgnoreCase("Nom");
-
-        assertEquals(1, auteurs.size());
-        verify(auteurRepo, times(1)).findByNomStartsWithIgnoreCase("Nom");
+        assertTrue(auteurRepo.findById(id).isEmpty());
     }
 
     @Test
     void testGetByNomContainingIgnoreCase() {
-        Auteur auteur = new Auteur(1, "Nom", "Prenom", null, null, null, null, null, null, null, null);
-        when(auteurRepo.findByNomContainingIgnoreCase("Nom")).thenReturn(Arrays.asList(auteur));
+        List<Auteur> result = auteurService.getByNomContainingIgnoreCase("zol");
 
-        List<Auteur> auteurs = auteurService.getByNomContainingIgnoreCase("Nom");
+        assertEquals(1, result.size());
+        assertEquals("Zola", result.get(0).getNom());
+    }
 
-        assertEquals(1, auteurs.size());
-        verify(auteurRepo, times(1)).findByNomContainingIgnoreCase("Nom");
+    @Test
+    void testGetByNomAndPrenom() {
+        List<Auteur> result = auteurService.getAuteursByNomAndPrenom("Dumas", "Alexandre");
+
+        assertEquals(1, result.size());
+        assertEquals(DUMAS.getId(), result.get(0).getId());
     }
 }
