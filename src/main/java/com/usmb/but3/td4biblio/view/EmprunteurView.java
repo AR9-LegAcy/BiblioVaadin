@@ -50,7 +50,6 @@ public class EmprunteurView extends VerticalLayout {
         grid.setColumns(
             "carteEmprunteur","nom","prenom","email","adresseRue","adresseVille","adresseCodePostal","dateNaissance","debutAbonnement","expirationAbonnement"
         );        
-        grid.getColumnByKey("carteEmprunteur").setWidth("50px").setFlexGrow(0);
 
         filter.setPlaceholder("Filtrer par nom ou prénom");
 
@@ -64,6 +63,9 @@ public class EmprunteurView extends VerticalLayout {
         // Connect selected Emprunteur to editor or hide if none is selected
         grid.asSingleSelect().addValueChangeListener(e -> {
             editor.editEmprunteur(e.getValue());
+        });
+        editor.setCancelHandler(() -> {
+            grid.deselectAll();
         });
 
         // Initialize listing

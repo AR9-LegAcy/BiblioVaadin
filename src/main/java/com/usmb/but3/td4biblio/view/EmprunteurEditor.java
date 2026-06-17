@@ -70,7 +70,7 @@ public class EmprunteurEditor extends VerticalLayout implements KeyNotifier {
         // wire action buttons to save, delete and reset
         save.addClickListener(e -> save());
         delete.addClickListener(e -> delete());
-        cancel.addClickListener(e -> editEmprunteur(emprunteur));
+        cancel.addClickListener(e -> cancel());
         addKeyPressListener(Key.ENTER, e -> save());
         setVisible(false);
     }
@@ -104,10 +104,26 @@ public class EmprunteurEditor extends VerticalLayout implements KeyNotifier {
         }
         binder.setBean(emprunteur);
         setVisible(true);
-        nom.focus();
+        prenom.focus();
     }
 
     public void setChangeHandler(ChangeHandler h) {
         this.changeHandler = h;
+    }
+    void cancel() {
+        setVisible(false);
+        if (cancelHandler != null) {
+            cancelHandler.onCancel();
+        }
+    }
+
+    public interface CancelHandler {
+        void onCancel();
+    }
+
+    private CancelHandler cancelHandler;
+
+    public void setCancelHandler(CancelHandler cancelHandler) {
+        this.cancelHandler = cancelHandler;
     }
 }
