@@ -70,6 +70,10 @@ public class BibliothecaireView extends VerticalLayout {
             listBibliothecaires(filter.getValue());
         });
 
+        editor.setCancelHandler(() -> {
+            grid.deselectAll();
+        });
+
         // Initialize listing
         listBibliothecaires(null);
     }
