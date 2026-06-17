@@ -49,7 +49,7 @@ public class BibliothecaireView extends VerticalLayout {
         grid.setColumns("pseudo", "bibliotheque", "nom", "prenom", "adresseRue", "adresseVille", "adresseCP", "email",
                 "dateNaissance");
 
-        filter.setPlaceholder("Filtrer par nom ou prénom");
+        filter.setPlaceholder("Filtrer par nom");
 
         // Replace listing with filtered content when user changes filter
         filter.setValueChangeMode(ValueChangeMode.LAZY);

@@ -14,6 +14,7 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
@@ -51,8 +52,8 @@ public class EmprunterEditor extends VerticalLayout implements KeyNotifier {
     private ChangeHandler changeHandler;
 
     public EmprunterEditor(EmprunterService emprunterService,
-                           EmprunteurService emprunteurService,
-                           DocumentService documentService) {
+            EmprunteurService emprunteurService,
+            DocumentService documentService) {
         this.emprunterService = emprunterService;
         this.emprunteurService = emprunteurService;
         this.documentService = documentService;
@@ -84,9 +85,8 @@ public class EmprunterEditor extends VerticalLayout implements KeyNotifier {
     void delete() {
         if (emprunter != null) {
             emprunterService.deleteEmpruntById(new com.usmb.but3.td4biblio.entity.EmprunterId(
-                emprunter.getIdDocument().getIdDocument(),
-                emprunter.getCarteEmprunteur().getCarteEmprunteur()
-            ));
+                    emprunter.getIdDocument().getIdDocument(),
+                    emprunter.getCarteEmprunteur().getCarteEmprunteur()));
             changeHandler.onChange();
         }
     }
@@ -96,16 +96,35 @@ public class EmprunterEditor extends VerticalLayout implements KeyNotifier {
             emprunter.setCarteEmprunteur(emprunteurField.getValue());
             emprunter.setIdDocument(documentField.getValue());
             emprunter.setDateEmprunt(dateEmprunt.getValue());
-            emprunter.setDateRetourPrevue(dateRetourPrevue.getValue());
             emprunter.setDateRetourReelle(dateRetourReelle.getValue());
             try {
-                emprunter.setProlongationEmprunt(prolongationEmprunt.getValue() != null && !prolongationEmprunt.getValue().isEmpty() 
-                    ? Integer.parseInt(prolongationEmprunt.getValue()) 
-                    : null);
+                emprunter.setProlongationEmprunt(
+                        prolongationEmprunt.getValue() != null && !prolongationEmprunt.getValue().isEmpty()
+                                ? Integer.parseInt(prolongationEmprunt.getValue())
+                                : null);
             } catch (NumberFormatException ex) {
                 emprunter.setProlongationEmprunt(null);
             }
+            // Ajout de la prolongation
+            if (dateRetourPrevue.getValue() != null
+                    && emprunter.getProlongationEmprunt() != null) {
 
+                emprunter.setDateRetourPrevue(
+                        dateRetourPrevue.getValue()
+                                .plusDays(emprunter.getProlongationEmprunt()));
+
+            } else {
+                emprunter.setDateRetourPrevue(dateRetourPrevue.getValue());
+            }
+            var emprunts = emprunterService.getEmpruntsByCarteEmprunteur(emprunteurField.getValue().getCarteEmprunteur());
+            if (emprunts.size()>=10){
+                Notification.show(
+                    "Impossible : cet emprunteur a déjà 10 emprunts en cours.",
+                    3000,
+                    Notification.Position.MIDDLE
+                );
+                return;
+            }
             emprunterService.saveEmprunt(emprunter);
             changeHandler.onChange();
         }
@@ -124,7 +143,8 @@ public class EmprunterEditor extends VerticalLayout implements KeyNotifier {
         dateEmprunt.setValue(emprunter.getDateEmprunt());
         dateRetourPrevue.setValue(emprunter.getDateRetourPrevue());
         dateRetourReelle.setValue(emprunter.getDateRetourReelle());
-        prolongationEmprunt.setValue(emprunter.getProlongationEmprunt() != null ? emprunter.getProlongationEmprunt().toString() : "");
+        prolongationEmprunt.setValue(
+                emprunter.getProlongationEmprunt() != null ? emprunter.getProlongationEmprunt().toString() : "");
 
         setVisible(true);
         emprunteurField.focus();
@@ -137,6 +157,7 @@ public class EmprunterEditor extends VerticalLayout implements KeyNotifier {
     public interface ChangeHandler {
         void onChange();
     }
+
     void cancel() {
         setVisible(false);
         if (cancelHandler != null) {

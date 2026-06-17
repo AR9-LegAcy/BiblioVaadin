@@ -46,6 +46,8 @@ public class EmprunterView extends VerticalLayout {
 
         grid.setHeight("300px");
         grid.setColumns("idDocument", "carteEmprunteur", "dateEmprunt", "dateRetourPrevue", "dateRetourReelle", "prolongationEmprunt");
+        grid.getColumnByKey("carteEmprunteur").setHeader("Nom de l'emprunteur");
+        grid.getColumnByKey("idDocument").setHeader("Code ISBN");
 
         filter.setPlaceholder("Filtrer par nom ou prénom");
 
