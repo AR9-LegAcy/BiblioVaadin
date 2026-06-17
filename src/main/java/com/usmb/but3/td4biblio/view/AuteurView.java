@@ -46,8 +46,7 @@ public class AuteurView extends VerticalLayout {
         add(actions, grid, editor);
 
         grid.setHeight("300px");
-        grid.setColumns("id", "nom", "prenom", "nationalite", "paysAuteur", "dateNaissance", "dateDeces");
-        grid.getColumnByKey("id").setWidth("50px").setFlexGrow(0);
+        grid.setColumns( "nom", "prenom", "nationalite", "paysAuteur", "dateNaissance", "dateDeces");
 
         filter.setPlaceholder("Filtrer par nom ou prénom");
 
@@ -67,6 +66,10 @@ public class AuteurView extends VerticalLayout {
         editor.setChangeHandler(() -> {
             editor.setVisible(false);
             listAuteurs(filter.getValue());
+        });
+
+        editor.setCancelHandler(() -> {
+            grid.deselectAll();
         });
 
         // Initialize listing
