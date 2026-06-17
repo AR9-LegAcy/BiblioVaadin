@@ -71,13 +71,20 @@ public class AuteurEditor extends VerticalLayout implements KeyNotifier {
         // wire action buttons to save, delete and reset
         save.addClickListener(e -> save());
         delete.addClickListener(e -> delete());
-        cancel.addClickListener(e -> editAuteur(auteur));
+        cancel.addClickListener(e -> cancel());
         setVisible(false);
     }
 
     void delete() {
         auteurService.deleteAuteurById(auteur.getId());
         changeHandler.onChange();
+    }
+
+    void cancel() {
+        setVisible(false);
+        if (cancelHandler != null) {
+            cancelHandler.onCancel();
+        }
     }
 
     void save() {
@@ -100,7 +107,7 @@ public class AuteurEditor extends VerticalLayout implements KeyNotifier {
         } else {
             auteur = a;
         }
-        cancel.setVisible(persisted);
+        cancel.setVisible(true);
 
         // Bind auteur properties to similarly named fields
         binder.setBean(auteur);
@@ -113,5 +120,15 @@ public class AuteurEditor extends VerticalLayout implements KeyNotifier {
 
     public void setChangeHandler(ChangeHandler h) {
         changeHandler = h;
+    }
+
+    public interface CancelHandler {
+        void onCancel();
+    }
+
+    private CancelHandler cancelHandler;
+
+    public void setCancelHandler(CancelHandler cancelHandler) {
+        this.cancelHandler = cancelHandler;
     }
 }

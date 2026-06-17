@@ -1,6 +1,7 @@
 package com.usmb.but3.td4biblio.view;
 
 import com.usmb.but3.td4biblio.entity.Livre;
+import com.usmb.but3.td4biblio.security.SessionManager;
 import com.usmb.but3.td4biblio.service.EditeurService;
 import com.usmb.but3.td4biblio.service.LivreService;
 import com.vaadin.flow.component.button.Button;
@@ -20,8 +21,8 @@ import org.springframework.util.StringUtils;
 @Component
 @Scope("prototype")
 @Route(value = "livre")
-@PageTitle("Les Livres")
-@Menu(title = "Les Livres", order = 1, icon = "vaadin:book")
+@PageTitle("Livres")
+@Menu(title = "Livres", order = 1, icon = "vaadin:book")
 public class LivreView extends VerticalLayout {
 
     private final LivreService livreService;
@@ -31,6 +32,7 @@ public class LivreView extends VerticalLayout {
     final TextField filter;
     private final Button addNewBtn;
     final LivreEditor editor;
+    boolean isBib = SessionManager.isBibliothecaire();
 
     public LivreView(LivreService livreService, EditeurService editeurService) {
         this.livreService = livreService;
@@ -42,31 +44,34 @@ public class LivreView extends VerticalLayout {
         this.grid = new Grid<>(Livre.class);
         this.filter = new TextField();
         this.addNewBtn = new Button("Ajouter un livre", VaadinIcon.PLUS.create());
-
+        addNewBtn.getStyle().set("visibility", "hidden");
+        
         // Construction de la mise en page
         HorizontalLayout actions = new HorizontalLayout(filter, addNewBtn);
         add(actions, grid, editor);
-
+        
         grid.setHeight("300px");
         grid.setColumns("idDocument", "titreLivre", "nbPages", "datePublication");
         grid.addColumn(livre -> livre.getIdEditeur() != null ? livre.getIdEditeur().getNom() : "Aucun")
-            .setHeader("Éditeur");
-
+        .setHeader("Éditeur");
+        
         grid.getColumnByKey("idDocument").setWidth("50px").setFlexGrow(0);
-
+        
         filter.setPlaceholder("Filtrer par titre");
         filter.setValueChangeMode(ValueChangeMode.LAZY);
         filter.addValueChangeListener(e -> listLivres(e.getValue()));
+        
+        if (isBib) {
+            addNewBtn.getStyle().set("visibility", "visible");
+            grid.asSingleSelect().addValueChangeListener(e -> editor.editLivre(e.getValue()));
+            
+            addNewBtn.addClickListener(e -> editor.editLivre(new Livre()));
 
-        grid.asSingleSelect().addValueChangeListener(e -> editor.editLivre(e.getValue()));
-
-        addNewBtn.addClickListener(e -> editor.editLivre(new Livre()));
-
-        editor.setChangeHandler(() -> {
-            editor.setVisible(false);
-            listLivres(filter.getValue());
-        });
-
+            editor.setChangeHandler(() -> {
+                editor.setVisible(false);
+                listLivres(filter.getValue());
+            });
+        }
         listLivres(null);
     }
 

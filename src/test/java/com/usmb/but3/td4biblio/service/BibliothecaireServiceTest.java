@@ -56,7 +56,7 @@ class BibliothecaireServiceTest {
     @Test
     void testGetBibliothecaireByPseudo() {
         Bibliothecaire biblio = new Bibliothecaire("pseudo1", "Nom", "Prenom", "Rue", "Ville", "75001", "email@test.com", LocalDate.of(1990, 1, 1), null, LocalDateTime.now(), LocalDateTime.now(), null);
-        when(bibliothecaireRepo.findByPseudo("pseudo1")).thenReturn(Arrays.asList(biblio));
+        when(bibliothecaireRepo.findByPseudo("pseudo1")).thenReturn(biblio);
 
         Bibliothecaire result = bibliothecaireService.getBibliothecaireByPseudo("pseudo1");
 
@@ -102,7 +102,7 @@ class BibliothecaireServiceTest {
         Bibliothecaire biblio = new Bibliothecaire("pseudo1", "Nom", "Prenom", "Rue", "Ville", "75001", "email@test.com", LocalDate.of(1990, 1, 1), null, LocalDateTime.now(), LocalDateTime.now(), null);
         Bibliothecaire updatedBiblio = new Bibliothecaire("pseudo1", "Nom", "Prenom", "Rue", "Ville", "75001", "email@test.com", LocalDate.of(1990, 1, 1), "oldPassword", LocalDateTime.now(), LocalDateTime.now(), null);
         
-        when(bibliothecaireRepo.findByPseudo("pseudo1")).thenReturn(Arrays.asList(oldBiblio));
+        when(bibliothecaireRepo.findByPseudo("pseudo1")).thenReturn(oldBiblio);
         when(bibliothecaireRepo.save(any(Bibliothecaire.class))).thenReturn(updatedBiblio);
 
         Bibliothecaire result = bibliothecaireService.updateBibliothecaire(biblio);

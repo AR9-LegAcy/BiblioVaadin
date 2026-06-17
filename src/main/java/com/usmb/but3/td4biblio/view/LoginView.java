@@ -30,8 +30,8 @@ import java.util.Optional;
 public class LoginView extends VerticalLayout {
 
     public LoginView(BibliothecaireRepo bibliothecaireRepo,
-                     EmprunteurRepo emprunteurRepo,
-                     PasswordEncoder passwordEncoder) {
+            EmprunteurRepo emprunteurRepo,
+            PasswordEncoder passwordEncoder) {
 
         setSizeFull();
         setAlignItems(Alignment.CENTER);
@@ -41,34 +41,34 @@ public class LoginView extends VerticalLayout {
         // ── Carte de connexion ────────────────────────────────────────────
         var card = new Div();
         card.getStyle()
-            .set("background",    "#fff")
-            .set("border-radius", "1rem")
-            .set("box-shadow",    "0 4px 24px rgba(0,0,0,0.08)")
-            .set("padding",       "2.5rem 2rem")
-            .set("width",         "100%")
-            .set("max-width",     "400px")
-            .set("box-sizing",    "border-box");
+                .set("background", "#fff")
+                .set("border-radius", "1rem")
+                .set("box-shadow", "0 4px 24px rgba(0,0,0,0.08)")
+                .set("padding", "2.5rem 2rem")
+                .set("width", "100%")
+                .set("max-width", "400px")
+                .set("box-sizing", "border-box");
 
         // Logo + titre
         var logoRow = new Div();
         logoRow.getStyle()
-            .set("display", "flex").set("align-items", "center")
-            .set("gap", "0.75rem").set("margin-bottom", "0.25rem");
+                .set("display", "flex").set("align-items", "center")
+                .set("gap", "0.75rem").set("margin-bottom", "0.25rem");
 
         var logoIco = new Icon(VaadinIcon.CUBES);
         logoIco.getStyle().set("color", "#2563EB").set("width", "2rem").set("height", "2rem");
 
         var logoText = new H1("BiBlio");
         logoText.getStyle()
-            .set("margin", "0").set("font-size", "1.5rem")
-            .set("font-weight", "700").set("color", "#1E293B");
+                .set("margin", "0").set("font-size", "1.5rem")
+                .set("font-weight", "700").set("color", "#1E293B");
 
         logoRow.add(logoIco, logoText);
 
         var subtitle = new Paragraph("Connectez-vous à votre espace");
         subtitle.getStyle()
-            .set("margin", "0 0 2rem 0")
-            .set("color", "#64748B").set("font-size", "0.9rem");
+                .set("margin", "0 0 2rem 0")
+                .set("color", "#64748B").set("font-size", "0.9rem");
 
         // Champs
         var usernameField = new TextField("Identifiant");
@@ -84,8 +84,8 @@ public class LoginView extends VerticalLayout {
         // Message d'aide discret
         var hint = new Span("Le mot de passe est votre date de naissance (ex: 15061990)");
         hint.getStyle()
-            .set("font-size", "0.75rem").set("color", "#94A3B8")
-            .set("display", "block").set("margin-bottom", "1.5rem");
+                .set("font-size", "0.75rem").set("color", "#94A3B8")
+                .set("display", "block").set("margin-bottom", "1.5rem");
 
         // Bouton connexion
         var btnLogin = new Button("Se connecter", new Icon(VaadinIcon.SIGN_IN));
@@ -109,11 +109,10 @@ public class LoginView extends VerticalLayout {
             }
 
             // Essai bibliothécaire (pseudo = String)
-            List<Bibliothecaire> bibs = bibliothecaireRepo.findByPseudo(username);
-            if (!bibs.isEmpty()) {
-                Bibliothecaire bib = bibs.get(0);
-                if (passwordEncoder.matches(password, bib.getMotDePasse())) {
-                    SessionManager.loginBibliothecaire(bib);
+            Bibliothecaire bibliothecaire = bibliothecaireRepo.findByPseudo(username);
+            if (bibliothecaire != null) {
+                if (passwordEncoder.matches(password, bibliothecaire.getMotDePasse())) {
+                    SessionManager.loginBibliothecaire(bibliothecaire);
                     UI.getCurrent().getPage().setLocation("/");
                     return;
                 } else {
@@ -137,7 +136,8 @@ public class LoginView extends VerticalLayout {
                         return;
                     }
                 }
-            } catch (NumberFormatException ignored) {}
+            } catch (NumberFormatException ignored) {
+            }
 
             showError("Identifiant introuvable.");
         };
@@ -145,7 +145,7 @@ public class LoginView extends VerticalLayout {
         btnLogin.addClickListener(e -> doLogin.run());
         // Connexion aussi sur Entrée
         passwordField.addKeyPressListener(
-            com.vaadin.flow.component.Key.ENTER, e -> doLogin.run());
+                com.vaadin.flow.component.Key.ENTER, e -> doLogin.run());
 
         card.add(logoRow, subtitle, usernameField, passwordField, hint, btnLogin, btnRetour);
         add(card);

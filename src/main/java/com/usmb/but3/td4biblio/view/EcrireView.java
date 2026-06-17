@@ -21,7 +21,7 @@ import com.vaadin.flow.router.Route;
 @Menu(
     title = "Ecrire auteurs",
     order = 7,
-    icon = "vaadin:tags"
+    icon = "vaadin:edit"
 )
 public class EcrireView extends VerticalLayout {
 
@@ -45,7 +45,7 @@ public class EcrireView extends VerticalLayout {
 
         grid.addColumn(c -> c.getIdAuteur().getPrenom() + " " + c.getIdAuteur().getNom()).setHeader("Auteur");
 
-        grid.addColumn(c -> c.getIdLivre().getTitreLivre()).setHeader("livre");
+        grid.addColumn(c -> c.getIdDocument().getTitreLivre()).setHeader("livre");
 
         grid.asSingleSelect().addValueChangeListener(e -> editor.editEcrire(e.getValue()));
 

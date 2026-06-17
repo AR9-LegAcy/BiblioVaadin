@@ -20,8 +20,8 @@ import org.springframework.util.StringUtils;
 @Component
 @Scope("prototype")
 @Route(value = "bibliothecaire")
-@PageTitle("Les Bibliothecaires")
-@Menu(title = "Les Bibliothecaires", order = 0, icon = "vaadin:clipboard-check")
+@PageTitle("Bibliothecaires")
+@Menu(title = "Bibliothecaires", order = 0, icon = "vaadin:male")
 public class BibliothecaireView extends VerticalLayout {
 
     private final BibliothecaireService bibliothecaireService;
@@ -68,6 +68,10 @@ public class BibliothecaireView extends VerticalLayout {
         editor.setChangeHandler(() -> {
             editor.setVisible(false);
             listBibliothecaires(filter.getValue());
+        });
+
+        editor.setCancelHandler(() -> {
+            grid.deselectAll();
         });
 
         // Initialize listing

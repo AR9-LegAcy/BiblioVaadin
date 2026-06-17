@@ -55,11 +55,12 @@ public class BibliothecaireEditor extends VerticalLayout implements KeyNotifier 
         // ✅ Remplir ComboBox Bibliothèque avec les items
         bibliothequeField.setItems(this.bibliothequeService.getAllBibliotheques());
         bibliothequeField.setItemLabelGenerator(Bibliotheque::getNom);
-
-        add(pseudo, nom, prenom, bibliothequeField,
-            adresseRue, adresseVille, adresseCP,
-            email, dateNaissance, motDePasse,
-            actions);
+        HorizontalLayout fields1 = new HorizontalLayout(pseudo, prenom, nom, bibliothequeField);
+        HorizontalLayout fields2 = new HorizontalLayout(adresseRue, adresseVille, adresseCP);
+        HorizontalLayout fields3 = new HorizontalLayout(email);
+        HorizontalLayout fields4 = new HorizontalLayout(dateNaissance);
+        HorizontalLayout fields5 = new HorizontalLayout(motDePasse);
+        add(fields1, fields2, fields3, fields4, fields5, actions);
 
         binder.bindInstanceFields(this);
 
@@ -69,7 +70,7 @@ public class BibliothecaireEditor extends VerticalLayout implements KeyNotifier 
 
         save.addClickListener(e -> save());
         delete.addClickListener(e -> delete());
-        cancel.addClickListener(e -> editBibliothecaire(bibliothecaire));
+        cancel.addClickListener(e -> cancel());
 
         addKeyPressListener(Key.ENTER, e -> save());
 
@@ -92,6 +93,13 @@ public class BibliothecaireEditor extends VerticalLayout implements KeyNotifier 
         }
     }
 
+    void cancel() {
+        setVisible(false);
+        if (cancelHandler != null) {
+            cancelHandler.onCancel();
+        }
+    }
+
     public final void editBibliothecaire(Bibliothecaire b) {
         if (b == null) {
             setVisible(false);
@@ -100,7 +108,7 @@ public class BibliothecaireEditor extends VerticalLayout implements KeyNotifier 
 
         bibliothecaire = b;
 
-        //  Assurer que le ComboBox est mis à jour avant le setBean
+        // Assurer que le ComboBox est mis à jour avant le setBean
         bibliothequeField.setItems(this.bibliothequeService.getAllBibliotheques());
 
         // Pré-sélectionner la bibliothèque actuelle
@@ -120,5 +128,15 @@ public class BibliothecaireEditor extends VerticalLayout implements KeyNotifier 
 
     public interface ChangeHandler {
         void onChange();
+    }
+
+    public interface CancelHandler {
+        void onCancel();
+    }
+
+    private CancelHandler cancelHandler;
+
+    public void setCancelHandler(CancelHandler cancelHandler) {
+        this.cancelHandler = cancelHandler;
     }
 }

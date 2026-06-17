@@ -7,7 +7,7 @@ import com.usmb.but3.td4biblio.entity.Bibliothecaire;
 
 public interface BibliothecaireRepo extends JpaRepository<Bibliothecaire, String> {
     List<Bibliothecaire> findByNom(String nom);
-    List<Bibliothecaire> findByPseudo(String pseudo);
+    Bibliothecaire findByPseudo(String pseudo);
     List<Bibliothecaire> findByNomAndPrenom(String nom, String prenom);
     List<Bibliothecaire> findByNomLikeAndPrenomLike(String nom, String prenom);
     List<Bibliothecaire> findByNomStartsWithIgnoreCase(String filterText);

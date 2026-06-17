@@ -66,6 +66,7 @@ public class DocumentEditor extends VerticalLayout implements KeyNotifier {
 
         // Listen to changes made by the user
         addKeyPressListener(Key.ENTER, e -> save());
+        setVisible(false);
     }
 
     void delete() {

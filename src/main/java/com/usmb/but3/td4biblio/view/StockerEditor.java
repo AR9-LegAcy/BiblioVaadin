@@ -51,6 +51,7 @@ public class StockerEditor extends VerticalLayout implements KeyNotifier {
 
 
         addKeyPressListener(Key.ENTER, e -> save());
+        setVisible(false);
     }
 
     void delete() {
