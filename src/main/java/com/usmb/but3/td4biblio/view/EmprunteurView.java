@@ -67,6 +67,10 @@ public class EmprunteurView extends VerticalLayout {
         editor.setCancelHandler(() -> {
             grid.deselectAll();
         });
+        editor.setChangeHandler(() -> {
+            editor.setVisible(false);
+            listEmprunteurs(filter.getValue());
+        });
 
         // Initialize listing
         listEmprunteurs(null);

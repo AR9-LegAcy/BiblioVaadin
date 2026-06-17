@@ -1,5 +1,7 @@
 package com.usmb.but3.td4biblio.view;
 
+import java.util.Random;
+
 import org.springframework.context.annotation.Scope;
 
 import com.usmb.but3.td4biblio.entity.Emprunteur;
@@ -79,8 +81,11 @@ public class EmprunteurEditor extends VerticalLayout implements KeyNotifier {
         emprunteurService.deleteEmprunteurById(emprunteur.getCarteEmprunteur());
         changeHandler.onChange();
     }
-    
+
     void save() {
+        if (emprunteur.getCarteEmprunteur() == null) {
+            emprunteur.setCarteEmprunteur(generateUniqueCardNumber());
+        }
         emprunteurService.saveEmprunteur(emprunteur);
         changeHandler.onChange();
     }
@@ -98,8 +103,7 @@ public class EmprunteurEditor extends VerticalLayout implements KeyNotifier {
         if (persisted) {
             // Find fresh entity for editing
             emprunteur = emprunteurService.getEmprunteurById(e.getCarteEmprunteur());
-        }
-        else {
+        } else {
             emprunteur = e;
         }
         binder.setBean(emprunteur);
@@ -110,6 +114,7 @@ public class EmprunteurEditor extends VerticalLayout implements KeyNotifier {
     public void setChangeHandler(ChangeHandler h) {
         this.changeHandler = h;
     }
+
     void cancel() {
         setVisible(false);
         if (cancelHandler != null) {
@@ -125,5 +130,16 @@ public class EmprunteurEditor extends VerticalLayout implements KeyNotifier {
 
     public void setCancelHandler(CancelHandler cancelHandler) {
         this.cancelHandler = cancelHandler;
+    }
+
+    private Integer generateUniqueCardNumber() {
+        Random random = new Random();
+        Integer cardNumber;
+
+        do {
+            cardNumber = random.nextInt(1000000000, Integer.MAX_VALUE);
+        } while (emprunteurService.getEmprunteurById(cardNumber) != null);
+
+        return cardNumber;
     }
 }
