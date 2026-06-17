@@ -1,6 +1,7 @@
 package com.usmb.but3.td4biblio.entity;
 
 import java.io.Serializable;
+
 import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -14,7 +15,7 @@ public class EcrireId implements Serializable {
 
     private Integer idAuteur;
 
-    private Integer idLivre;
+    private Integer idDocument;
 
     // equals et hashCode personnalisés (optionnels si Lombok gère @Data)
     @Override
@@ -26,7 +27,7 @@ public class EcrireId implements Serializable {
         EcrireId other = (EcrireId) obj;
         if (idAuteur == null ? other.idAuteur != null : !idAuteur.equals(other.idAuteur))
             return false;
-        if (idLivre == null ? other.idLivre != null : !idLivre.equals(other.idLivre))
+        if (idDocument == null ? other.idDocument != null : !idDocument.equals(other.idDocument))
             return false;
         return true;
     }
@@ -36,7 +37,7 @@ public class EcrireId implements Serializable {
         final int prime = 31;
         int result = 1;
         result = prime * result + (idAuteur == null ? 0 : idAuteur.hashCode());
-        result = prime * result + (idLivre == null ? 0 : idLivre.hashCode());
+        result = prime * result + (idDocument == null ? 0 : idDocument.hashCode());
         return result;
     }
 }

@@ -5,7 +5,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import com.usmb.but3.td4biblio.entity.*;
+import com.usmb.but3.td4biblio.entity.Ecrire;
+import com.usmb.but3.td4biblio.entity.EcrireId;
+import com.usmb.but3.td4biblio.entity.Auteur;
+import com.usmb.but3.td4biblio.entity.Livre;
 import com.usmb.but3.td4biblio.service.EcrireService;
 
 import java.util.List;
@@ -25,12 +28,12 @@ public class EcrireController {
     }
 
     /* GET by composite ID */
-    @GetMapping("/{idAuteur}/{idLivre}")
+    @GetMapping("/{idAuteur}/{idDocument}")
     public ResponseEntity<Ecrire> getEcrireById(
             @PathVariable Integer idAuteur,
-            @PathVariable Integer idLivre) {
+            @PathVariable Integer idDocument) {
 
-        EcrireId id = new EcrireId(idAuteur, idLivre);
+        EcrireId id = new EcrireId(idAuteur, idDocument);
         Ecrire ecrire = ecrireService.getEcrireById(id);
 
         return (ecrire != null)
@@ -45,13 +48,13 @@ public class EcrireController {
     }
 
     /* UPDATE */
-    @PutMapping("/{idAuteur}/{idLivre}")
+    @PutMapping("/{idAuteur}/{idDocument}")
     public ResponseEntity<Ecrire> updateEcrire(
             @PathVariable Integer idAuteur,
-            @PathVariable Integer idLivre,
+            @PathVariable Integer idDocument,
             @RequestBody Ecrire ecrire) {
 
-        EcrireId id = new EcrireId(idAuteur, idLivre);
+        EcrireId id = new EcrireId(idAuteur, idDocument);
 
         Ecrire existing = ecrireService.getEcrireById(id);
         if (existing == null) {
@@ -59,25 +62,25 @@ public class EcrireController {
         }
 
         Auteur auteur = ecrireService.getAuteurById(idAuteur);
-        Livre livre = ecrireService.getLivreById(idLivre);
+        Livre livre = ecrireService.getLivreById(idDocument);
 
         if (auteur == null || livre == null) {
             return ResponseEntity.badRequest().build();
         }
 
         ecrire.setIdAuteur(auteur);
-        ecrire.setIdLivre(livre);
+        ecrire.setIdDocument(livre);
 
         return ResponseEntity.ok(ecrireService.updateEcrire(ecrire));
     }
 
     /* DELETE */
-    @DeleteMapping("/{idAuteur}/{idLivre}")
+    @DeleteMapping("/{idAuteur}/{idDocument}")
     public ResponseEntity<Void> deleteEcrire(
             @PathVariable Integer idAuteur,
-            @PathVariable Integer idLivre) {
+            @PathVariable Integer idDocument) {
 
-        EcrireId id = new EcrireId(idAuteur, idLivre);
+        EcrireId id = new EcrireId(idAuteur, idDocument);
 
         if (ecrireService.getEcrireById(id) == null) {
             return ResponseEntity.notFound().build();
