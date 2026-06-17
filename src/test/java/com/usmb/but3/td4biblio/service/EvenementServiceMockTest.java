@@ -69,7 +69,7 @@ public class EvenementServiceMockTest {
         when(evenementRepo.findById(999)).thenReturn(Optional.empty());
 
         //Act
-        Evenement result = evenementService.getEvenementById(1);
+        Evenement result = evenementService.getEvenementById(999);
 
         //Assert
         assertThat(result).isNull();
@@ -109,16 +109,257 @@ public class EvenementServiceMockTest {
 
     @Test
     void testUpdateEvenement() {
-        //Arrange
-        Evenement eventToUpdate = new Evenement(1, "Dédicace", "Rencontre avec l'auteur", LocalDate.of(2026, 7, 1), LocalDate.of(2026, 7, 3), LocalDateTime.now(), null, null, null);
-        when(evenementRepo.save(any(Evenement.class))).thenReturn(eventToUpdate);
+        // Arrange
+        Evenement event = new Evenement(
+                1,
+                "Dédicace",
+                "Nouvelle description",
+                LocalDate.of(2026, 7, 1),
+                LocalDate.of(2026, 7, 3),
+                LocalDateTime.now().minusDays(10),
+                null,
+                null,
+                null);
 
-        //Act
-        Evenement result = evenementService.updateEvenement(eventToUpdate);
+        Evenement updatedEvent = new Evenement(
+                1,
+                "Dédicace",
+                "Nouvelle description",
+                LocalDate.of(2026, 7, 1),
+                LocalDate.of(2026, 7, 3),
+                event.getCreatedAt(),
+                LocalDateTime.now(),
+                null,
+                null);
 
-        //Assert
+        when(evenementRepo.save(event)).thenReturn(updatedEvent);
+
+        // Act
+        Evenement result = evenementService.updateEvenement(event);
+
+        // Assert
         assertThat(result).isNotNull();
-        assertThat(result.getId()).isEqualTo(1);
-        verify(evenementRepo, times(1)).save(any(Evenement.class));
+        assertThat(result.getUpdatedAt()).isNotNull();
+
+        verify(evenementRepo, times(1)).save(event);
+    }
+
+    @Test
+    void testDeleteEvenementById() {
+        // Act
+        evenementService.deleteEvenementById(1);
+
+        // Assert
+        verify(evenementRepo, times(1)).deleteById(1);
+    }
+
+    @Test
+    void testGetEvenementByTitre() {
+        // Arrange
+        Evenement event = new Evenement(
+                1,
+                "Dédicace",
+                "Rencontre auteur",
+                LocalDate.now(),
+                LocalDate.now(),
+                LocalDateTime.now(),
+                null,
+                null,
+                null);
+
+        List<Evenement> events = List.of(event);
+
+        when(evenementRepo.findByTitre("Dédicace"))
+                .thenReturn(events);
+
+        // Act
+        List<Evenement> result =
+                evenementService.getEvenementsByTitre("Dédicace");
+
+        // Assert
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getTitre()).isEqualTo("Dédicace");
+
+        verify(evenementRepo, times(1))
+                .findByTitre("Dédicace");
+    }
+
+    @Test
+    void testGetEvenementByDateDebut() {
+        // Arrange
+        LocalDate date = LocalDate.of(2026, 7, 1);
+
+        Evenement event = new Evenement(
+                1,
+                "Dédicace",
+                "Description",
+                date,
+                date.plusDays(2),
+                LocalDateTime.now(),
+                null,
+                null,
+                null);
+
+        when(evenementRepo.findByDateDebut(date))
+                .thenReturn(List.of(event));
+
+        // Act
+        List<Evenement> result =
+                evenementService.getEvenementsByDateDebut(date);
+
+        // Assert
+        assertThat(result).hasSize(1);
+
+        verify(evenementRepo, times(1))
+                .findByDateDebut(date);
+    }
+
+    @Test
+    void testGetEvenementByDateFin() {
+        // Arrange
+        LocalDate date = LocalDate.of(2026, 7, 3);
+
+        Evenement event = new Evenement(
+                1,
+                "Dédicace",
+                "Description",
+                date.minusDays(2),
+                date,
+                LocalDateTime.now(),
+                null,
+                null,
+                null);
+
+        when(evenementRepo.findByDateFin(date))
+                .thenReturn(List.of(event));
+
+        // Act
+        List<Evenement> result =
+                evenementService.getEvenementsByDateFin(date);
+
+        // Assert
+        assertThat(result).hasSize(1);
+
+        verify(evenementRepo, times(1))
+                .findByDateFin(date);
+    }
+
+    @Test
+    void testGetEvenementsByTitreLikeAndDateDebut() {
+        // Arrange
+        String titre = "%Dédi%";
+        LocalDate date = LocalDate.of(2026, 7, 1);
+
+        Evenement event = new Evenement(
+                1,
+                "Dédicace",
+                "Description",
+                date,
+                date.plusDays(2),
+                LocalDateTime.now(),
+                null,
+                null,
+                null);
+
+        when(evenementRepo.findByTitreLikeAndDateDebut(titre, date))
+                .thenReturn(List.of(event));
+
+        // Act
+        List<Evenement> result =
+                evenementService.getEvenementsByTitreLikeAndDateDebut(titre, date);
+
+        // Assert
+        assertThat(result).hasSize(1);
+
+        verify(evenementRepo, times(1))
+                .findByTitreLikeAndDateDebut(titre, date);
+    }
+
+    @Test
+    void testGetEvenementsByTitreLikeAndDateFin() {
+        // Arrange
+        String titre = "%Dédi%";
+        LocalDate date = LocalDate.of(2026, 7, 3);
+
+        Evenement event = new Evenement(
+                1,
+                "Dédicace",
+                "Description",
+                date.minusDays(2),
+                date,
+                LocalDateTime.now(),
+                null,
+                null,
+                null);
+
+        when(evenementRepo.findByTitreLikeAndDateFin(titre, date))
+                .thenReturn(List.of(event));
+
+        // Act
+        List<Evenement> result =
+                evenementService.getEvenementsByTitreLikeAndDateFin(titre, date);
+
+        // Assert
+        assertThat(result).hasSize(1);
+
+        verify(evenementRepo, times(1))
+                .findByTitreLikeAndDateFin(titre, date);
+    }
+
+    @Test
+    void testGetEvenementsByTitreLike() {
+       // Arrange
+       Evenement event = new Evenement(
+               1,
+               "Dédicace",
+               "Description",
+               LocalDate.now(),
+               LocalDate.now(),
+               LocalDateTime.now(),
+               null,
+               null,
+               null);
+
+       when(evenementRepo.findByTitreLike("%Dédi%"))
+               .thenReturn(List.of(event));
+
+       // Act
+       List<Evenement> result =
+               evenementService.getEvenementsByTitreLike("%Dédi%");
+
+       // Assert
+       assertThat(result).hasSize(1);
+       assertThat(result.get(0).getTitre()).isEqualTo("Dédicace");
+
+       verify(evenementRepo, times(1))
+               .findByTitreLike("%Dédi%");
+    }
+
+    @Test
+    void testGetEvenementsFuturs() {
+        // Arrange
+        Evenement event = new Evenement(
+                1,
+                "Salon du livre",
+                "Description",
+                LocalDate.now().plusDays(10),
+                LocalDate.now().plusDays(12),
+                LocalDateTime.now(),
+                null,
+                null,
+                null);
+
+        when(evenementRepo.findByDateDebutAfterOrderByDateDebutAsc(any(LocalDate.class)))
+                .thenReturn(List.of(event));
+
+        // Act
+        List<Evenement> result = evenementService.getEvenementsFuturs();
+
+        // Assert
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getTitre()).isEqualTo("Salon du livre");
+
+        verify(evenementRepo, times(1))
+                .findByDateDebutAfterOrderByDateDebutAsc(any(LocalDate.class));
     }
 }
