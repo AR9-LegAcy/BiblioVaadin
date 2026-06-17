@@ -49,6 +49,7 @@ public class TypeDocumentEditor extends VerticalLayout implements KeyNotifier {
         save.addClickListener(e -> save());
         delete.addClickListener(e -> delete());
         cancel.addClickListener(e -> editTypeDocument(typeDocument));
+        setVisible(false);
     }
 
     void delete() {

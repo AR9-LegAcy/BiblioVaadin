@@ -22,16 +22,12 @@ import org.springframework.util.StringUtils;
 @Route(value = "type-document")
 @PageTitle("Les Types de Documents")
 @Menu(title = "Les Types de Documents", order = 1, icon = "vaadin:clipboard-list")
-public class TypeDocumentView extends VerticalLayout {    
+public class TypeDocumentView extends VerticalLayout {
     private final TypeDocumentService typeDocumentService;
     final Grid<TypeDocument> grid;
     final TextField filter;
     private final Button addNewBtn;
     final TypeDocumentEditor editor;
-
-    public Button getAddNewBtn() {
-        return addNewBtn;
-    }
 
     public TypeDocumentView(TypeDocumentService typeDocumentService, TypeDocumentEditor editor) {
         this.typeDocumentService = typeDocumentService;
@@ -54,6 +50,10 @@ public class TypeDocumentView extends VerticalLayout {
         filter.setValueChangeMode(ValueChangeMode.LAZY);
         filter.addValueChangeListener(e -> listTypeDocuments(e.getValue()));
 
+        
+        // Instantiate and edit new Auteur when the new button is clicked
+        addNewBtn.addClickListener(e -> editor.editTypeDocument(new TypeDocument()));
+
         // Connect selected TypeDocument to editor or hide if none is selected
         grid.asSingleSelect().addValueChangeListener(e -> {
             editor.editTypeDocument(e.getValue());
@@ -69,5 +69,9 @@ public class TypeDocumentView extends VerticalLayout {
         } else {
             grid.setItems(typeDocumentService.getTypeDocumentsByNomTypeDocumentLike(filterText));
         }
+    }
+
+    public Button getAddNewBtn() {
+        return addNewBtn;
     }
 }
