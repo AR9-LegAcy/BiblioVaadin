@@ -51,7 +51,7 @@ public class EmprunteurView extends VerticalLayout {
             "carteEmprunteur","nom","prenom","email","adresseRue","adresseVille","adresseCodePostal","dateNaissance","debutAbonnement","expirationAbonnement"
         );        
 
-        filter.setPlaceholder("Filtrer par nom ou prénom");
+        filter.setPlaceholder("Filtrer par nom, prénom ou carte emprunteur");
 
         // Replace listing with filtered content when user changes filter
         filter.setValueChangeMode(ValueChangeMode.LAZY);
@@ -77,10 +77,25 @@ public class EmprunteurView extends VerticalLayout {
     }
 
     void listEmprunteurs(String filterText) {
-        if (StringUtils.isEmpty(filterText)) {
-            grid.setItems(emprunteurService.getAllEmprunteurs());
-        }
-        else {
+        if (StringUtils.hasText(filterText)) {
+    
+            try {
+                Integer carte = Integer.parseInt(filterText);
+    
+                Emprunteur emprunteur = emprunteurService.getEmprunteurById(carte);
+    
+                if (emprunteur != null) {
+                    grid.setItems(emprunteur);
+                } else {
+                    grid.setItems(emprunteurService.getEmprunteursByNomContainingIgnoreCase(filterText));
+                }
+    
+            } catch (Exception e) {
+                // Si ce n'est pas un nombre, recherche par nom/prénom
+                grid.setItems(emprunteurService.getEmprunteursByNomContainingIgnoreCase(filterText));
+            }
+    
+        } else {
             grid.setItems(emprunteurService.getAllEmprunteurs());
         }
     }
