@@ -66,7 +66,7 @@ public class EditeurEditor extends VerticalLayout implements KeyNotifier {
         // wire action buttons to save, delete and reset
         save.addClickListener(e -> save());
         delete.addClickListener(e -> delete());
-        cancel.addClickListener(e -> editEditeur(editeur));
+        cancel.addClickListener(e -> cancel());
         setVisible(false);
     }
 
@@ -95,7 +95,7 @@ public class EditeurEditor extends VerticalLayout implements KeyNotifier {
         } else {
             editeur = a;
         }
-        cancel.setVisible(persisted);
+        cancel.setVisible(true);
 
         // Bind editeur properties to similarly named fields
         binder.setBean(editeur);
@@ -108,5 +108,21 @@ public class EditeurEditor extends VerticalLayout implements KeyNotifier {
 
     public void setChangeHandler(ChangeHandler h) {
         changeHandler = h;
+    }
+    void cancel() {
+        setVisible(false);
+        if (cancelHandler != null) {
+            cancelHandler.onCancel();
+        }
+    }
+
+    public interface CancelHandler {
+        void onCancel();
+    }
+
+    private CancelHandler cancelHandler;
+
+    public void setCancelHandler(CancelHandler cancelHandler) {
+        this.cancelHandler = cancelHandler;
     }
 }

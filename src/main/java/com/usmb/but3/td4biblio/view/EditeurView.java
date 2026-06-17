@@ -46,8 +46,7 @@ public class EditeurView extends VerticalLayout {
         add(actions, grid, editor);
 
         grid.setHeight("300px");
-        grid.setColumns("id", "nom", "adresse", "siteWeb", "wikipedia");
-        grid.getColumnByKey("id").setWidth("50px").setFlexGrow(0);
+        grid.setColumns("nom", "adresse", "siteWeb", "wikipedia");
 
         filter.setPlaceholder("Filtrer par nom");
 
@@ -67,6 +66,9 @@ public class EditeurView extends VerticalLayout {
         editor.setChangeHandler(() -> {
             editor.setVisible(false);
             listEditeurs(filter.getValue());
+        });
+        editor.setCancelHandler(() -> {
+            grid.deselectAll();
         });
 
         // Initialize listing
