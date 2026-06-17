@@ -20,9 +20,9 @@ import com.vaadin.flow.router.Route;
 @Component
 @Scope("prototype")
 @Route("typeAuteur")
-@PageTitle("Types d'auteur")
+@PageTitle("Types d'auteurs")
 @Menu(
-    title = "Types d'auteur",
+    title = "Types d'auteurs",
     order = 6,
     icon = "vaadin:user-card"
 )

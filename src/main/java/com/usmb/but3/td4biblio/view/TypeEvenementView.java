@@ -21,7 +21,7 @@ import org.springframework.util.StringUtils;
 @Scope("prototype")
 @Route("type-evenement")
 @PageTitle("Types d'événements")
-@Menu(title = "Types d'événements", order = 3, icon = "vaadin:calendar")
+@Menu(title = "Types d'événements", order = 3, icon = "vaadin:calendar-briefcase")
 public class TypeEvenementView extends VerticalLayout {
     private final TypeEvenementService typeEvenementService;
     final Grid<TypeEvenement> grid;

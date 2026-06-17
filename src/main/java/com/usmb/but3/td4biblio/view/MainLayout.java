@@ -83,7 +83,7 @@ public final class MainLayout extends AppLayout {
             // Toujours visibles
             nav.addItem(new SideNavItem("Bibliothèques", "bibliotheque", new Icon(VaadinIcon.BUILDING)));
             nav.addItem(new SideNavItem("Documents", "document", new Icon(VaadinIcon.ARCHIVE)));
-            nav.addItem(new SideNavItem("Évènements", "evenement", new Icon(VaadinIcon.CALENDAR)));
+            nav.addItem(new SideNavItem("Evénements", "evenement", new Icon(VaadinIcon.CALENDAR)));
             nav.addItem(new SideNavItem("Livres", "livre", new Icon(VaadinIcon.BOOK)));
         }
 
