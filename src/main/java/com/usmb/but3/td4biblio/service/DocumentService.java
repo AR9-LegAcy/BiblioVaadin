@@ -10,10 +10,14 @@ import org.springframework.stereotype.Service;
 import com.usmb.but3.td4biblio.entity.Bibliotheque;
 import com.usmb.but3.td4biblio.entity.Document;
 import com.usmb.but3.td4biblio.entity.Stocker;
+import com.usmb.but3.td4biblio.entity.StockerId;
 import com.usmb.but3.td4biblio.entity.TypeDocument;
 import com.usmb.but3.td4biblio.repository.DocumentRepo;
+import com.usmb.but3.td4biblio.repository.EmprunterRepo;
 import com.usmb.but3.td4biblio.repository.StockerRepo;
+import com.usmb.but3.td4biblio.security.SessionManager;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -22,6 +26,8 @@ public class DocumentService {
     private final DocumentRepo documentRepo;
     private final IsbnGeneratorService isbnGeneratorService;
     private final StockerRepo stockerRepo;
+    private final EmprunterRepo emprunterRepo;
+
 
     public List<Document> getAllDocuments() {
         return documentRepo.findAll(Sort.by(Sort.Direction.ASC, "descriptionDocument"));
@@ -36,7 +42,7 @@ public class DocumentService {
         boolean isNew = (document.getIdDocument() == null);
 
         if (isNew) {
-            
+
             document.setCodeIsbn(isbnGeneratorService.generateNextIsbn());
 
             // 📅 date par défaut
@@ -78,8 +84,26 @@ public class DocumentService {
         return documentRepo.save(document);
     }
 
+    @Transactional
     public void deleteDocumentById(Integer id) {
-        documentRepo.deleteById(id);
+
+        Document document = documentRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Document introuvable"));
+
+        Integer documentId = document.getIdDocument();
+
+        // 1. supprimer emprunts liés (si table existante)
+        emprunterRepo.deleteByIdDocument_IdDocument(documentId);
+
+        // 2. supprimer stocker (si tu stockes les documents en bibliothèque)
+        Integer bibliothequeId = SessionManager.getBibliothecaire()
+                .getBibliotheque()
+                .getId();
+
+        stockerRepo.deleteById(new StockerId(bibliothequeId, documentId));
+
+        // 3. supprimer document
+        documentRepo.delete(document);
     }
 
     public List<Document> getDocumentsByCodeIsbn(String codeIsbn) {
