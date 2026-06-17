@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import com.usmb.but3.td4biblio.entity.Bibliotheque;
 import com.usmb.but3.td4biblio.entity.Livre;
 import com.usmb.but3.td4biblio.service.LivreService;
 import java.util.List;
@@ -28,8 +30,14 @@ public class LivreController {
     }
 
     @PostMapping("/")
-    public ResponseEntity<Livre> saveLivre(@RequestBody Livre livre) {
-        return ResponseEntity.ok(livreService.saveLivre(livre));
+    public ResponseEntity<Livre> saveLivre(@RequestBody Livre livre,
+            @RequestParam Integer idBibliotheque) {
+
+        Bibliotheque bib = new Bibliotheque();
+        bib.setId(idBibliotheque);
+
+        return ResponseEntity.ok(
+                livreService.saveLivre(livre, bib));
     }
 
     @PutMapping("/")

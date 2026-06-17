@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
 @Table(name = "livre", schema = "biblio")
 public class Livre {
     @Id
-    @Column(name = "id_document")
+
     private Integer idDocument;
 
     @Column(name = "titre_livre", nullable = false, length = 250)

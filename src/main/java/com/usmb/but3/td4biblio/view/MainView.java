@@ -1,9 +1,12 @@
 package com.usmb.but3.td4biblio.view;
 
 import com.usmb.but3.td4biblio.entity.Document;
+import com.usmb.but3.td4biblio.entity.Emprunter;
 import com.usmb.but3.td4biblio.entity.Evenement;
 import com.usmb.but3.td4biblio.entity.Livre;
+import com.usmb.but3.td4biblio.security.SessionManager;
 import com.usmb.but3.td4biblio.service.DocumentService;
+import com.usmb.but3.td4biblio.service.EmprunterService;
 import com.usmb.but3.td4biblio.service.EvenementService;
 import com.usmb.but3.td4biblio.service.LivreService;
 
@@ -13,6 +16,8 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.PageTitle;
@@ -28,10 +33,12 @@ public final class MainView extends Main {
 
     private static final DateTimeFormatter DATE_FMT =
             DateTimeFormatter.ofPattern("dd MMM yyyy");
+    private static final int PROLONGATION_JOURS = 7;
 
     MainView(EvenementService evenementService,
              LivreService livreService,
-             DocumentService documentService) {
+             DocumentService documentService,
+             EmprunterService emprunterService) {
         getStyle()
             .set("--accent",       "#2563EB")
             .set("--teal",         "#0F766E")
@@ -44,6 +51,12 @@ public final class MainView extends Main {
             .set("gap",            "0");
 
         add(buildHero());
+
+        // ── Section "Mes emprunts" uniquement pour un emprunteur connecté ──
+        if (SessionManager.isEmprunteur()) {
+            add(buildMesEmpruntsRow(emprunterService, livreService, documentService));
+        }
+
         add(buildEvenementsRow(evenementService));
         add(buildAcquisitionsRow(livreService, documentService));
     }
@@ -66,11 +79,9 @@ public final class MainView extends Main {
             .set("letter-spacing", "0.12em").set("text-transform", "uppercase")
             .set("opacity", "0.75").set("display", "block").set("margin-bottom", "0.5rem");
 
-        // ── Titre dynamique selon connexion ──────────────────────────────
         String titleText = "Bienvenue à la bibliothèque";
-        if (com.usmb.but3.td4biblio.security.SessionManager.isLoggedIn()) {
-            titleText = "Bienvenue, "
-                + com.usmb.but3.td4biblio.security.SessionManager.getDisplayName();
+        if (SessionManager.isLoggedIn()) {
+            titleText = "Bienvenue, " + SessionManager.getDisplayName();
         }
         var title = new H1(titleText);
         title.getStyle()
@@ -85,7 +96,6 @@ public final class MainView extends Main {
             .set("margin", "0 0 1.5rem 0").set("opacity", "0.85")
             .set("max-width", "520px").set("font-size", "1rem");
 
-        // ── Ligne boutons : Rechercher + Connexion/Déconnexion ───────────
         var btnRow = new HorizontalLayout();
         btnRow.setSpacing(true);
         btnRow.setAlignItems(com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment.CENTER);
@@ -98,18 +108,15 @@ public final class MainView extends Main {
             .set("font-weight", "600").set("border-radius", "0.5rem");
         btnRecherche.addClickListener(e -> UI.getCurrent().navigate("livre"));
 
-        // Bouton connexion / déconnexion
-        if (com.usmb.but3.td4biblio.security.SessionManager.isLoggedIn()) {
+        if (SessionManager.isLoggedIn()) {
             var btnLogout = new Button("Se déconnecter", new Icon(VaadinIcon.SIGN_OUT));
             btnLogout.addThemeVariants(ButtonVariant.LUMO_LARGE);
             btnLogout.getStyle()
-                .set("background",    "rgba(255,255,255,0.15)")
-                .set("color",         "#fff")
-                .set("border",        "2px solid rgba(255,255,255,0.6)")
-                .set("font-weight",   "600")
-                .set("border-radius", "0.5rem");
+                .set("background", "rgba(255,255,255,0.15)").set("color", "#fff")
+                .set("border", "2px solid rgba(255,255,255,0.6)")
+                .set("font-weight", "600").set("border-radius", "0.5rem");
             btnLogout.addClickListener(e -> {
-                com.usmb.but3.td4biblio.security.SessionManager.logout();
+                SessionManager.logout();
                 UI.getCurrent().navigate(MainView.class);
                 UI.getCurrent().getPage().reload();
             });
@@ -118,17 +125,175 @@ public final class MainView extends Main {
             var btnLogin = new Button("Se connecter", new Icon(VaadinIcon.SIGN_IN));
             btnLogin.addThemeVariants(ButtonVariant.LUMO_LARGE);
             btnLogin.getStyle()
-                .set("background",    "rgba(255,255,255,0.15)")
-                .set("color",         "#fff")
-                .set("border",        "2px solid rgba(255,255,255,0.6)")
-                .set("font-weight",   "600")
-                .set("border-radius", "0.5rem");
+                .set("background", "rgba(255,255,255,0.15)").set("color", "#fff")
+                .set("border", "2px solid rgba(255,255,255,0.6)")
+                .set("font-weight", "600").set("border-radius", "0.5rem");
             btnLogin.addClickListener(e -> UI.getCurrent().navigate("login"));
             btnRow.add(btnRecherche, btnLogin);
         }
 
         section.add(eyebrow, title, sub, btnRow);
         return section;
+    }
+
+    // ── MES EMPRUNTS ──────────────────────────────────────────────────────
+
+    private VerticalLayout buildMesEmpruntsRow(EmprunterService emprunterService,
+                                               LivreService livreService,
+                                               DocumentService documentService) {
+        var wrapper = new VerticalLayout();
+        wrapper.setPadding(false);
+        wrapper.setSpacing(false);
+        wrapper.setWidthFull();
+        wrapper.getStyle().set("padding", "0 1rem 1.5rem");
+
+        var section = sectionCard();
+        section.add(buildSectionHeader(VaadinIcon.PACKAGE, "Mes emprunts en cours", "#7C3AED", null));
+
+        List<Emprunter> emprunts = List.of();
+        try {
+            int carte = SessionManager.getEmprunteur().getCarteEmprunteur();
+            emprunts = emprunterService.getEmpruntsByCarteEmprunteur(carte)
+                    .stream()
+                    .filter(e -> e.getDateRetourReelle() == null) // actifs uniquement
+                    .toList();
+        } catch (Exception ignored) {}
+
+        if (emprunts.isEmpty()) {
+            section.add(emptyState("Vous n'avez aucun emprunt en cours."));
+        } else {
+            var grid = new Div();
+            grid.getStyle()
+                .set("display", "grid")
+                .set("grid-template-columns", "repeat(auto-fill, minmax(min(100%, 280px), 1fr))")
+                .set("width", "100%");
+
+            for (Emprunter emprunt : emprunts) {
+                grid.add(buildEmpruntCard(emprunt, emprunterService, livreService, documentService));
+            }
+            section.add(grid);
+        }
+
+        wrapper.add(section);
+        return wrapper;
+    }
+
+    private Div buildEmpruntCard(Emprunter emprunt,
+                                  EmprunterService emprunterService,
+                                  LivreService livreService,
+                                  DocumentService documentService) {
+        var card = new Div();
+        card.getStyle()
+            .set("padding",      "1rem 1.1rem")
+            .set("border-right", "1px solid var(--border)")
+            .set("border-bottom","1px solid var(--border)")
+            .set("display",      "flex")
+            .set("flex-direction","column")
+            .set("gap",          "0.5rem");
+
+        // Retrouver le livre à partir du document
+        Document doc = emprunt.getIdDocument();
+        Livre livre = null;
+        if (doc != null) {
+            livre = livreService.getLivreById(doc.getIdDocument());
+        }
+
+        // ── En-tête : icône + titre cliquable ────────────────────────────
+        var header = new Div();
+        header.getStyle()
+            .set("display", "flex").set("gap", "0.6rem").set("align-items", "flex-start")
+            .set("cursor", "pointer");
+
+        var ico = new Icon(VaadinIcon.BOOK);
+        ico.getStyle()
+            .set("color", "#7C3AED").set("background", "#7C3AED18")
+            .set("padding", "0.4rem").set("border-radius", "0.4rem")
+            .set("min-width", "2rem").set("height", "2rem").set("flex-shrink", "0");
+
+        String titreLivre = livre != null && livre.getTitreLivre() != null
+                ? livre.getTitreLivre()
+                : (doc != null ? "Document #" + doc.getIdDocument() : "Livre inconnu");
+
+        var titreEl = new H3(titreLivre);
+        titreEl.getStyle()
+            .set("margin", "0").set("font-size", "0.93rem").set("font-weight", "600")
+            .set("color", "#1E293B");
+
+        header.add(ico, titreEl);
+
+        // Clic → page détail du livre
+        final Livre livreFinal = livre;
+        header.addClickListener(e -> {
+            if (livreFinal != null)
+                UI.getCurrent().navigate("livre/detail/" + livreFinal.getIdDocument());
+        });
+        card.add(header);
+
+        // ── Dates ────────────────────────────────────────────────────────
+        var datesDiv = new Div();
+        datesDiv.getStyle().set("display", "flex").set("flex-direction", "column").set("gap", "0.2rem");
+
+        if (emprunt.getDateEmprunt() != null) {
+            var de = new Span("📅 Emprunté le : " + emprunt.getDateEmprunt().format(DATE_FMT));
+            de.getStyle().set("font-size", "0.8rem").set("color", "var(--muted)");
+            datesDiv.add(de);
+        }
+
+        if (emprunt.getDateRetourPrevue() != null) {
+            boolean enRetard = emprunt.getDateRetourPrevue().isBefore(LocalDate.now());
+            String retourTxt = (enRetard ? "⚠ En retard — retour prévu le : " : "🔄 Retour prévu le : ")
+                    + emprunt.getDateRetourPrevue().format(DATE_FMT);
+            var dr = new Span(retourTxt);
+            dr.getStyle()
+                .set("font-size", "0.8rem")
+                .set("font-weight", enRetard ? "600" : "400")
+                .set("color", enRetard ? "#B91C1C" : "var(--muted)");
+            datesDiv.add(dr);
+        }
+        card.add(datesDiv);
+
+        // ── Prolongation ─────────────────────────────────────────────────
+        boolean dejaProlonge = emprunt.getProlongationEmprunt() != null
+                && emprunt.getProlongationEmprunt() > 0;
+
+        if (dejaProlonge) {
+            var deja = new Span("✓ Déjà prolongé de " + emprunt.getProlongationEmprunt() + " j");
+            deja.getStyle()
+                .set("font-size", "0.75rem").set("color", "#64748B")
+                .set("font-style", "italic");
+            card.add(deja);
+        } else {
+            var btnProlonger = new Button(
+                    "Prolonger de " + PROLONGATION_JOURS + " j",
+                    new Icon(VaadinIcon.CLOCK));
+            btnProlonger.addThemeVariants(ButtonVariant.LUMO_SMALL);
+            btnProlonger.getStyle()
+                .set("background", "#7C3AED").set("color", "#fff")
+                .set("font-size", "0.78rem").set("border-radius", "0.4rem");
+            btnProlonger.addClickListener(e -> {
+                try {
+                    LocalDate nouvelleDateRetour = emprunt.getDateRetourPrevue() != null
+                            ? emprunt.getDateRetourPrevue().plusDays(PROLONGATION_JOURS)
+                            : LocalDate.now().plusDays(PROLONGATION_JOURS);
+                    emprunt.setDateRetourPrevue(nouvelleDateRetour);
+                    emprunt.setProlongationEmprunt(PROLONGATION_JOURS);
+                    emprunterService.updateEmprunt(emprunt);
+                    var n = Notification.show(
+                            "Emprunt prolongé ! Retour prévu le "
+                            + nouvelleDateRetour.format(DATE_FMT),
+                            3500, Notification.Position.BOTTOM_CENTER);
+                    n.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+                    UI.getCurrent().getPage().reload();
+                } catch (Exception ex) {
+                    var n = Notification.show("Erreur : " + ex.getMessage(),
+                            3000, Notification.Position.MIDDLE);
+                    n.addThemeVariants(NotificationVariant.LUMO_ERROR);
+                }
+            });
+            card.add(btnProlonger);
+        }
+
+        return card;
     }
 
     // ── RANGÉE ÉVÉNEMENTS ────────────────────────────────────────────────
@@ -210,9 +375,8 @@ public final class MainView extends Main {
                 .set("display", "inline-block").set("margin-bottom", "0.35rem");
         } else {
             String dateLabel = ev.getDateDebut() != null ? ev.getDateDebut().format(DATE_FMT) : "Date inconnue";
-            if (ev.getDateFin() != null && ev.getDateDebut() != null && !ev.getDateFin().equals(ev.getDateDebut())) {
+            if (ev.getDateFin() != null && ev.getDateDebut() != null && !ev.getDateFin().equals(ev.getDateDebut()))
                 dateLabel += " → " + ev.getDateFin().format(DATE_FMT);
-            }
             badge = new Span(dateLabel);
             badge.getStyle()
                 .set("font-size", "0.7rem").set("font-weight", "600")
@@ -228,9 +392,9 @@ public final class MainView extends Main {
         if (ev.getTypeEvenement() != null && ev.getTypeEvenement().getNom() != null) {
             var typeSpan = new Span(ev.getTypeEvenement().getNom());
             typeSpan.getStyle()
-                .set("font-size", "0.72rem").set("color", "#fff")
-                .set("background", "#6366F1").set("padding", "0.1rem 0.45rem")
-                .set("border-radius", "999px").set("display", "inline-block").set("margin-bottom", "0.3rem");
+                .set("font-size", "0.72rem").set("color", "#fff").set("background", "#6366F1")
+                .set("padding", "0.1rem 0.45rem").set("border-radius", "999px")
+                .set("display", "inline-block").set("margin-bottom", "0.3rem");
             card.add(typeSpan);
         }
         if (ev.getBibliotheque() != null && ev.getBibliotheque().getNom() != null) {
@@ -296,18 +460,15 @@ public final class MainView extends Main {
             .set("padding",       "0.9rem 1.1rem")
             .set("border-right",  "1px solid var(--border)")
             .set("border-bottom", "1px solid var(--border)")
-            .set("display",       "flex")
-            .set("gap",           "0.75rem")
+            .set("display",       "flex").set("gap", "0.75rem")
             .set("align-items",   "flex-start")
-            .set("cursor",        "pointer")
-            .set("transition",    "background 0.15s");
+            .set("cursor",        "pointer").set("transition", "background 0.15s");
         card.getElement().addEventListener("mouseover",
             e -> card.getStyle().set("background", "#F0FDF4"));
         card.getElement().addEventListener("mouseout",
             e -> card.getStyle().set("background", "transparent"));
         card.addClickListener(e -> UI.getCurrent().navigate("livre/detail/" + livre.getIdDocument()));
 
-        // ── Récupération du document via ISBN pour état et empruntabilité ─
         Document doc = null;
         if (livre.getDocument() != null && livre.getDocument().getCodeIsbn() != null) {
             List<Document> docs = documentService.getDocumentsByCodeIsbn(
@@ -341,8 +502,6 @@ public final class MainView extends Main {
             dateSpan.getStyle().set("font-size", "0.75rem").set("color", "var(--muted)");
             meta.add(dateSpan);
         }
-
-        // ── Badges depuis le Document lié (via ISBN) ──────────────────────
         if (doc != null) {
             if (Boolean.FALSE.equals(doc.getCodeEmpruntable())) {
                 var nonEmp = new Span("Non empruntable");
@@ -382,6 +541,9 @@ public final class MainView extends Main {
         return v;
     }
 
+    /**
+     * @param navTarget null → pas de bouton "Voir tout"
+     */
     private Div buildSectionHeader(VaadinIcon icon, String label,
                                    String color, String navTarget) {
         var header = new Div();
@@ -406,12 +568,16 @@ public final class MainView extends Main {
             .set("font-weight", "700").set("color", "#1E293B");
         left.add(ico, title);
 
-        var btn = new Button("Voir tout");
-        btn.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_SMALL);
-        btn.getStyle().set("color", color).set("font-size", "0.78rem");
-        btn.addClickListener(e -> UI.getCurrent().navigate(navTarget));
+        header.add(left);
 
-        header.add(left, btn);
+        if (navTarget != null) {
+            var btn = new Button("Voir tout");
+            btn.addThemeVariants(ButtonVariant.LUMO_TERTIARY, ButtonVariant.LUMO_SMALL);
+            btn.getStyle().set("color", color).set("font-size", "0.78rem");
+            btn.addClickListener(e -> UI.getCurrent().navigate(navTarget));
+            header.add(btn);
+        }
+
         return header;
     }
 
