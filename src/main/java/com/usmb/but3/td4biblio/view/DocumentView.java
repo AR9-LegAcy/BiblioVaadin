@@ -1,7 +1,6 @@
 package com.usmb.but3.td4biblio.view;
 
 import com.usmb.but3.td4biblio.entity.Document;
-import com.usmb.but3.td4biblio.entity.Livre;
 import com.usmb.but3.td4biblio.security.SessionManager;
 import com.usmb.but3.td4biblio.service.DocumentService;
 import com.vaadin.flow.component.button.Button;
@@ -25,49 +24,72 @@ import org.springframework.util.StringUtils;
 @PageTitle("Documents")
 @Menu(title = "Documents", order = 1, icon = "vaadin:archive")
 public class DocumentView extends VerticalLayout {
+
     private final DocumentService documentService;
-    final Grid<Document> grid;
-    final TextField filter;
+    private final Grid<Document> grid;
+    private final TextField filter;
     private final Button addNewBtn;
-    final DocumentEditor editor;
-    boolean isBib = SessionManager.isBibliothecaire();
+    private final DocumentEditor editor;
+
+    private final boolean isBib = SessionManager.isBibliothecaire();
 
     public DocumentView(DocumentService documentService, DocumentEditor editor) {
         this.documentService = documentService;
         this.editor = editor;
-        this.grid = new Grid<>(Document.class);
+
+        this.grid = new Grid<>(Document.class, false);
         this.filter = new TextField();
         this.addNewBtn = new Button("Ajouter un document", VaadinIcon.PLUS.create());
+
         addNewBtn.getStyle().set("visibility", "hidden");
 
-        // build layout
         HorizontalLayout actions = new HorizontalLayout(filter, addNewBtn);
         add(actions, grid, editor);
 
         grid.setHeight("300px");
-        grid.setColumns("codeIsbn", "descriptionDocument", "codeEmpruntable", "etatDocument", "dateAcquisition",
-                "formatTaille", "codeEmplacement");
 
-        filter.setPlaceholder("Filtrer par code ISBN ou description");
+        // ---------------- Colonnes ----------------
+        grid.addColumn(Document::getCodeIsbn).setHeader("ISBN");
+        grid.addColumn(Document::getDescriptionDocument).setHeader("Description");
+        grid.addColumn(Document::getCodeEmpruntable).setHeader("Empruntable");
+        grid.addColumn(Document::getEtatDocument).setHeader("État");
 
-        // Replace listing with filtered content when user changes filter
+        // 👉 NOUVEAU : type document
+        grid.addColumn(doc ->
+                doc.getTypeDocument() != null
+                        ? doc.getTypeDocument().getNomTypeDocument()
+                        : ""
+        ).setHeader("Type de document");
+
+        grid.addColumn(Document::getDateAcquisition).setHeader("Date acquisition");
+        grid.addColumn(Document::getFormatTaille).setHeader("Format / Taille");
+        grid.addColumn(Document::getCodeEmplacement).setHeader("Emplacement");
+
+        // ---------------- Filter ----------------
+        filter.setPlaceholder("Filtrer par ISBN ou description");
         filter.setValueChangeMode(ValueChangeMode.LAZY);
         filter.addValueChangeListener(e -> listDocuments(e.getValue()));
+
+        // ---------------- Bibliothécaire ----------------
         if (isBib) {
             addNewBtn.getStyle().set("visibility", "visible");
-            grid.asSingleSelect().addValueChangeListener(e -> editor.editDocument(e.getValue()));
 
-            addNewBtn.addClickListener(e -> editor.editDocument(new Document()));
+            grid.asSingleSelect().addValueChangeListener(e ->
+                    editor.editDocument(e.getValue())
+            );
+
+            addNewBtn.addClickListener(e ->
+                    editor.editDocument(new Document())
+            );
 
             editor.setChangeHandler(() -> {
                 editor.setVisible(false);
                 listDocuments(filter.getValue());
             });
-            editor.setCancelHandler(() -> {
-                grid.deselectAll();
-            });
+
+            editor.setCancelHandler(() -> grid.deselectAll());
         }
-        // Initialize listing
+
         listDocuments(null);
     }
 

@@ -75,17 +75,42 @@ class DocumentServiceTest {
 
     @Test
     void testSaveDocument() {
-        Document doc = new Document(null, "gif1.jpg", "New Description", "A4", LocalDate.of(2022, 3, 3), "E001", "978-1234567890", true, "Bon", null, null, null, null, null);
-        Document savedDoc = new Document(1, "gif1.jpg", "New Description", "A4", LocalDate.of(2022, 3, 3), "E001", "978-1234567890", true, "Bon", LocalDateTime.now(), LocalDateTime.now(), null, null, null);
+    
+        Document doc = new Document();
+        doc.setDescriptionDocument("New Description");
+        doc.setFormatTaille("A4");
+        doc.setDateAcquisition(LocalDate.of(2022, 3, 3));
+        doc.setCodeEmplacement("E001");
+        doc.setCodeEmpruntable(true);
+        doc.setEtatDocument("Bon");
+    
+        Document savedDoc = new Document();
+        savedDoc.setIdDocument(1);
+        savedDoc.setGifDocument("gif1.jpg");
+        savedDoc.setDescriptionDocument("New Description");
+        savedDoc.setFormatTaille("A4");
+        savedDoc.setDateAcquisition(LocalDate.of(2022, 3, 3));
+        savedDoc.setCodeEmplacement("E001");
+        savedDoc.setCodeIsbn("978-1234567890");
+        savedDoc.setCodeEmpruntable(true);
+        savedDoc.setEtatDocument("Bon");
+        savedDoc.setCreatedAt(LocalDateTime.now());
+        savedDoc.setUpdatedAt(LocalDateTime.now());
+    
         when(documentRepo.save(any(Document.class))).thenReturn(savedDoc);
-
-        Document result = documentService.saveDocument(doc);
-
+    
+        Document result = documentService.saveDocument(doc, null); 
+        // ou bibliotheque mock si nécessaire
+    
         assertNotNull(result);
         assertEquals(1, result.getIdDocument());
         assertEquals("New Description", result.getDescriptionDocument());
+        assertEquals("978-1234567890", result.getCodeIsbn());
+        assertTrue(result.getCodeEmpruntable());
+        assertEquals("Bon", result.getEtatDocument());
         assertNotNull(result.getCreatedAt());
         assertNotNull(result.getUpdatedAt());
+    
         verify(documentRepo, times(1)).save(any(Document.class));
     }
 

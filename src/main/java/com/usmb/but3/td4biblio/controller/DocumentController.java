@@ -5,7 +5,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import com.usmb.but3.td4biblio.entity.Bibliothecaire;
 import com.usmb.but3.td4biblio.entity.Document;
+import com.usmb.but3.td4biblio.security.SessionManager;
 import com.usmb.but3.td4biblio.service.DocumentService;
 
 import java.util.List;
@@ -55,8 +57,15 @@ public class DocumentController {
      */
     @PostMapping("/")
     public ResponseEntity<Document> createDocument(@RequestBody Document document) {
-        Document savedDocument = documentService.saveDocument(document);
-        return ResponseEntity.ok().body(savedDocument);
+    
+        Bibliothecaire bib = SessionManager.getBibliothecaire();
+    
+        Document savedDocument = documentService.saveDocument(
+            document,
+            bib.getBibliotheque()
+        );
+    
+        return ResponseEntity.ok(savedDocument);
     }
 
     /**

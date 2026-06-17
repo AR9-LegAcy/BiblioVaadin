@@ -7,8 +7,12 @@ import java.util.List;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import com.usmb.but3.td4biblio.entity.Bibliotheque;
 import com.usmb.but3.td4biblio.entity.Document;
+import com.usmb.but3.td4biblio.entity.Stocker;
+import com.usmb.but3.td4biblio.entity.TypeDocument;
 import com.usmb.but3.td4biblio.repository.DocumentRepo;
+import com.usmb.but3.td4biblio.repository.StockerRepo;
 
 import lombok.RequiredArgsConstructor;
 
@@ -16,6 +20,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class DocumentService {
     private final DocumentRepo documentRepo;
+    private final IsbnGeneratorService isbnGeneratorService;
+    private final StockerRepo stockerRepo;
 
     public List<Document> getAllDocuments() {
         return documentRepo.findAll(Sort.by(Sort.Direction.ASC, "descriptionDocument"));
@@ -25,12 +31,46 @@ public class DocumentService {
         return documentRepo.findById(id).orElse(null);
     }
 
-    public Document saveDocument(Document document) {
-        if (document.getCreatedAt() == null) {
-            document.setCreatedAt(LocalDateTime.now());
+    public Document saveDocument(Document document, Bibliotheque bibliotheque) {
+
+        boolean isNew = (document.getIdDocument() == null);
+
+        if (isNew) {
+            
+            document.setCodeIsbn(isbnGeneratorService.generateNextIsbn());
+
+            // 📅 date par défaut
+            document.setDateAcquisition(LocalDate.now());
+
+            // état par défaut si vide
+            if (document.getEtatDocument() == null) {
+                document.setEtatDocument("Neuf");
+            }
+
+            document.setCodeEmpruntable(true);
+
+            // type auto (optionnel si déjà choisi dans UI)
+            if (document.getTypeDocument() == null) {
+                TypeDocument td = new TypeDocument();
+                td.setIdTypeDocument(1); // ou "DOCUMENT GENERIQUE"
+                document.setTypeDocument(td);
+            }
         }
+        document.setCreatedAt(LocalDateTime.now());
         document.setUpdatedAt(LocalDateTime.now());
-        return documentRepo.save(document);
+
+        Document saved = documentRepo.save(document);
+
+        // 📦 stockage bibliothèque (comme Livre)
+        Stocker s = new Stocker();
+        s.setIdBibliotheque(bibliotheque.getId());
+        s.setIdDocument(saved.getIdDocument());
+        s.setCreatedAt(LocalDateTime.now());
+        s.setUpdatedAt(LocalDateTime.now());
+
+        stockerRepo.save(s);
+
+        return saved;
     }
 
     public Document updateDocument(Document document) {
