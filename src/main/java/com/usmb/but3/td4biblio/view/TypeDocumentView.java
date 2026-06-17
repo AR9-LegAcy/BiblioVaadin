@@ -20,8 +20,8 @@ import org.springframework.util.StringUtils;
 @Component
 @Scope("prototype")
 @Route(value = "type-document")
-@PageTitle("Les Types de Documents")
-@Menu(title = "Les Types de Documents", order = 1, icon = "vaadin:clipboard-list")
+@PageTitle("Types de Documents")
+@Menu(title = "Types de Documents", order = 1, icon = "vaadin:clipboard-list")
 public class TypeDocumentView extends VerticalLayout {
     private final TypeDocumentService typeDocumentService;
     final Grid<TypeDocument> grid;

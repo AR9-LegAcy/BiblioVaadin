@@ -32,6 +32,8 @@ import com.vaadin.flow.theme.lumo.LumoUtility.TextColor;
 
 import static com.vaadin.flow.theme.lumo.LumoUtility.*;
 
+import java.util.Comparator;
+
 @Layout
 public final class MainLayout extends AppLayout {
 
@@ -68,7 +70,9 @@ public final class MainLayout extends AppLayout {
 
         // Uniquement bibliothécaire
         if (isBib) {
-            MenuConfiguration.getMenuEntries().forEach(entry -> {
+            MenuConfiguration.getMenuEntries().stream()
+            .sorted(Comparator.comparing(MenuEntry::title, String.CASE_INSENSITIVE_ORDER))
+            .forEach(entry -> {
                 String path = entry.path();
                 // Exclure les pages déjà ajoutées et les pages réservées
                 if (!path.contains("classer") && !path.contains("stocker") && !path.contains("ecrire")) {
@@ -77,10 +81,10 @@ public final class MainLayout extends AppLayout {
             });
         } else {
             // Toujours visibles
-            nav.addItem(new SideNavItem("Livres", "livre", new Icon(VaadinIcon.BOOK)));
-            nav.addItem(new SideNavItem("Évènements", "evenement", new Icon(VaadinIcon.CALENDAR)));
             nav.addItem(new SideNavItem("Bibliothèques", "bibliotheque", new Icon(VaadinIcon.BUILDING)));
             nav.addItem(new SideNavItem("Documents", "document", new Icon(VaadinIcon.ARCHIVE)));
+            nav.addItem(new SideNavItem("Évènements", "evenement", new Icon(VaadinIcon.CALENDAR)));
+            nav.addItem(new SideNavItem("Livres", "livre", new Icon(VaadinIcon.BOOK)));
         }
 
         return nav;
