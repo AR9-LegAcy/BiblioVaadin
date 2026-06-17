@@ -62,7 +62,7 @@ public class DocumentEditor extends VerticalLayout implements KeyNotifier {
         // Add listeners
         save.addClickListener(e -> save());
         delete.addClickListener(e -> delete());
-        cancel.addClickListener(e -> editDocument(document));
+        cancel.addClickListener(e -> cancel());
 
         // Listen to changes made by the user
         addKeyPressListener(Key.ENTER, e -> save());
@@ -98,7 +98,7 @@ public class DocumentEditor extends VerticalLayout implements KeyNotifier {
         } else {
             this.document = document;
         }
-        cancel.setVisible(persisted);
+        cancel.setVisible(true);
 
         binder.setBean(document);
 
@@ -109,5 +109,22 @@ public class DocumentEditor extends VerticalLayout implements KeyNotifier {
 
     public void setChangeHandler(ChangeHandler h) {
         this.changeHandler = h;
+    }
+
+    void cancel() {
+        setVisible(false);
+        if (cancelHandler != null) {
+            cancelHandler.onCancel();
+        }
+    }
+
+    public interface CancelHandler {
+        void onCancel();
+    }
+
+    private CancelHandler cancelHandler;
+
+    public void setCancelHandler(CancelHandler cancelHandler) {
+        this.cancelHandler = cancelHandler;
     }
 }

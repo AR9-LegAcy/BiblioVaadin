@@ -45,13 +45,8 @@ public class DocumentView extends VerticalLayout {
         add(actions, grid, editor);
 
         grid.setHeight("300px");
-        grid.setColumns(
-                "idDocument", "codeIsbn", "descriptionDocument", "codeEmpruntable", "etatDocument", "dateAcquisition",
+        grid.setColumns("codeIsbn", "descriptionDocument", "codeEmpruntable", "etatDocument", "dateAcquisition",
                 "formatTaille", "codeEmplacement");
-
-        grid.getColumnByKey("idDocument")
-                .setWidth("50px")
-                .setFlexGrow(0);
 
         filter.setPlaceholder("Filtrer par code ISBN ou description");
 
@@ -67,6 +62,9 @@ public class DocumentView extends VerticalLayout {
             editor.setChangeHandler(() -> {
                 editor.setVisible(false);
                 listDocuments(filter.getValue());
+            });
+            editor.setCancelHandler(() -> {
+                grid.deselectAll();
             });
         }
         // Initialize listing
