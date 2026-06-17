@@ -30,7 +30,7 @@ public class EcrireEditor extends VerticalLayout implements KeyNotifier {
     private Ecrire ecrire;
 
     ComboBox<Auteur> idAuteur = new ComboBox<>("Auteur");
-    ComboBox<Livre> idDocument = new ComboBox<>("Type d'auteur");
+    ComboBox<Livre> idDocument = new ComboBox<>("Livre");
 
     Button save = new Button("Sauvegarder", VaadinIcon.CHECK.create());
     Button cancel = new Button("Annuler");

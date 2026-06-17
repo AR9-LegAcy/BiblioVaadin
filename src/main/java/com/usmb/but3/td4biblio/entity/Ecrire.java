@@ -39,13 +39,13 @@ public class Ecrire {
     @Id
     @ManyToOne
     @JoinColumn(name = "id_document")
-    private Livre idLivre;
+    private Document idDocument;
 
     public boolean isEqualTo(Ecrire ecrire) {
         if (ecrire == null) return false;
 
         return idAuteur.equals(ecrire.idAuteur)
-                && idLivre.equals(ecrire.idLivre);
+                && idDocument.equals(ecrire.idDocument);
     }
 
     @Override
@@ -64,7 +64,7 @@ public class Ecrire {
                 + (idAuteur != null ? idAuteur.hashCode() : 0);
 
         result = 31 * result
-                + (idLivre != null ? idLivre.hashCode() : 0);
+                + (idDocument != null ? idDocument.hashCode() : 0);
 
         return result;
     }
