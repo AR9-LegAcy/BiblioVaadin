@@ -39,7 +39,7 @@ public class Ecrire {
     @Id
     @ManyToOne
     @JoinColumn(name = "id_document")
-    private Document idDocument;
+    private Livre idDocument;
 
     public boolean isEqualTo(Ecrire ecrire) {
         if (ecrire == null) return false;

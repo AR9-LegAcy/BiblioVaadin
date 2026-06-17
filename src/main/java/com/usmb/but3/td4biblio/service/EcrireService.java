@@ -7,11 +7,11 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.usmb.but3.td4biblio.entity.Auteur;
-import com.usmb.but3.td4biblio.entity.Document;
+import com.usmb.but3.td4biblio.entity.Livre;
 import com.usmb.but3.td4biblio.entity.Ecrire;
 import com.usmb.but3.td4biblio.entity.EcrireId;
 import com.usmb.but3.td4biblio.repository.AuteurRepo;
-import com.usmb.but3.td4biblio.repository.DocumentRepo;
+import com.usmb.but3.td4biblio.repository.LivreRepo;
 import com.usmb.but3.td4biblio.repository.EcrireRepo;
 
 import lombok.RequiredArgsConstructor;
@@ -20,7 +20,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class EcrireService {
     private final EcrireRepo ecrireRepo;
-    private final DocumentRepo documentRepo;
+    private final LivreRepo livreRepo;
     private final AuteurRepo auteurRepo;
 
     // --- CRUD Ecrire ---
@@ -50,8 +50,8 @@ public class EcrireService {
     }
 
     // --- Helper methods pour controller ---
-    public Document getDocumentById(Integer idDocument) {
-        return documentRepo.findById(idDocument).orElse(null);
+    public Livre getLivreById(Integer idDocument) {
+        return livreRepo.findById(idDocument).orElse(null);
     }
 
     public Auteur getAuteurById(Integer carteAuteur) {
@@ -63,8 +63,8 @@ public class EcrireService {
         return e == null ? List.of() : ecrireRepo.findByIdAuteur(e);
     }
     
-    public List<Ecrire> getEcriresByIdDocument(Integer idDocument) {
-        Document d = documentRepo.findById(idDocument).orElse(null);
+    public List<Ecrire> getEcriresByIdDocument(Integer idLivre) {
+        Livre d = livreRepo.findById(idLivre).orElse(null);
         return d == null ? List.of() : ecrireRepo.findByIdDocument(d);
     }
 }

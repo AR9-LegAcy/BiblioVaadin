@@ -5,7 +5,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import com.usmb.but3.td4biblio.entity.*;
+import com.usmb.but3.td4biblio.entity.Ecrire;
+import com.usmb.but3.td4biblio.entity.EcrireId;
+import com.usmb.but3.td4biblio.entity.Auteur;
+import com.usmb.but3.td4biblio.entity.Livre;
 import com.usmb.but3.td4biblio.service.EcrireService;
 
 import java.util.List;
@@ -59,14 +62,14 @@ public class EcrireController {
         }
 
         Auteur auteur = ecrireService.getAuteurById(idAuteur);
-        Document document = ecrireService.getDocumentById(idDocument);
+        Livre livre = ecrireService.getLivreById(idDocument);
 
-        if (auteur == null || document == null) {
+        if (auteur == null || livre == null) {
             return ResponseEntity.badRequest().build();
         }
 
         ecrire.setIdAuteur(auteur);
-        ecrire.setIdDocument(document);
+        ecrire.setIdDocument(livre);
 
         return ResponseEntity.ok(ecrireService.updateEcrire(ecrire));
     }
