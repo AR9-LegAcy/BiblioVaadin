@@ -64,11 +64,7 @@ public final class MainLayout extends AppLayout {
         nav.addClassNames(Margin.Horizontal.MEDIUM);
 
         boolean isBib = SessionManager.isBibliothecaire();
-
-        // Toujours visibles
         nav.addItem(new SideNavItem("Accueil", "", new Icon(VaadinIcon.HOME)));
-        nav.addItem(new SideNavItem("Livres", "livre", new Icon(VaadinIcon.BOOK)));
-        nav.addItem(new SideNavItem("Événements", "evenement", new Icon(VaadinIcon.CALENDAR)));
 
         // Uniquement bibliothécaire
         if (isBib) {
@@ -80,6 +76,12 @@ public final class MainLayout extends AppLayout {
                     nav.addItem(createSideNavItem(entry));
                 }
             });
+        } else {
+            // Toujours visibles
+            nav.addItem(new SideNavItem("Livres", "livre", new Icon(VaadinIcon.BOOK)));
+            nav.addItem(new SideNavItem("Événements", "evenement", new Icon(VaadinIcon.CALENDAR)));
+            nav.addItem(new SideNavItem("Bibliothèques", "bibliotheque", new Icon(VaadinIcon.BUILDING)));
+            nav.addItem(new SideNavItem("Documents", "document", new Icon(VaadinIcon.ARCHIVE)));
         }
 
         return nav;
