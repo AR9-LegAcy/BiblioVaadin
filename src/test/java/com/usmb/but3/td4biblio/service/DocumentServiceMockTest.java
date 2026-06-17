@@ -7,8 +7,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Sort;
 
+import com.usmb.but3.td4biblio.entity.Bibliotheque;
 import com.usmb.but3.td4biblio.entity.Document;
+import com.usmb.but3.td4biblio.entity.Stocker;
 import com.usmb.but3.td4biblio.repository.DocumentRepo;
+import com.usmb.but3.td4biblio.repository.StockerRepo;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -21,6 +24,15 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class DocumentServiceMockTest {
+
+    @Mock
+    private Bibliotheque bibliotheque;
+
+    @Mock
+    private IsbnGeneratorService isbnGeneratorService;
+
+    @Mock
+    private StockerRepo stockerRepo;
 
     @Mock
     private DocumentRepo documentRepo;
@@ -78,30 +90,46 @@ public class DocumentServiceMockTest {
 
     @Test
     void testSaveDocument() {
-        // Arrange
+
         Document doc = new Document();
         doc.setDescriptionDocument("L'Aleph");
-        doc.setCodeIsbn("978-2-07-036823-5");
         doc.setFormatTaille("PDF");
         doc.setCodeEmpruntable(true);
         doc.setEtatDocument("Bon");
         doc.setCodeEmplacement("C3");
         doc.setDateAcquisition(LocalDate.of(2021, 3, 10));
 
-        Document savedDoc = new Document(3, "image3.gif", "L'Aleph", "PDF", LocalDate.of(2021, 3, 10), "C3", "978-2-07-036823-5", true, "Bon", LocalDateTime.now(), LocalDateTime.now(), null, null, null);
+        Bibliotheque bib = new Bibliotheque();
+        bib.setId(1);
 
-        when(documentRepo.save(any(Document.class))).thenReturn(savedDoc);
+        // mock ISBN
+        when(isbnGeneratorService.generateNextIsbn())
+                .thenReturn("978-0-000-00000-1");
 
-        // Act
-        Document result = documentService.saveDocument(doc);
+        // mock Document save
+        Document savedDoc = new Document(
+                1, "img", "L'Aleph", "PDF",
+                LocalDate.of(2021, 3, 10), "C3",
+                "978-0-000-00000-1", true, "Bon",
+                LocalDateTime.now(), LocalDateTime.now(),
+                null, null, null
+        );
 
-        // Assert
+        when(documentRepo.save(any(Document.class)))
+                .thenReturn(savedDoc);
+
+        // mock Stocker save (IMPORTANT)
+        when(stockerRepo.save(any(Stocker.class)))
+                .thenReturn(new Stocker());
+
+        Document result = documentService.saveDocument(doc, bib);
+
         assertThat(result).isNotNull();
-        assertThat(result.getIdDocument()).isEqualTo(3);
-        assertThat(result.getDescriptionDocument()).isEqualTo("L'Aleph");
-        assertThat(result.getCreatedAt()).isNotNull();
-        assertThat(result.getUpdatedAt()).isNotNull();
+        assertThat(result.getIdDocument()).isEqualTo(1);
+
+        verify(isbnGeneratorService, times(1)).generateNextIsbn();
         verify(documentRepo, times(1)).save(any(Document.class));
+        verify(stockerRepo, times(1)).save(any(Stocker.class));
     }
 
     @Test

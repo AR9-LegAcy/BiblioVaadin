@@ -1,5 +1,7 @@
 package com.usmb.but3.td4biblio.service;
 
+import com.usmb.but3.td4biblio.entity.Bibliothecaire;
+import com.usmb.but3.td4biblio.entity.Bibliotheque;
 import com.usmb.but3.td4biblio.entity.Document;
 import com.usmb.but3.td4biblio.entity.TypeDocument;
 import com.usmb.but3.td4biblio.repository.DocumentRepo;
@@ -9,12 +11,22 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
+import com.usmb.but3.td4biblio.security.SessionManager;
+
+import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.server.VaadinService;
+import com.vaadin.flow.server.VaadinServletRequest;
+import jakarta.servlet.http.HttpSession;
+import org.mockito.MockedStatic;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -38,6 +50,22 @@ class DocumentServiceTest {
     private Document DOC1;
     private Document DOC2;
     private Document DOC3;
+
+    private MockedStatic<SessionManager> sessionMock;
+
+    @BeforeEach
+    void setupSession() {
+
+        sessionMock = mockStatic(SessionManager.class);
+
+        Bibliothecaire bib = new Bibliothecaire();
+        Bibliotheque b = new Bibliotheque();
+        b.setId(1);
+        bib.setBibliotheque(b);
+
+        sessionMock.when(SessionManager::getBibliothecaire)
+                .thenReturn(bib);
+    }
 
     @BeforeAll
     void setUp() {
@@ -106,6 +134,11 @@ class DocumentServiceTest {
         ));
     }
 
+    @AfterEach
+    void tearDownVaadin() {
+        sessionMock.close();
+    }
+
     @AfterAll
     void tearDown() {
 
@@ -160,7 +193,9 @@ class DocumentServiceTest {
                 null
         );
 
-        Document saved = documentService.saveDocument(doc);
+        Bibliotheque bib = SessionManager.getBibliothecaire().getBibliotheque();
+
+        Document saved = documentService.saveDocument(doc, bib);
 
         assertNotNull(saved.getIdDocument());
         assertNotNull(saved.getCreatedAt());
