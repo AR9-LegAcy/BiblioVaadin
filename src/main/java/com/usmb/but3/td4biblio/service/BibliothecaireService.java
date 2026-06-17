@@ -27,7 +27,7 @@ public class BibliothecaireService {
     }
 
     public Bibliothecaire getBibliothecaireByPseudo(String pseudo) {
-        return bibliothecaireRepo.findByPseudo(pseudo).getFirst();
+        return bibliothecaireRepo.findByPseudo(pseudo);
     }
 
     public Bibliothecaire saveBibliothecaire(Bibliothecaire bibliothecaire) {
@@ -49,7 +49,7 @@ public class BibliothecaireService {
         if (bibliothecaire.getMotDePasse() == null ||
                 bibliothecaire.getMotDePasse().isBlank()) {
 
-            Bibliothecaire ancien = bibliothecaireRepo.findByPseudo(bibliothecaire.getPseudo()).getFirst();
+            Bibliothecaire ancien = bibliothecaireRepo.findByPseudo(bibliothecaire.getPseudo());
             bibliothecaire.setMotDePasse(ancien.getMotDePasse());
         }
         return bibliothecaireRepo.save(bibliothecaire);

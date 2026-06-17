@@ -29,16 +29,14 @@ public class AuthService {
         // -----------------------------
         // Bibliothécaire
         // -----------------------------
-        List<Bibliothecaire> liste = bibliothecaireRepository.findByPseudo(username);
+        Bibliothecaire bibliothecaire = bibliothecaireRepository.findByPseudo(username);
 
-        if (!liste.isEmpty()) {
-
-            Bibliothecaire b = liste.getFirst();
+        if (bibliothecaire != null) {
 
             System.out.println("Bibliothécaire trouvé");
-            System.out.println("Hash en base : " + b.getMotDePasse());
+            System.out.println("Hash en base : " + bibliothecaire.getMotDePasse());
 
-            boolean ok = passwordEncoder.matches(password, b.getMotDePasse());
+            boolean ok = passwordEncoder.matches(password, bibliothecaire.getMotDePasse());
 
             System.out.println("Mot de passe valide ? " + ok);
 
@@ -54,18 +52,16 @@ public class AuthService {
 
             Integer carte = Integer.parseInt(username);
 
-            Optional<Emprunteur> emp =
-                    emprunteurRepository.findByCarteEmprunteur(carte);
+            Optional<Emprunteur> emp = emprunteurRepository.findByCarteEmprunteur(carte);
 
             if (emp.isPresent()) {
 
                 System.out.println("Emprunteur trouvé");
                 System.out.println("Hash en base : " + emp.get().getMotDePasse());
 
-                boolean ok =
-                        passwordEncoder.matches(
-                                password,
-                                emp.get().getMotDePasse());
+                boolean ok = passwordEncoder.matches(
+                        password,
+                        emp.get().getMotDePasse());
 
                 System.out.println("Mot de passe valide ? " + ok);
 
