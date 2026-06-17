@@ -51,7 +51,9 @@ public class LivreEditor extends VerticalLayout implements KeyNotifier {
 
         save.addClickListener(e -> save());
         delete.addClickListener(e -> delete());
-        cancel.addClickListener(e -> setVisible(false));
+        cancel.addClickListener(e -> cancel());
+        save.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        delete.addThemeVariants(ButtonVariant.LUMO_ERROR);
 
         setVisible(false);
     }
@@ -96,7 +98,7 @@ public class LivreEditor extends VerticalLayout implements KeyNotifier {
         nbPages.setValue(l.getNbPages());
         datePublication.setValue(l.getDatePublication());
         editeurField.setValue(l.getIdEditeur());
-
+        titreLivre.focus();
         setVisible(true);
     }
 
@@ -106,5 +108,22 @@ public class LivreEditor extends VerticalLayout implements KeyNotifier {
 
     public interface ChangeHandler {
         void onChange();
+    }
+
+    void cancel() {
+        setVisible(false);
+        if (cancelHandler != null) {
+            cancelHandler.onCancel();
+        }
+    }
+
+    public interface CancelHandler {
+        void onCancel();
+    }
+
+    private CancelHandler cancelHandler;
+
+    public void setCancelHandler(CancelHandler cancelHandler) {
+        this.cancelHandler = cancelHandler;
     }
 }

@@ -51,11 +51,10 @@ public class LivreView extends VerticalLayout {
         add(actions, grid, editor);
         
         grid.setHeight("300px");
-        grid.setColumns("idDocument", "titreLivre", "nbPages", "datePublication");
+        grid.setColumns( "titreLivre", "nbPages", "datePublication");
         grid.addColumn(livre -> livre.getIdEditeur() != null ? livre.getIdEditeur().getNom() : "Aucun")
         .setHeader("Éditeur");
         
-        grid.getColumnByKey("idDocument").setWidth("50px").setFlexGrow(0);
         
         filter.setPlaceholder("Filtrer par titre");
         filter.setValueChangeMode(ValueChangeMode.LAZY);
@@ -70,6 +69,9 @@ public class LivreView extends VerticalLayout {
             editor.setChangeHandler(() -> {
                 editor.setVisible(false);
                 listLivres(filter.getValue());
+            });
+            editor.setCancelHandler(() -> {
+                grid.deselectAll();
             });
         }
         listLivres(null);
