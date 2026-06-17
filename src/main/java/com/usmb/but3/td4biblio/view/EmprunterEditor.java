@@ -14,6 +14,7 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
@@ -115,7 +116,15 @@ public class EmprunterEditor extends VerticalLayout implements KeyNotifier {
             } else {
                 emprunter.setDateRetourPrevue(dateRetourPrevue.getValue());
             }
-
+            var emprunts = emprunterService.getEmpruntsByCarteEmprunteur(emprunteurField.getValue().getCarteEmprunteur());
+            if (emprunts.size()>=10){
+                Notification.show(
+                    "Impossible : cet emprunteur a déjà 10 emprunts en cours.",
+                    3000,
+                    Notification.Position.MIDDLE
+                );
+                return;
+            }
             emprunterService.saveEmprunt(emprunter);
             changeHandler.onChange();
         }
