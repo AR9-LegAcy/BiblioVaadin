@@ -50,6 +50,9 @@ public class TypeDocumentEditor extends VerticalLayout implements KeyNotifier {
         delete.addClickListener(e -> delete());
         cancel.addClickListener(e -> cancel());
         setVisible(false);
+        
+        save.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        delete.addThemeVariants(ButtonVariant.LUMO_ERROR);
     }
 
     void delete() {
