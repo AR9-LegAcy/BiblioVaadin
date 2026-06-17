@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import com.usmb.but3.td4biblio.entity.Evenement;
+import com.usmb.but3.td4biblio.security.SessionManager;
 import com.usmb.but3.td4biblio.service.EvenementService;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
@@ -21,101 +22,98 @@ import com.vaadin.flow.router.Route;
 @Scope("prototype")
 @Route("evenement")
 @PageTitle("Les évènements")
-@Menu(
-    title = "Les évènements",
-    order = 4,
-    icon = "vaadin:calendar"
-)
+@Menu(title = "Les évènements", order = 4, icon = "vaadin:calendar")
 public class EvenementView extends VerticalLayout {
 
-    private final EvenementService evenementService;
+        private final EvenementService evenementService;
 
-    final Grid<Evenement> grid;
+        final Grid<Evenement> grid;
 
-    final TextField filter;
+        final TextField filter;
 
-    final Button addNewBtn;
+        final Button addNewBtn;
 
-    final EvenementEditor editor;
+        final EvenementEditor editor;
 
-    public EvenementView(
-            EvenementService evenementService,
-            EvenementEditor editor) {
+        boolean isBib = SessionManager.isBibliothecaire();
 
-        this.evenementService = evenementService;
-        this.editor = editor;
+        public EvenementView(
+                        EvenementService evenementService,
+                        EvenementEditor editor) {
 
-        grid = new Grid<>(Evenement.class);
+                this.evenementService = evenementService;
+                this.editor = editor;
 
-        filter = new TextField();
+                grid = new Grid<>(Evenement.class);
 
-        addNewBtn =
-                new Button("Ajouter", VaadinIcon.PLUS.create());
+                filter = new TextField();
 
-        HorizontalLayout actions =
-                new HorizontalLayout(filter, addNewBtn);
+                addNewBtn = new Button("Ajouter", VaadinIcon.PLUS.create());
+                addNewBtn.getStyle().set("visibility", "hidden");
 
-        add(actions, grid, editor);
+                HorizontalLayout actions = new HorizontalLayout(filter, addNewBtn);
 
-        grid.setColumns(
-                "id",
-                "titre",
-                "description",
-                "dateDebut",
-                "dateFin"
-        );
+                add(actions, grid, editor);
 
-        grid.addColumn(
-                e -> e.getTypeEvenement() != null
-                        ? e.getTypeEvenement().getNom()
-                        : ""
-        ).setHeader("Type");
+                grid.setColumns(
+                                "id",
+                                "titre",
+                                "description",
+                                "dateDebut",
+                                "dateFin");
 
-        grid.addColumn(
-                e -> e.getBibliotheque() != null
-                        ? e.getBibliotheque().getNom()
-                        : ""
-        ).setHeader("Bibliothèque");
+                grid.addColumn(
+                                e -> e.getTypeEvenement() != null
+                                                ? e.getTypeEvenement().getNom()
+                                                : "")
+                                .setHeader("Type");
 
-        filter.setPlaceholder(
-                "Filtrer par titre");
+                grid.addColumn(
+                                e -> e.getBibliotheque() != null
+                                                ? e.getBibliotheque().getNom()
+                                                : "")
+                                .setHeader("Bibliothèque");
 
-        filter.setValueChangeMode(
-                ValueChangeMode.LAZY);
+                filter.setPlaceholder(
+                                "Filtrer par titre");
 
-        filter.addValueChangeListener(
-                e -> listEvenements(e.getValue()));
+                filter.setValueChangeMode(
+                                ValueChangeMode.LAZY);
 
-        grid.asSingleSelect()
-                .addValueChangeListener(
-                        e -> editor.editEvenement(
-                                e.getValue()));
+                filter.addValueChangeListener(
+                                e -> listEvenements(e.getValue()));
+                if (isBib) {
+                        addNewBtn.getStyle().set("visibility", "visible");
+                        grid.asSingleSelect()
+                                        .addValueChangeListener(
+                                                        e -> editor.editEvenement(
+                                                                        e.getValue()));
 
-        addNewBtn.addClickListener(
-                e -> editor.editEvenement(
-                        new Evenement()));
+                        addNewBtn.addClickListener(
+                                        e -> editor.editEvenement(
+                                                        new Evenement()));
 
-        editor.setChangeHandler(() -> {
-            editor.setVisible(false);
-            listEvenements(filter.getValue());
-        });
-
-        listEvenements(null);
-    }
-
-    void listEvenements(String filterText) {
-
-        if (StringUtils.hasText(filterText)) {
-
-            grid.setItems(
-                    evenementService
-                            .getEvenementsByTitreLike(
-                                    "%" + filterText + "%"));
-        } else {
-
-            grid.setItems(
-                    evenementService
-                            .getAllEvenements());
+                        editor.setChangeHandler(() -> {
+                                editor.setVisible(false);
+                                listEvenements(filter.getValue());
+                        });
+                }
+                listEvenements(null);
         }
-    }
+
+        void listEvenements(String filterText) {
+
+                if (StringUtils.hasText(filterText)) {
+
+                        grid.setItems(
+                                        evenementService
+                                                        .getEvenementsByTitreLike(
+                                                                        "%" + filterText + "%"));
+                } else {
+
+                        grid.setItems(
+                                        evenementService
+                                                        .getAllEvenements());
+                }
+        }
 }
