@@ -71,8 +71,7 @@ public final class MainLayout extends AppLayout {
             MenuConfiguration.getMenuEntries().forEach(entry -> {
                 String path = entry.path();
                 // Exclure les pages déjà ajoutées et les pages réservées
-                if (!path.equals("") && !path.equals("livre")
-                        && !path.equals("evenement") && !path.equals("login")) {
+                if (!path.contains("classer") && !path.contains("stocker") && !path.contains("ecrire")) {
                     nav.addItem(createSideNavItem(entry));
                 }
             });
