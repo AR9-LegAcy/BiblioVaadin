@@ -41,8 +41,7 @@ public class TypeDocumentView extends VerticalLayout {
         add(actions, grid, editor);
 
         grid.setHeight("300px");
-        grid.setColumns("idTypeDocument", "nomTypeDocument");
-        grid.getColumnByKey("idTypeDocument").setWidth("50px").setFlexGrow(0);
+        grid.setColumns("nomTypeDocument");
 
         filter.setPlaceholder("Filtrer par nom du type de document");
 
@@ -50,13 +49,19 @@ public class TypeDocumentView extends VerticalLayout {
         filter.setValueChangeMode(ValueChangeMode.LAZY);
         filter.addValueChangeListener(e -> listTypeDocuments(e.getValue()));
 
-        
         // Instantiate and edit new Auteur when the new button is clicked
         addNewBtn.addClickListener(e -> editor.editTypeDocument(new TypeDocument()));
 
         // Connect selected TypeDocument to editor or hide if none is selected
         grid.asSingleSelect().addValueChangeListener(e -> {
             editor.editTypeDocument(e.getValue());
+        });
+        editor.setChangeHandler(() -> {
+            editor.setVisible(false);
+            listTypeDocuments(filter.getValue());
+        });
+        editor.setCancelHandler(() -> {
+            grid.deselectAll();
         });
 
         // Initialize listing

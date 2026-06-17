@@ -52,11 +52,7 @@ public class TypeAuteurView extends VerticalLayout {
 
         add(actions, grid, editor);
 
-        grid.setColumns("id", "nom");
-
-        grid.getColumnByKey("id")
-                .setWidth("70px")
-                .setFlexGrow(0);
+        grid.setColumns("nom");
 
         filter.setPlaceholder("Filtrer par nom");
         filter.setValueChangeMode(ValueChangeMode.LAZY);
@@ -68,6 +64,9 @@ public class TypeAuteurView extends VerticalLayout {
         editor.setChangeHandler(() -> {
             editor.setVisible(false);
             listTypeAuteurs(filter.getValue());
+        });
+        editor.setCancelHandler(() -> {
+            grid.deselectAll();
         });
 
         listTypeAuteurs(null);

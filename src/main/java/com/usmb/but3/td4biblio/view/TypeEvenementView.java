@@ -45,8 +45,7 @@ public class TypeEvenementView extends VerticalLayout {
         add(actions, grid, editor);
 
         grid.setHeight("300px");
-        grid.setColumns("id", "nom");
-        grid.getColumnByKey("id").setWidth("60px").setFlexGrow(0);
+        grid.setColumns( "nom");
 
         filter.setPlaceholder("Filtrer par nom");
 
@@ -60,6 +59,9 @@ public class TypeEvenementView extends VerticalLayout {
         editor.setChangeHandler(() -> {
             editor.setVisible(false);
             listTypeEvenements(filter.getValue());
+        });
+        editor.setCancelHandler(() -> {
+            grid.deselectAll();
         });
 
         listTypeEvenements(null);

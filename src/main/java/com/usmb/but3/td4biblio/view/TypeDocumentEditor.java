@@ -48,8 +48,11 @@ public class TypeDocumentEditor extends VerticalLayout implements KeyNotifier {
 
         save.addClickListener(e -> save());
         delete.addClickListener(e -> delete());
-        cancel.addClickListener(e -> editTypeDocument(typeDocument));
+        cancel.addClickListener(e -> cancel());
         setVisible(false);
+        
+        save.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        delete.addThemeVariants(ButtonVariant.LUMO_ERROR);
     }
 
     void delete() {
@@ -78,7 +81,7 @@ public class TypeDocumentEditor extends VerticalLayout implements KeyNotifier {
         } else {
             typeDocument = td;
         }
-        cancel.setVisible(persisted);
+        cancel.setVisible(true);
 
         // Bind the TypeDocument to the editor fields
         binder.setBean(typeDocument);
@@ -91,5 +94,21 @@ public class TypeDocumentEditor extends VerticalLayout implements KeyNotifier {
 
     public void setChangeHandler(ChangeHandler h) {
         changeHandler = h;
+    }
+    void cancel() {
+        setVisible(false);
+        if (cancelHandler != null) {
+            cancelHandler.onCancel();
+        }
+    }
+
+    public interface CancelHandler {
+        void onCancel();
+    }
+
+    private CancelHandler cancelHandler;
+
+    public void setCancelHandler(CancelHandler cancelHandler) {
+        this.cancelHandler = cancelHandler;
     }
 }

@@ -54,7 +54,7 @@ public class TypeAuteurEditor extends VerticalLayout implements KeyNotifier {
 
         save.addClickListener(e -> save());
         delete.addClickListener(e -> delete());
-        cancel.addClickListener(e -> editTypeAuteur(typeAuteur));
+        cancel.addClickListener(e -> cancel());
 
         setVisible(false);
     }
@@ -88,7 +88,7 @@ public class TypeAuteurEditor extends VerticalLayout implements KeyNotifier {
             typeAuteur = t;
         }
 
-        cancel.setVisible(persisted);
+        cancel.setVisible(true);
 
         binder.setBean(typeAuteur);
 
@@ -99,5 +99,21 @@ public class TypeAuteurEditor extends VerticalLayout implements KeyNotifier {
 
     public void setChangeHandler(ChangeHandler h) {
         changeHandler = h;
+    }
+    void cancel() {
+        setVisible(false);
+        if (cancelHandler != null) {
+            cancelHandler.onCancel();
+        }
+    }
+
+    public interface CancelHandler {
+        void onCancel();
+    }
+
+    private CancelHandler cancelHandler;
+
+    public void setCancelHandler(CancelHandler cancelHandler) {
+        this.cancelHandler = cancelHandler;
     }
 }
