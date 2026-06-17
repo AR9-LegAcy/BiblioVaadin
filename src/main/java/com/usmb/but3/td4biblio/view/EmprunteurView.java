@@ -1,6 +1,7 @@
 package com.usmb.but3.td4biblio.view;
 
 import com.usmb.but3.td4biblio.entity.Emprunteur;
+import com.usmb.but3.td4biblio.entity.TypeDocument;
 import com.usmb.but3.td4biblio.service.EmprunteurService;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
@@ -56,6 +57,9 @@ public class EmprunteurView extends VerticalLayout {
         // Replace listing with filtered content when user changes filter
         filter.setValueChangeMode(ValueChangeMode.LAZY);
         filter.addValueChangeListener(e -> listEmprunteurs(e.getValue()));
+
+        // Instantiate and edit new Auteur when the new button is clicked
+        addNewBtn.addClickListener(e -> editor.editEmprunteur(new Emprunteur()));
 
         // Connect selected Emprunteur to editor or hide if none is selected
         grid.asSingleSelect().addValueChangeListener(e -> {

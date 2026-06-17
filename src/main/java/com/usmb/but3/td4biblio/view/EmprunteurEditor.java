@@ -72,6 +72,7 @@ public class EmprunteurEditor extends VerticalLayout implements KeyNotifier {
         delete.addClickListener(e -> delete());
         cancel.addClickListener(e -> editEmprunteur(emprunteur));
         addKeyPressListener(Key.ENTER, e -> save());
+        setVisible(false);
     }
 
     void delete() {
