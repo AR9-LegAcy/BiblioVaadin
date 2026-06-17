@@ -2,6 +2,7 @@ package com.usmb.but3.td4biblio.view;
 
 import com.usmb.but3.td4biblio.entity.Document;
 import com.usmb.but3.td4biblio.entity.Emprunter;
+import com.usmb.but3.td4biblio.entity.Emprunteur;
 import com.usmb.but3.td4biblio.entity.Evenement;
 import com.usmb.but3.td4biblio.entity.Livre;
 import com.usmb.but3.td4biblio.security.SessionManager;
@@ -10,9 +11,11 @@ import com.usmb.but3.td4biblio.service.EmprunterService;
 import com.usmb.but3.td4biblio.service.EvenementService;
 import com.usmb.but3.td4biblio.service.LivreService;
 
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -25,30 +28,31 @@ import com.vaadin.flow.router.Route;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @Route
 @PageTitle("Accueil — Bibliothèque")
 public final class MainView extends Main {
 
-    private static final DateTimeFormatter DATE_FMT =
-            DateTimeFormatter.ofPattern("dd MMM yyyy");
+    private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("dd MMM yyyy");
     private static final int PROLONGATION_JOURS = 7;
+    private static final long SEUIL_ALERTE_ABONNEMENT_JOURS = 14; // 2 semaines
 
     MainView(EvenementService evenementService,
-             LivreService livreService,
-             DocumentService documentService,
-             EmprunterService emprunterService) {
+            LivreService livreService,
+            DocumentService documentService,
+            EmprunterService emprunterService) {
         getStyle()
-            .set("--accent",       "#2563EB")
-            .set("--teal",         "#0F766E")
-            .set("--surface",      "#FFFFFF")
-            .set("--muted",        "#64748B")
-            .set("--border",       "#E2E8F0")
-            .set("font-family",    "sans-serif")
-            .set("display",        "flex")
-            .set("flex-direction", "column")
-            .set("gap",            "0");
+                .set("--accent", "#2563EB")
+                .set("--teal", "#0F766E")
+                .set("--surface", "#FFFFFF")
+                .set("--muted", "#64748B")
+                .set("--border", "#E2E8F0")
+                .set("font-family", "sans-serif")
+                .set("display", "flex")
+                .set("flex-direction", "column")
+                .set("gap", "0");
 
         add(buildHero());
 
@@ -61,23 +65,153 @@ public final class MainView extends Main {
         add(buildAcquisitionsRow(livreService, documentService));
     }
 
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+        verifierExpirationAbonnement();
+    }
+
+    // ── POPUP EXPIRATION ABONNEMENT ─────────────────────────────────────────
+
+    /**
+     * Affiche une popup d'alerte si l'abonnement de l'emprunteur connecté
+     * arrive à expiration dans moins de 2 semaines (ou est déjà expiré).
+     */
+    private void verifierExpirationAbonnement() {
+        if (!SessionManager.isEmprunteur()) {
+            return;
+        }
+        Emprunteur emprunteur = SessionManager.getEmprunteur();
+        if (emprunteur == null || emprunteur.getExpirationAbonnement() == null) {
+            return;
+        }
+
+        LocalDate expiration = emprunteur.getExpirationAbonnement();
+        long joursRestants = ChronoUnit.DAYS.between(LocalDate.now(), expiration);
+
+        if (joursRestants < SEUIL_ALERTE_ABONNEMENT_JOURS) {
+            afficherPopupAbonnement(joursRestants, expiration);
+        }
+    }
+
+    private void afficherPopupAbonnement(long joursRestants, LocalDate expiration) {
+        boolean expire = joursRestants < 0;
+
+        var dialog = new Dialog();
+        dialog.setHeaderTitle(expire ? "Abonnement expiré" : "Abonnement bientôt expiré");
+        dialog.setCloseOnEsc(true);
+        dialog.setCloseOnOutsideClick(true);
+
+        var icone = new Icon(VaadinIcon.WARNING);
+        icone.getStyle()
+                .set("color", expire ? "#B91C1C" : "#D97706")
+                .set("min-width", "1.5rem").set("height", "1.5rem").set("margin-top", "0.1rem");
+
+        String texte;
+        if (expire) {
+            texte = "Votre abonnement a expiré le " + expiration.format(DATE_FMT)
+                    + " (il y a " + Math.abs(joursRestants) + " jour(s)). "
+                    + "Renouvelez-le pour continuer à emprunter des documents.";
+        } else if (joursRestants == 0) {
+            texte = "Votre abonnement expire aujourd'hui (" + expiration.format(DATE_FMT) + "). "
+                    + "Pensez à le renouveler dès maintenant.";
+        } else {
+            texte = "Votre abonnement arrive bientôt à expiration : il expire dans "
+                    + joursRestants + " jour(s), le " + expiration.format(DATE_FMT) + ". "
+                    + "Pensez à le renouveler pour continuer à emprunter des documents.";
+        }
+
+        var message = new Paragraph(texte);
+        message.getStyle().set("margin", "0").set("max-width", "320px");
+
+        var content = new HorizontalLayout(icone, message);
+        content.setAlignItems(com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment.START);
+        content.setSpacing(true);
+        dialog.add(content);
+
+        var btnPlusTard = new Button("Plus tard");
+        btnPlusTard.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
+        btnPlusTard.addClickListener(e -> dialog.close());
+
+        var btnRenouveler = new Button("Renouveler mon abonnement", new Icon(VaadinIcon.REFRESH));
+        btnRenouveler.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        btnRenouveler.addClickListener(e -> {
+            dialog.close();
+            UI.getCurrent().navigate("profil");
+        });
+
+        dialog.getFooter().add(btnPlusTard, btnRenouveler);
+        dialog.open();
+    }
+
     // ── HERO ──────────────────────────────────────────────────────────────
 
     private Section buildHero() {
         var section = new Section();
+
         section.getStyle()
-            .set("background",    "linear-gradient(135deg,#1E3A8A 0%,#2563EB 60%,#3B82F6 100%)")
-            .set("color",         "#fff")
-            .set("padding",       "3rem 2.5rem 2.5rem")
-            .set("border-radius", "0 0 1.5rem 1.5rem")
-            .set("margin-bottom", "2rem")
-            .set("position",      "relative");
+                .set("background", "linear-gradient(135deg,#1E3A8A 0%,#2563EB 60%,#3B82F6 100%)")
+                .set("color", "#fff")
+                .set("padding", "3rem 2.5rem 2.5rem")
+                .set("border-radius", "0 0 1.5rem 1.5rem")
+                .set("margin-bottom", "2rem")
+                .set("position", "relative");
+
+        // Avatar en haut à droite uniquement pour un emprunteur connecté
+        if (SessionManager.isEmprunteur()) {
+
+            Emprunteur emp = SessionManager.getEmprunteur();
+
+            String initiales = "";
+
+            if (emp.getPrenom() != null && !emp.getPrenom().isBlank()) {
+                initiales += emp.getPrenom().substring(0, 1);
+            }
+
+            if (emp.getNom() != null && !emp.getNom().isBlank()) {
+                initiales += emp.getNom().substring(0, 1);
+            }
+
+            Button avatar = new Button(initiales.toUpperCase());
+            avatar.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
+
+            avatar.getStyle()
+                    .set("position", "absolute")
+                    .set("top", "1.5rem")
+                    .set("right", "2rem")
+                    .set("width", "64px")
+                    .set("height", "64px")
+                    .set("min-width", "64px")
+                    .set("padding", "0")
+                    .set("border-radius", "50%")
+                    .set("background", "rgba(255,255,255,0.2)")
+                    .set("border", "2px solid rgba(255,255,255,0.5)")
+                    .set("color", "#FFFFFF")
+                    .set("font-size", "1.3rem")
+                    .set("font-weight", "700")
+                    .set("cursor", "pointer")
+                    .set("transition", "all 0.2s ease");
+
+            avatar.getElement().addEventListener("mouseover",
+                    e -> avatar.getStyle()
+                            .set("background", "rgba(255,255,255,0.35)")
+                            .set("transform", "scale(1.05)"));
+
+            avatar.getElement().addEventListener("mouseout",
+                    e -> avatar.getStyle()
+                            .set("background", "rgba(255,255,255,0.2)")
+                            .set("transform", "scale(1.0)"));
+
+            avatar.addClickListener(e -> UI.getCurrent().navigate("profil"));
+
+            section.add(avatar);
+        }
 
         var eyebrow = new Span("Réseau des Bibliothèques");
         eyebrow.getStyle()
-            .set("font-size", "0.75rem").set("font-weight", "600")
-            .set("letter-spacing", "0.12em").set("text-transform", "uppercase")
-            .set("opacity", "0.75").set("display", "block").set("margin-bottom", "0.5rem");
+                .set("font-size", "0.75rem").set("font-weight", "600")
+                .set("letter-spacing", "0.12em").set("text-transform", "uppercase")
+                .set("opacity", "0.75").set("display", "block").set("margin-bottom", "0.5rem");
 
         String titleText = "Bienvenue à la bibliothèque";
         if (SessionManager.isLoggedIn()) {
@@ -85,16 +219,16 @@ public final class MainView extends Main {
         }
         var title = new H1(titleText);
         title.getStyle()
-            .set("margin", "0 0 0.75rem 0")
-            .set("font-size", "clamp(1.6rem,4vw,2.4rem)")
-            .set("font-weight", "700").set("line-height", "1.2");
+                .set("margin", "0 0 0.75rem 0")
+                .set("font-size", "clamp(1.6rem,4vw,2.4rem)")
+                .set("font-weight", "700").set("line-height", "1.2");
 
         var sub = new Paragraph(
-            "Découvrez nos nouvelles acquisitions, consultez les événements à venir "
-          + "et gérez vos emprunts en ligne.");
+                "Découvrez nos nouvelles acquisitions, consultez les événements à venir "
+                        + "et gérez vos emprunts en ligne.");
         sub.getStyle()
-            .set("margin", "0 0 1.5rem 0").set("opacity", "0.85")
-            .set("max-width", "520px").set("font-size", "1rem");
+                .set("margin", "0 0 1.5rem 0").set("opacity", "0.85")
+                .set("max-width", "520px").set("font-size", "1rem");
 
         var btnRow = new HorizontalLayout();
         btnRow.setSpacing(true);
@@ -104,17 +238,17 @@ public final class MainView extends Main {
         var btnRecherche = new Button("Rechercher un livre", new Icon(VaadinIcon.SEARCH));
         btnRecherche.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_LARGE);
         btnRecherche.getStyle()
-            .set("background", "#fff").set("color", "#1E3A8A")
-            .set("font-weight", "600").set("border-radius", "0.5rem");
+                .set("background", "#fff").set("color", "#1E3A8A")
+                .set("font-weight", "600").set("border-radius", "0.5rem");
         btnRecherche.addClickListener(e -> UI.getCurrent().navigate("livre"));
 
         if (SessionManager.isLoggedIn()) {
             var btnLogout = new Button("Se déconnecter", new Icon(VaadinIcon.SIGN_OUT));
             btnLogout.addThemeVariants(ButtonVariant.LUMO_LARGE);
             btnLogout.getStyle()
-                .set("background", "rgba(255,255,255,0.15)").set("color", "#fff")
-                .set("border", "2px solid rgba(255,255,255,0.6)")
-                .set("font-weight", "600").set("border-radius", "0.5rem");
+                    .set("background", "rgba(255,255,255,0.15)").set("color", "#fff")
+                    .set("border", "2px solid rgba(255,255,255,0.6)")
+                    .set("font-weight", "600").set("border-radius", "0.5rem");
             btnLogout.addClickListener(e -> {
                 SessionManager.logout();
                 UI.getCurrent().navigate(MainView.class);
@@ -125,9 +259,9 @@ public final class MainView extends Main {
             var btnLogin = new Button("Se connecter", new Icon(VaadinIcon.SIGN_IN));
             btnLogin.addThemeVariants(ButtonVariant.LUMO_LARGE);
             btnLogin.getStyle()
-                .set("background", "rgba(255,255,255,0.15)").set("color", "#fff")
-                .set("border", "2px solid rgba(255,255,255,0.6)")
-                .set("font-weight", "600").set("border-radius", "0.5rem");
+                    .set("background", "rgba(255,255,255,0.15)").set("color", "#fff")
+                    .set("border", "2px solid rgba(255,255,255,0.6)")
+                    .set("font-weight", "600").set("border-radius", "0.5rem");
             btnLogin.addClickListener(e -> UI.getCurrent().navigate("login"));
             btnRow.add(btnRecherche, btnLogin);
         }
@@ -139,8 +273,8 @@ public final class MainView extends Main {
     // ── MES EMPRUNTS ──────────────────────────────────────────────────────
 
     private VerticalLayout buildMesEmpruntsRow(EmprunterService emprunterService,
-                                               LivreService livreService,
-                                               DocumentService documentService) {
+            LivreService livreService,
+            DocumentService documentService) {
         var wrapper = new VerticalLayout();
         wrapper.setPadding(false);
         wrapper.setSpacing(false);
@@ -157,16 +291,17 @@ public final class MainView extends Main {
                     .stream()
                     .filter(e -> e.getDateRetourReelle() == null) // actifs uniquement
                     .toList();
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
 
         if (emprunts.isEmpty()) {
             section.add(emptyState("Vous n'avez aucun emprunt en cours."));
         } else {
             var grid = new Div();
             grid.getStyle()
-                .set("display", "grid")
-                .set("grid-template-columns", "repeat(auto-fill, minmax(min(100%, 280px), 1fr))")
-                .set("width", "100%");
+                    .set("display", "grid")
+                    .set("grid-template-columns", "repeat(auto-fill, minmax(min(100%, 280px), 1fr))")
+                    .set("width", "100%");
 
             for (Emprunter emprunt : emprunts) {
                 grid.add(buildEmpruntCard(emprunt, emprunterService, livreService, documentService));
@@ -179,17 +314,17 @@ public final class MainView extends Main {
     }
 
     private Div buildEmpruntCard(Emprunter emprunt,
-                                  EmprunterService emprunterService,
-                                  LivreService livreService,
-                                  DocumentService documentService) {
+            EmprunterService emprunterService,
+            LivreService livreService,
+            DocumentService documentService) {
         var card = new Div();
         card.getStyle()
-            .set("padding",      "1rem 1.1rem")
-            .set("border-right", "1px solid var(--border)")
-            .set("border-bottom","1px solid var(--border)")
-            .set("display",      "flex")
-            .set("flex-direction","column")
-            .set("gap",          "0.5rem");
+                .set("padding", "1rem 1.1rem")
+                .set("border-right", "1px solid var(--border)")
+                .set("border-bottom", "1px solid var(--border)")
+                .set("display", "flex")
+                .set("flex-direction", "column")
+                .set("gap", "0.5rem");
 
         // Retrouver le livre à partir du document
         Document doc = emprunt.getIdDocument();
@@ -201,14 +336,14 @@ public final class MainView extends Main {
         // ── En-tête : icône + titre cliquable ────────────────────────────
         var header = new Div();
         header.getStyle()
-            .set("display", "flex").set("gap", "0.6rem").set("align-items", "flex-start")
-            .set("cursor", "pointer");
+                .set("display", "flex").set("gap", "0.6rem").set("align-items", "flex-start")
+                .set("cursor", "pointer");
 
         var ico = new Icon(VaadinIcon.BOOK);
         ico.getStyle()
-            .set("color", "#7C3AED").set("background", "#7C3AED18")
-            .set("padding", "0.4rem").set("border-radius", "0.4rem")
-            .set("min-width", "2rem").set("height", "2rem").set("flex-shrink", "0");
+                .set("color", "#7C3AED").set("background", "#7C3AED18")
+                .set("padding", "0.4rem").set("border-radius", "0.4rem")
+                .set("min-width", "2rem").set("height", "2rem").set("flex-shrink", "0");
 
         String titreLivre = livre != null && livre.getTitreLivre() != null
                 ? livre.getTitreLivre()
@@ -216,8 +351,8 @@ public final class MainView extends Main {
 
         var titreEl = new H3(titreLivre);
         titreEl.getStyle()
-            .set("margin", "0").set("font-size", "0.93rem").set("font-weight", "600")
-            .set("color", "#1E293B");
+                .set("margin", "0").set("font-size", "0.93rem").set("font-weight", "600")
+                .set("color", "#1E293B");
 
         header.add(ico, titreEl);
 
@@ -245,9 +380,9 @@ public final class MainView extends Main {
                     + emprunt.getDateRetourPrevue().format(DATE_FMT);
             var dr = new Span(retourTxt);
             dr.getStyle()
-                .set("font-size", "0.8rem")
-                .set("font-weight", enRetard ? "600" : "400")
-                .set("color", enRetard ? "#B91C1C" : "var(--muted)");
+                    .set("font-size", "0.8rem")
+                    .set("font-weight", enRetard ? "600" : "400")
+                    .set("color", enRetard ? "#B91C1C" : "var(--muted)");
             datesDiv.add(dr);
         }
         card.add(datesDiv);
@@ -259,8 +394,8 @@ public final class MainView extends Main {
         if (dejaProlonge) {
             var deja = new Span("✓ Déjà prolongé de " + emprunt.getProlongationEmprunt() + " j");
             deja.getStyle()
-                .set("font-size", "0.75rem").set("color", "#64748B")
-                .set("font-style", "italic");
+                    .set("font-size", "0.75rem").set("color", "#64748B")
+                    .set("font-style", "italic");
             card.add(deja);
         } else {
             var btnProlonger = new Button(
@@ -268,8 +403,8 @@ public final class MainView extends Main {
                     new Icon(VaadinIcon.CLOCK));
             btnProlonger.addThemeVariants(ButtonVariant.LUMO_SMALL);
             btnProlonger.getStyle()
-                .set("background", "#7C3AED").set("color", "#fff")
-                .set("font-size", "0.78rem").set("border-radius", "0.4rem");
+                    .set("background", "#7C3AED").set("color", "#fff")
+                    .set("font-size", "0.78rem").set("border-radius", "0.4rem");
             btnProlonger.addClickListener(e -> {
                 try {
                     LocalDate nouvelleDateRetour = emprunt.getDateRetourPrevue() != null
@@ -280,7 +415,7 @@ public final class MainView extends Main {
                     emprunterService.updateEmprunt(emprunt);
                     var n = Notification.show(
                             "Emprunt prolongé ! Retour prévu le "
-                            + nouvelleDateRetour.format(DATE_FMT),
+                                    + nouvelleDateRetour.format(DATE_FMT),
                             3500, Notification.Position.BOTTOM_CENTER);
                     n.addThemeVariants(NotificationVariant.LUMO_SUCCESS);
                     UI.getCurrent().getPage().reload();
@@ -306,7 +441,7 @@ public final class MainView extends Main {
 
         LocalDate today = LocalDate.now();
         List<Evenement> enCours = List.of();
-        List<Evenement> futurs  = List.of();
+        List<Evenement> futurs = List.of();
 
         try {
             enCours = evenementService.getAllEvenements().stream()
@@ -316,7 +451,8 @@ public final class MainView extends Main {
             final List<Evenement> enCoursRef = enCours;
             futurs = evenementService.getEvenementsFuturs().stream()
                     .filter(ev -> !enCoursRef.contains(ev)).toList();
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
 
         var secEnCours = sectionCard();
         secEnCours.add(buildSectionHeader(VaadinIcon.CLOCK, "Événements en cours", "#16A34A", "evenement"));
@@ -345,44 +481,44 @@ public final class MainView extends Main {
     private Div eventGrid() {
         var grid = new Div();
         grid.getStyle()
-            .set("display", "grid")
-            .set("grid-template-columns", "repeat(auto-fill, minmax(min(100%, 260px), 1fr))")
-            .set("width", "100%");
+                .set("display", "grid")
+                .set("grid-template-columns", "repeat(auto-fill, minmax(min(100%, 260px), 1fr))")
+                .set("width", "100%");
         return grid;
     }
 
     private Div buildEventCard(Evenement ev, boolean isEnCours) {
         var card = new Div();
         card.getStyle()
-            .set("padding",      "1rem 1.1rem")
-            .set("border-right", "1px solid var(--border)")
-            .set("border-bottom","1px solid var(--border)")
-            .set("cursor",       "pointer")
-            .set("transition",   "background 0.15s");
+                .set("padding", "1rem 1.1rem")
+                .set("border-right", "1px solid var(--border)")
+                .set("border-bottom", "1px solid var(--border)")
+                .set("cursor", "pointer")
+                .set("transition", "background 0.15s");
         card.getElement().addEventListener("mouseover",
-            e -> card.getStyle().set("background", "#F8FAFC"));
+                e -> card.getStyle().set("background", "#F8FAFC"));
         card.getElement().addEventListener("mouseout",
-            e -> card.getStyle().set("background", "transparent"));
+                e -> card.getStyle().set("background", "transparent"));
         card.addClickListener(e -> UI.getCurrent().navigate("evenement/detail/" + ev.getId()));
 
         Span badge;
         if (isEnCours) {
             badge = new Span("● En cours");
             badge.getStyle()
-                .set("font-size", "0.7rem").set("font-weight", "600")
-                .set("color", "#fff").set("background", "#16A34A")
-                .set("padding", "0.15rem 0.5rem").set("border-radius", "999px")
-                .set("display", "inline-block").set("margin-bottom", "0.35rem");
+                    .set("font-size", "0.7rem").set("font-weight", "600")
+                    .set("color", "#fff").set("background", "#16A34A")
+                    .set("padding", "0.15rem 0.5rem").set("border-radius", "999px")
+                    .set("display", "inline-block").set("margin-bottom", "0.35rem");
         } else {
             String dateLabel = ev.getDateDebut() != null ? ev.getDateDebut().format(DATE_FMT) : "Date inconnue";
             if (ev.getDateFin() != null && ev.getDateDebut() != null && !ev.getDateFin().equals(ev.getDateDebut()))
                 dateLabel += " → " + ev.getDateFin().format(DATE_FMT);
             badge = new Span(dateLabel);
             badge.getStyle()
-                .set("font-size", "0.7rem").set("font-weight", "600")
-                .set("color", "#2563EB").set("background", "#EFF6FF")
-                .set("padding", "0.15rem 0.5rem").set("border-radius", "999px")
-                .set("display", "inline-block").set("margin-bottom", "0.35rem");
+                    .set("font-size", "0.7rem").set("font-weight", "600")
+                    .set("color", "#2563EB").set("background", "#EFF6FF")
+                    .set("padding", "0.15rem 0.5rem").set("border-radius", "999px")
+                    .set("display", "inline-block").set("margin-bottom", "0.35rem");
         }
 
         var titre = new H3(ev.getTitre() != null ? ev.getTitre() : "Événement sans titre");
@@ -392,9 +528,9 @@ public final class MainView extends Main {
         if (ev.getTypeEvenement() != null && ev.getTypeEvenement().getNom() != null) {
             var typeSpan = new Span(ev.getTypeEvenement().getNom());
             typeSpan.getStyle()
-                .set("font-size", "0.72rem").set("color", "#fff").set("background", "#6366F1")
-                .set("padding", "0.1rem 0.45rem").set("border-radius", "999px")
-                .set("display", "inline-block").set("margin-bottom", "0.3rem");
+                    .set("font-size", "0.72rem").set("color", "#fff").set("background", "#6366F1")
+                    .set("padding", "0.1rem 0.45rem").set("border-radius", "999px")
+                    .set("display", "inline-block").set("margin-bottom", "0.3rem");
             card.add(typeSpan);
         }
         if (ev.getBibliotheque() != null && ev.getBibliotheque().getNom() != null) {
@@ -405,7 +541,7 @@ public final class MainView extends Main {
             lieuText.getStyle().set("font-size", "0.8rem").set("color", "var(--muted)");
             lieuRow.add(ico, lieuText);
             lieuRow.getStyle().set("display", "flex").set("align-items", "center")
-                .set("gap", "0.25rem").set("margin-bottom", "0.3rem");
+                    .set("gap", "0.25rem").set("margin-bottom", "0.3rem");
             card.add(lieuRow);
         }
         if (ev.getDescription() != null && !ev.getDescription().isBlank()) {
@@ -419,7 +555,7 @@ public final class MainView extends Main {
     // ── RANGÉE ACQUISITIONS ──────────────────────────────────────────────
 
     private VerticalLayout buildAcquisitionsRow(LivreService livreService,
-                                                DocumentService documentService) {
+            DocumentService documentService) {
         var wrapper = new VerticalLayout();
         wrapper.setPadding(false);
         wrapper.setSpacing(false);
@@ -443,9 +579,9 @@ public final class MainView extends Main {
         } else {
             var grid = new Div();
             grid.getStyle()
-                .set("display", "grid")
-                .set("grid-template-columns", "repeat(auto-fill, minmax(220px, 1fr))")
-                .set("gap", "0").set("width", "100%");
+                    .set("display", "grid")
+                    .set("grid-template-columns", "repeat(auto-fill, minmax(220px, 1fr))")
+                    .set("gap", "0").set("width", "100%");
             livres.stream().limit(6).forEach(l -> grid.add(buildLivreCard(l, documentService)));
             section.add(grid);
         }
@@ -457,30 +593,31 @@ public final class MainView extends Main {
     private Div buildLivreCard(Livre livre, DocumentService documentService) {
         var card = new Div();
         card.getStyle()
-            .set("padding",       "0.9rem 1.1rem")
-            .set("border-right",  "1px solid var(--border)")
-            .set("border-bottom", "1px solid var(--border)")
-            .set("display",       "flex").set("gap", "0.75rem")
-            .set("align-items",   "flex-start")
-            .set("cursor",        "pointer").set("transition", "background 0.15s");
+                .set("padding", "0.9rem 1.1rem")
+                .set("border-right", "1px solid var(--border)")
+                .set("border-bottom", "1px solid var(--border)")
+                .set("display", "flex").set("gap", "0.75rem")
+                .set("align-items", "flex-start")
+                .set("cursor", "pointer").set("transition", "background 0.15s");
         card.getElement().addEventListener("mouseover",
-            e -> card.getStyle().set("background", "#F0FDF4"));
+                e -> card.getStyle().set("background", "#F0FDF4"));
         card.getElement().addEventListener("mouseout",
-            e -> card.getStyle().set("background", "transparent"));
+                e -> card.getStyle().set("background", "transparent"));
         card.addClickListener(e -> UI.getCurrent().navigate("livre/detail/" + livre.getIdDocument()));
 
         Document doc = null;
         if (livre.getDocument() != null && livre.getDocument().getCodeIsbn() != null) {
             List<Document> docs = documentService.getDocumentsByCodeIsbn(
                     livre.getDocument().getCodeIsbn());
-            if (!docs.isEmpty()) doc = docs.get(0);
+            if (!docs.isEmpty())
+                doc = docs.get(0);
         }
 
         var ico = new Icon(VaadinIcon.BOOK);
         ico.getStyle()
-            .set("color", "#0F766E").set("background", "#0F766E18")
-            .set("padding", "0.45rem").set("border-radius", "0.4rem")
-            .set("min-width", "2rem").set("height", "2rem").set("flex-shrink", "0");
+                .set("color", "#0F766E").set("background", "#0F766E18")
+                .set("padding", "0.45rem").set("border-radius", "0.4rem")
+                .set("min-width", "2rem").set("height", "2rem").set("flex-shrink", "0");
 
         var info = new VerticalLayout();
         info.setPadding(false);
@@ -506,17 +643,17 @@ public final class MainView extends Main {
             if (Boolean.FALSE.equals(doc.getCodeEmpruntable())) {
                 var nonEmp = new Span("Non empruntable");
                 nonEmp.getStyle()
-                    .set("font-size", "0.7rem").set("color", "#B91C1C")
-                    .set("background", "#FEE2E2").set("padding", "0.1rem 0.35rem")
-                    .set("border-radius", "4px");
+                        .set("font-size", "0.7rem").set("color", "#B91C1C")
+                        .set("background", "#FEE2E2").set("padding", "0.1rem 0.35rem")
+                        .set("border-radius", "4px");
                 meta.add(nonEmp);
             }
             if (doc.getEtatDocument() != null && !doc.getEtatDocument().isBlank()) {
                 var etat = new Span(doc.getEtatDocument());
                 etat.getStyle()
-                    .set("font-size", "0.7rem").set("color", "#92400E")
-                    .set("background", "#FEF3C7").set("padding", "0.1rem 0.35rem")
-                    .set("border-radius", "4px");
+                        .set("font-size", "0.7rem").set("color", "#92400E")
+                        .set("background", "#FEF3C7").set("padding", "0.1rem 0.35rem")
+                        .set("border-radius", "4px");
                 meta.add(etat);
             }
         }
@@ -534,10 +671,10 @@ public final class MainView extends Main {
         v.setSpacing(false);
         v.setWidthFull();
         v.getStyle()
-            .set("background",    "var(--surface)")
-            .set("border",        "1px solid var(--border)")
-            .set("border-radius", "1rem")
-            .set("overflow",      "hidden");
+                .set("background", "var(--surface)")
+                .set("border", "1px solid var(--border)")
+                .set("border-radius", "1rem")
+                .set("overflow", "hidden");
         return v;
     }
 
@@ -545,16 +682,16 @@ public final class MainView extends Main {
      * @param navTarget null → pas de bouton "Voir tout"
      */
     private Div buildSectionHeader(VaadinIcon icon, String label,
-                                   String color, String navTarget) {
+            String color, String navTarget) {
         var header = new Div();
         header.setWidthFull();
         header.getStyle()
-            .set("display", "flex").set("align-items", "center")
-            .set("justify-content", "space-between")
-            .set("padding", "1rem 1.1rem 0.8rem")
-            .set("border-bottom", "2px solid " + color)
-            .set("background", color + "0D")
-            .set("box-sizing", "border-box");
+                .set("display", "flex").set("align-items", "center")
+                .set("justify-content", "space-between")
+                .set("padding", "1rem 1.1rem 0.8rem")
+                .set("border-bottom", "2px solid " + color)
+                .set("background", color + "0D")
+                .set("box-sizing", "border-box");
 
         var left = new Div();
         left.getStyle().set("display", "flex").set("align-items", "center").set("gap", "0.5rem");
@@ -564,8 +701,8 @@ public final class MainView extends Main {
 
         var title = new H2(label);
         title.getStyle()
-            .set("margin", "0").set("font-size", "1rem")
-            .set("font-weight", "700").set("color", "#1E293B");
+                .set("margin", "0").set("font-size", "1rem")
+                .set("font-weight", "700").set("color", "#1E293B");
         left.add(ico, title);
 
         header.add(left);
@@ -584,14 +721,15 @@ public final class MainView extends Main {
     private Div emptyState(String msg) {
         var d = new Div(new Span(msg));
         d.getStyle()
-            .set("padding", "2rem 1rem").set("text-align", "center")
-            .set("color", "var(--muted)").set("font-size", "0.85rem")
-            .set("font-style", "italic");
+                .set("padding", "2rem 1rem").set("text-align", "center")
+                .set("color", "var(--muted)").set("font-size", "0.85rem")
+                .set("font-style", "italic");
         return d;
     }
 
     private String truncate(String s, int max) {
-        if (s == null) return "";
+        if (s == null)
+            return "";
         return s.length() <= max ? s : s.substring(0, max) + "…";
     }
 
