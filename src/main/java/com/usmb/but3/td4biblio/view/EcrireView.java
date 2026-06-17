@@ -21,7 +21,7 @@ import com.vaadin.flow.router.Route;
 @Menu(
     title = "Ecrire auteurs",
     order = 7,
-    icon = "vaadin:tags"
+    icon = "vaadin:edit"
 )
 public class EcrireView extends VerticalLayout {
 

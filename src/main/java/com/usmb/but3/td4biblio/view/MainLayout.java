@@ -79,7 +79,7 @@ public final class MainLayout extends AppLayout {
         } else {
             // Toujours visibles
             nav.addItem(new SideNavItem("Livres", "livre", new Icon(VaadinIcon.BOOK)));
-            nav.addItem(new SideNavItem("Événements", "evenement", new Icon(VaadinIcon.CALENDAR)));
+            nav.addItem(new SideNavItem("Évènements", "evenement", new Icon(VaadinIcon.CALENDAR)));
             nav.addItem(new SideNavItem("Bibliothèques", "bibliotheque", new Icon(VaadinIcon.BUILDING)));
             nav.addItem(new SideNavItem("Documents", "document", new Icon(VaadinIcon.ARCHIVE)));
         }

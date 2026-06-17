@@ -21,8 +21,8 @@ import com.vaadin.flow.router.Route;
 @Component
 @Scope("prototype")
 @Route("evenement")
-@PageTitle("Les évènements")
-@Menu(title = "Les évènements", order = 4, icon = "vaadin:calendar")
+@PageTitle("Évènements")
+@Menu(title = "Évènements", order = 4, icon = "vaadin:calendar")
 public class EvenementView extends VerticalLayout {
 
         private final EvenementService evenementService;

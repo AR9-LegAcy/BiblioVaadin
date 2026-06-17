@@ -20,8 +20,8 @@ import org.springframework.util.StringUtils;
 @Component
 @Scope("prototype")
 @Route(value = "auteur")
-@PageTitle("Les Auteurs")
-@Menu(title = "Les Auteurs", order = 0, icon = "vaadin:clipboard-check")
+@PageTitle("Auteurs")
+@Menu(title = "Auteurs", order = 0, icon = "vaadin:male")
 public class AuteurView extends VerticalLayout {
 
     private final AuteurService auteurService;

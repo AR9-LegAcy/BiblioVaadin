@@ -21,8 +21,8 @@ import org.springframework.util.StringUtils;
 @Component
 @Scope("prototype")
 @Route(value = "livre")
-@PageTitle("Les Livres")
-@Menu(title = "Les Livres", order = 1, icon = "vaadin:book")
+@PageTitle("Livres")
+@Menu(title = "Livres", order = 1, icon = "vaadin:book")
 public class LivreView extends VerticalLayout {
 
     private final LivreService livreService;

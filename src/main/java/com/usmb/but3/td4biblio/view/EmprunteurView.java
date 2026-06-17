@@ -20,8 +20,8 @@ import org.springframework.util.StringUtils;
 @Component
 @Scope("prototype")
 @Route(value = "emprunteur")
-@PageTitle("Les Emprunteurs")
-@Menu(title = "Les Emprunteurs", order = 1, icon = "vaadin:clipboard-list")
+@PageTitle("Emprunteurs")
+@Menu(title = "Emprunteurs", order = 1, icon = "vaadin:male")
 public class EmprunteurView extends VerticalLayout {
 
     private final EmprunteurService emprunteurService;

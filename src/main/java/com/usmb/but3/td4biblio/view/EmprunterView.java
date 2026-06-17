@@ -20,8 +20,8 @@ import org.springframework.util.StringUtils;
 @Component
 @Scope("prototype")
 @Route(value = "emprunter")
-@PageTitle("Les Emprunts")
-@Menu(title = "Les Emprunts", order = 1, icon = "vaadin:clipboard-check")
+@PageTitle("Emprunts")
+@Menu(title = "Emprunts", order = 1, icon = "vaadin:clipboard-check")
 public class EmprunterView extends VerticalLayout {
     private final EmprunterService emprunterService;
     final Grid<Emprunter> grid;

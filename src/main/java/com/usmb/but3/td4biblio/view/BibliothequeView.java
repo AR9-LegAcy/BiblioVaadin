@@ -20,8 +20,8 @@ import org.springframework.util.StringUtils;
 @Component
 @Scope("prototype")
 @Route(value = "bibliotheque")
-@PageTitle("Les Bibliotheques")
-@Menu(title = "Les Bibliotheques", order = 0, icon = "vaadin:clipboard-check")
+@PageTitle("Bibliotheques")
+@Menu(title = "Bibliotheques", order = 0, icon = "vaadin:building")
 public class BibliothequeView extends VerticalLayout {
 
     private final BibliothequeService bibliothequeService;

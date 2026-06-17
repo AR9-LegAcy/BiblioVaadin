@@ -20,8 +20,8 @@ import org.springframework.util.StringUtils;
 @Component
 @Scope("prototype")
 @Route(value = "document")
-@PageTitle("Les Documents")
-@Menu(title = "Les Documents", order = 1, icon = "vaadin:book")
+@PageTitle("Documents")
+@Menu(title = "Documents", order = 1, icon = "vaadin:archive")
 public class DocumentView extends VerticalLayout {
     private final DocumentService documentService;
     final Grid<Document> grid;
