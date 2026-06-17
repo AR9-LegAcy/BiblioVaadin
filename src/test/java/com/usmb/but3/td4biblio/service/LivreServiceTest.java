@@ -18,8 +18,11 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Sort;
 
+import com.usmb.but3.td4biblio.entity.Bibliotheque;
+import com.usmb.but3.td4biblio.entity.Document;
 import com.usmb.but3.td4biblio.entity.Editeur;
 import com.usmb.but3.td4biblio.entity.Livre;
+import com.usmb.but3.td4biblio.repository.DocumentRepo;
 import com.usmb.but3.td4biblio.repository.LivreRepo;
 
 @SpringBootTest
@@ -30,6 +33,8 @@ public class LivreServiceTest {
 
     @InjectMocks
     private LivreService livreService;
+    private IsbnGeneratorService isbnGeneratorService;
+    private DocumentRepo documentRepo;
 
     @BeforeEach
     void setUp() {
@@ -66,9 +71,14 @@ public class LivreServiceTest {
     void testSaveLivre() {
         Livre livre = new Livre(null, "New Title", 200, LocalDate.of(2022, 3, 3), null, null, new Editeur(), null);
         Livre savedLivre = new Livre(1, "New Title", 200, LocalDate.of(2022, 3, 3), LocalDateTime.now(), LocalDateTime.now(), new Editeur(), null);
+        Bibliotheque bibliotheque = new Bibliotheque();
+        bibliotheque.setId(1);
+
+        when(isbnGeneratorService.generateNextIsbn()).thenReturn("ISBN-123");
+        when(documentRepo.save(any(Document.class))).thenReturn(new Document() {{ setIdDocument(1); }});
         when(livreRepo.save(any(Livre.class))).thenReturn(savedLivre);
 
-        Livre result = livreService.saveLivre(livre);
+        Livre result = livreService.saveLivre(livre, bibliotheque);
 
         assertNotNull(result);
         assertEquals(1, result.getIdDocument());

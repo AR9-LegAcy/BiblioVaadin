@@ -2,6 +2,7 @@ package com.usmb.but3.td4biblio.view;
 
 import org.springframework.context.annotation.Scope;
 import com.usmb.but3.td4biblio.entity.*;
+import com.usmb.but3.td4biblio.security.SessionManager;
 import com.usmb.but3.td4biblio.service.*;
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.*;
@@ -47,7 +48,7 @@ public class LivreEditor extends VerticalLayout implements KeyNotifier {
         editeurField.setItemLabelGenerator(Editeur::getNom);
 
         add(new HorizontalLayout(titreLivre, nbPages, datePublication, editeurField),
-            new HorizontalLayout(save, cancel, delete));
+                new HorizontalLayout(save, cancel, delete));
 
         save.addClickListener(e -> save());
         delete.addClickListener(e -> delete());
@@ -64,9 +65,10 @@ public class LivreEditor extends VerticalLayout implements KeyNotifier {
         livre.setDatePublication(datePublication.getValue());
         livre.setIdEditeur(editeurField.getValue());
 
-        livreService.saveLivre(livre);
+        Bibliothecaire bib = SessionManager.getBibliothecaire();
 
-        // Appel du ChangeHandler après sauvegarde
+        livreService.saveLivre(livre, bib.getBibliotheque());
+
         if (changeHandler != null) {
             changeHandler.onChange();
         }
