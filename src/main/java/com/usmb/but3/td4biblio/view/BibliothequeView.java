@@ -49,8 +49,7 @@ public class BibliothequeView extends VerticalLayout {
         add(actions, grid, editor);
 
         grid.setHeight("300px");
-        grid.setColumns("id", "nom", "adresseRue", "adresseVille", "adresseCP", "horaires");
-        grid.getColumnByKey("id").setWidth("50px").setFlexGrow(0);
+        grid.setColumns("nom", "adresseRue", "adresseVille", "adresseCP", "horaires");
 
         filter.setPlaceholder("Filtrer par nom");
 
@@ -72,6 +71,9 @@ public class BibliothequeView extends VerticalLayout {
             editor.setChangeHandler(() -> {
                 editor.setVisible(false);
                 listBibliotheques(filter.getValue());
+            });
+            editor.setCancelHandler(() -> {
+                grid.deselectAll();
             });
         }
         // Initialize listing
