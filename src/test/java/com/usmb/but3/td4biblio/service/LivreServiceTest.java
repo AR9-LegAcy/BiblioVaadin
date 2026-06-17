@@ -66,7 +66,7 @@ public class LivreServiceTest {
         // EDITEUR
         // =====================
         editeur = editeurRepo.save(new Editeur(
-                null,
+                null,   
                 "Editeur Test",
                 "Paris",
                 null,

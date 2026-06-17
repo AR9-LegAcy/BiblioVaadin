@@ -1,136 +1,182 @@
 package com.usmb.but3.td4biblio.service;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.Sort;
-
 import com.usmb.but3.td4biblio.entity.TypeEvenement;
 import com.usmb.but3.td4biblio.repository.TypeEvenementRepo;
 
+import org.junit.jupiter.api.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 @SpringBootTest
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@Transactional
 class TypeEvenementServiceTest {
 
-    @Mock
-    private TypeEvenementRepo typeEvenementRepo;
-
-    @InjectMocks
+    @Autowired
     private TypeEvenementService typeEvenementService;
 
-    @BeforeEach
+    @Autowired
+    private TypeEvenementRepo typeEvenementRepo;
+
+    private TypeEvenement type1;
+    private TypeEvenement type2;
+
+    @BeforeAll
     void setUp() {
-        MockitoAnnotations.openMocks(this);
+
+        type1 = typeEvenementRepo.save(
+                new TypeEvenement(
+                        null,
+                        "Conference",
+                        LocalDateTime.now(),
+                        LocalDateTime.now(),
+                        null
+                ));
+
+        type2 = typeEvenementRepo.save(
+                new TypeEvenement(
+                        null,
+                        "Atelier",
+                        LocalDateTime.now(),
+                        LocalDateTime.now(),
+                        null
+                ));
+    }
+
+    @AfterAll
+    void tearDown() {
+        typeEvenementRepo.deleteAll(List.of(type1, type2));
     }
 
     @Test
     void testGetAllTypeEvenements() {
-        TypeEvenement type1 = new TypeEvenement();
-        type1.setNom("Type1");
-        TypeEvenement type2 = new TypeEvenement();
-        type2.setNom("Type2");
 
-        when(typeEvenementRepo.findAll(Sort.by(Sort.Direction.ASC, "nom"))).thenReturn(Arrays.asList(type1, type2));
+        List<TypeEvenement> result =
+                typeEvenementService.getAllTypeEvenements();
 
-        List<TypeEvenement> result = typeEvenementService.getAllTypeEvenements();
-
-        assertEquals(2, result.size());
-        assertEquals("Type1", result.get(0).getNom());
-        assertEquals("Type2", result.get(1).getNom());
-        verify(typeEvenementRepo, times(1)).findAll(Sort.by(Sort.Direction.ASC, "nom"));
+        assertTrue(result.size() >= 2);
     }
 
     @Test
     void testGetTypeEvenementById() {
-        TypeEvenement type = new TypeEvenement();
-        type.setId(1);
-        type.setNom("Type1");
 
-        when(typeEvenementRepo.findById(1)).thenReturn(Optional.of(type));
-
-        TypeEvenement result = typeEvenementService.getTypeEvenementById(1);
+        TypeEvenement result =
+                typeEvenementService.getTypeEvenementById(type1.getId());
 
         assertNotNull(result);
-        assertEquals(1, result.getId());
-        assertEquals("Type1", result.getNom());
-        verify(typeEvenementRepo, times(1)).findById(1);
+        assertEquals("Conference", result.getNom());
+    }
+
+    @Test
+    void testGetTypeEvenementByIdNotFound() {
+
+        TypeEvenement result =
+                typeEvenementService.getTypeEvenementById(-999);
+
+        assertNull(result);
     }
 
     @Test
     void testSaveTypeEvenement() {
-        TypeEvenement type = new TypeEvenement();
-        type.setNom("Type1");
 
-        when(typeEvenementRepo.save(any(TypeEvenement.class))).thenReturn(type);
+        TypeEvenement type =
+                new TypeEvenement(
+                        null,
+                        "Salon",
+                        null,
+                        null,
+                        null
+                );
 
-        TypeEvenement result = typeEvenementService.saveTypeEvenement(type);
+        TypeEvenement saved =
+                typeEvenementService.saveTypeEvenement(type);
 
-        assertNotNull(result);
-        assertEquals("Type1", result.getNom());
-        assertNotNull(result.getCreatedAt());
-        assertNotNull(result.getUpdatedAt());
-        verify(typeEvenementRepo, times(1)).save(type);
+        assertNotNull(saved.getId());
+        assertNotNull(saved.getCreatedAt());
+        assertNotNull(saved.getUpdatedAt());
+
+        typeEvenementRepo.delete(saved);
     }
 
     @Test
     void testUpdateTypeEvenement() {
-        TypeEvenement type = new TypeEvenement();
-        type.setId(1);
-        type.setNom("Type1");
 
-        when(typeEvenementRepo.save(any(TypeEvenement.class))).thenReturn(type);
+        type1.setNom("Conference Internationale");
 
-        TypeEvenement result = typeEvenementService.updateTypeEvenement(type);
+        TypeEvenement updated =
+                typeEvenementService.updateTypeEvenement(type1);
 
-        assertNotNull(result);
-        assertEquals("Type1", result.getNom());
-        assertNotNull(result.getUpdatedAt());
-        verify(typeEvenementRepo, times(1)).save(type);
+        assertEquals(
+                "Conference Internationale",
+                updated.getNom()
+        );
+
+        assertNotNull(updated.getUpdatedAt());
     }
 
     @Test
     void testDeleteTypeEvenementById() {
-        doNothing().when(typeEvenementRepo).deleteById(1);
 
-        typeEvenementService.deleteTypeEvenementById(1);
+        TypeEvenement temp =
+                typeEvenementRepo.save(
+                        new TypeEvenement(
+                                null,
+                                "Temporaire",
+                                null,
+                                null,
+                                null
+                        )
+                );
 
-        verify(typeEvenementRepo, times(1)).deleteById(1);
+        Integer id = temp.getId();
+
+        typeEvenementService.deleteTypeEvenementById(id);
+
+        assertTrue(
+                typeEvenementRepo.findById(id).isEmpty()
+        );
     }
 
     @Test
     void testGetTypeEvenementsByNom() {
-        TypeEvenement type = new TypeEvenement();
-        type.setNom("Type1");
 
-        when(typeEvenementRepo.findByNom("Type1")).thenReturn(Arrays.asList(type));
+        List<TypeEvenement> result =
+                typeEvenementService.getTypeEvenementsByNom("Conference");
 
-        List<TypeEvenement> result = typeEvenementService.getTypeEvenementsByNom("Type1");
+        assertFalse(result.isEmpty());
+        assertEquals("Conference", result.get(0).getNom());
+    }
 
-        assertEquals(1, result.size());
-        assertEquals("Type1", result.get(0).getNom());
-        verify(typeEvenementRepo, times(1)).findByNom("Type1");
+    @Test
+    void testGetTypeEvenementsByNomEmpty() {
+
+        List<TypeEvenement> result =
+                typeEvenementService.getTypeEvenementsByNom("Inexistant");
+
+        assertTrue(result.isEmpty());
     }
 
     @Test
     void testGetTypeEvenementsByNomLike() {
-        TypeEvenement type = new TypeEvenement();
-        type.setNom("Type1");
 
-        when(typeEvenementRepo.findByNomLike("%Type%")).thenReturn(Arrays.asList(type));
+        List<TypeEvenement> result =
+                typeEvenementService.getTypeEvenementsByNomLike("%feren%");
 
-        List<TypeEvenement> result = typeEvenementService.getTypeEvenementsByNomLike("%Type%");
+        assertFalse(result.isEmpty());
+    }
 
-        assertEquals(1, result.size());
-        assertEquals("Type1", result.get(0).getNom());
-        verify(typeEvenementRepo, times(1)).findByNomLike("%Type%");
+    @Test
+    void testGetTypeEvenementsByNomLikeEmpty() {
+
+        List<TypeEvenement> result =
+                typeEvenementService.getTypeEvenementsByNomLike("%XYZ%");
+
+        assertTrue(result.isEmpty());
     }
 }

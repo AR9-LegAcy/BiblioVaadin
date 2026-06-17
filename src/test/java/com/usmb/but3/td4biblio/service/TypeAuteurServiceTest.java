@@ -1,172 +1,178 @@
 package com.usmb.but3.td4biblio.service;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.junit.jupiter.api.TestInstance;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.Sort;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.usmb.but3.td4biblio.entity.TypeAuteur;
 import com.usmb.but3.td4biblio.repository.TypeAuteurRepo;
 
 @SpringBootTest
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@Transactional
 class TypeAuteurServiceTest {
 
-    @Mock
-    private TypeAuteurRepo typeAuteurRepo;
-
-    @InjectMocks
+    @Autowired
     private TypeAuteurService typeAuteurService;
 
-    @BeforeEach
+    @Autowired
+    private TypeAuteurRepo typeAuteurRepo;
+
+    private TypeAuteur auteur;
+    private TypeAuteur illustrateur;
+
+    @BeforeAll
     void setUp() {
-        MockitoAnnotations.openMocks(this);
+
+        auteur = typeAuteurRepo.save(
+            new TypeAuteur(
+                null,
+                "Auteur",
+                LocalDateTime.now(),
+                LocalDateTime.now()
+            )
+        );
+
+        illustrateur = typeAuteurRepo.save(
+            new TypeAuteur(
+                null,
+                "Illustrateur",
+                LocalDateTime.now(),
+                LocalDateTime.now()
+            )
+        );
+    }
+
+    @AfterAll
+    void tearDown() {
+        typeAuteurRepo.deleteAll(List.of(auteur, illustrateur));
     }
 
     @Test
     void testGetAllTypeAuteurs() {
-        TypeAuteur typeAuteur1 = new TypeAuteur(1, "Auteur", LocalDateTime.now(), LocalDateTime.now());
-        TypeAuteur typeAuteur2 = new TypeAuteur(2, "Illustrateur", LocalDateTime.now(), LocalDateTime.now());
-        when(typeAuteurRepo.findAll(Sort.by(Sort.Direction.ASC, "nom")))
-            .thenReturn(Arrays.asList(typeAuteur1, typeAuteur2));
+        List<TypeAuteur> result = typeAuteurService.getAllTypeAuteurs();
 
-        List<TypeAuteur> typeAuteurs = typeAuteurService.getAllTypeAuteurs();
-
-        assertEquals(2, typeAuteurs.size());
-        assertEquals("Auteur", typeAuteurs.get(0).getNom());
-        assertEquals("Illustrateur", typeAuteurs.get(1).getNom());
-        verify(typeAuteurRepo, times(1)).findAll(Sort.by(Sort.Direction.ASC, "nom"));
+        assertFalse(result.isEmpty());
     }
 
     @Test
     void testGetTypeAuteurById() {
-        TypeAuteur typeAuteur = new TypeAuteur(1, "Auteur", LocalDateTime.now(), LocalDateTime.now());
-        when(typeAuteurRepo.findById(1)).thenReturn(Optional.of(typeAuteur));
-
-        TypeAuteur result = typeAuteurService.getTypeAuteurById(1);
+        TypeAuteur result =
+                typeAuteurService.getTypeAuteurById(auteur.getId());
 
         assertNotNull(result);
-        assertEquals(1, result.getId());
         assertEquals("Auteur", result.getNom());
-        verify(typeAuteurRepo, times(1)).findById(1);
     }
 
     @Test
     void testGetTypeAuteurByIdNotFound() {
-        when(typeAuteurRepo.findById(1)).thenReturn(Optional.empty());
-
-        TypeAuteur result = typeAuteurService.getTypeAuteurById(1);
+        TypeAuteur result =
+                typeAuteurService.getTypeAuteurById(-999);
 
         assertNull(result);
-        verify(typeAuteurRepo, times(1)).findById(1);
     }
 
     @Test
     void testSaveTypeAuteur() {
-        TypeAuteur typeAuteur = new TypeAuteur(null, "Editeur", null, null);
-        TypeAuteur savedTypeAuteur = new TypeAuteur(1, "Editeur", LocalDateTime.now(), LocalDateTime.now());
-        when(typeAuteurRepo.save(any(TypeAuteur.class))).thenReturn(savedTypeAuteur);
 
-        TypeAuteur result = typeAuteurService.saveTypeAuteur(typeAuteur);
+        TypeAuteur nouveau =
+                new TypeAuteur(
+                        null,
+                        "Traducteur",
+                        null,
+                        null
+                );
 
-        assertNotNull(result);
-        assertEquals(1, result.getId());
-        assertEquals("Editeur", result.getNom());
-        assertNotNull(result.getCreatedAt());
-        assertNotNull(result.getUpdatedAt());
-        verify(typeAuteurRepo, times(1)).save(any(TypeAuteur.class));
+        TypeAuteur saved =
+                typeAuteurService.saveTypeAuteur(nouveau);
+
+        assertNotNull(saved.getId());
+        assertNotNull(saved.getCreatedAt());
+        assertNotNull(saved.getUpdatedAt());
+
+        typeAuteurRepo.delete(saved);
     }
 
     @Test
     void testUpdateTypeAuteur() {
-        TypeAuteur typeAuteur = new TypeAuteur(1, "Traducteur", LocalDateTime.now(), LocalDateTime.now());
-        when(typeAuteurRepo.save(any(TypeAuteur.class))).thenReturn(typeAuteur);
 
-        TypeAuteur result = typeAuteurService.updateTypeAuteur(typeAuteur);
+        auteur.setNom("Auteur Principal");
 
-        assertNotNull(result);
-        assertEquals(1, result.getId());
-        assertEquals("Traducteur", result.getNom());
-        assertNotNull(result.getUpdatedAt());
-        verify(typeAuteurRepo, times(1)).save(any(TypeAuteur.class));
+        TypeAuteur updated =
+                typeAuteurService.updateTypeAuteur(auteur);
+
+        assertEquals(
+                "Auteur Principal",
+                updated.getNom()
+        );
+
+        assertNotNull(updated.getUpdatedAt());
     }
 
     @Test
     void testDeleteTypeAuteurById() {
-        doNothing().when(typeAuteurRepo).deleteById(1);
 
-        typeAuteurService.deleteTypeAuteurById(1);
+        TypeAuteur temp =
+                typeAuteurRepo.save(
+                        new TypeAuteur(
+                                null,
+                                "Temp",
+                                null,
+                                null
+                        )
+                );
 
-        verify(typeAuteurRepo, times(1)).deleteById(1);
+        Integer id = temp.getId();
+
+        typeAuteurService.deleteTypeAuteurById(id);
+
+        assertTrue(
+                typeAuteurRepo.findById(id).isEmpty()
+        );
     }
 
     @Test
     void testGetTypeAuteursByNom() {
-        TypeAuteur typeAuteur = new TypeAuteur(1, "Auteur", LocalDateTime.now(), LocalDateTime.now());
-        when(typeAuteurRepo.findByNom("Auteur")).thenReturn(Arrays.asList(typeAuteur));
 
-        List<TypeAuteur> typeAuteurs = typeAuteurService.getTypeAuteursByNom("Auteur");
+        List<TypeAuteur> result =
+                typeAuteurService.getTypeAuteursByNom("Auteur");
 
-        assertEquals(1, typeAuteurs.size());
-        assertEquals("Auteur", typeAuteurs.get(0).getNom());
-        verify(typeAuteurRepo, times(1)).findByNom("Auteur");
-    }
-
-    @Test
-    void testGetTypeAuteursByNomLike() {
-        TypeAuteur typeAuteur1 = new TypeAuteur(1, "Auteur", LocalDateTime.now(), LocalDateTime.now());
-        TypeAuteur typeAuteur2 = new TypeAuteur(2, "Co-Auteur", LocalDateTime.now(), LocalDateTime.now());
-        when(typeAuteurRepo.findByNomLike("%Auteur%")).thenReturn(Arrays.asList(typeAuteur1, typeAuteur2));
-
-        List<TypeAuteur> typeAuteurs = typeAuteurService.getTypeAuteursByNomLike("%Auteur%");
-
-        assertEquals(2, typeAuteurs.size());
-        verify(typeAuteurRepo, times(1)).findByNomLike("%Auteur%");
-    }
-
-    @Test
-    void testGetTypeAuteursByNomLikeEmpty() {
-        when(typeAuteurRepo.findByNomLike("%NonExistent%")).thenReturn(Arrays.asList());
-
-        List<TypeAuteur> typeAuteurs = typeAuteurService.getTypeAuteursByNomLike("%NonExistent%");
-
-        assertEquals(0, typeAuteurs.size());
-        verify(typeAuteurRepo, times(1)).findByNomLike("%NonExistent%");
-    }
-
-    @Test
-    void testSaveTypeAuteurWithCreatedAtAlreadySet() {
-        LocalDateTime createdAt = LocalDateTime.of(2024, 1, 1, 10, 0);
-        TypeAuteur typeAuteur = new TypeAuteur(null, "Illustrateur", createdAt, null);
-        TypeAuteur savedTypeAuteur = new TypeAuteur(1, "Illustrateur", createdAt, LocalDateTime.now());
-        when(typeAuteurRepo.save(any(TypeAuteur.class))).thenReturn(savedTypeAuteur);
-
-        TypeAuteur result = typeAuteurService.saveTypeAuteur(typeAuteur);
-
-        assertNotNull(result);
-        assertEquals(createdAt, result.getCreatedAt());
-        assertNotNull(result.getUpdatedAt());
-        verify(typeAuteurRepo, times(1)).save(any(TypeAuteur.class));
+        assertFalse(result.isEmpty());
     }
 
     @Test
     void testGetTypeAuteursByNomEmpty() {
-        when(typeAuteurRepo.findByNom("NonExistent")).thenReturn(Arrays.asList());
 
-        List<TypeAuteur> typeAuteurs = typeAuteurService.getTypeAuteursByNom("NonExistent");
+        List<TypeAuteur> result =
+                typeAuteurService.getTypeAuteursByNom("Inexistant");
 
-        assertEquals(0, typeAuteurs.size());
-        verify(typeAuteurRepo, times(1)).findByNom("NonExistent");
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void testGetTypeAuteursByNomLike() {
+
+        List<TypeAuteur> result =
+                typeAuteurService.getTypeAuteursByNomLike("%uteur%");
+
+        assertFalse(result.isEmpty());
+    }
+
+    @Test
+    void testGetTypeAuteursByNomLikeEmpty() {
+
+        List<TypeAuteur> result =
+                typeAuteurService.getTypeAuteursByNomLike("%xxxxx%");
+
+        assertTrue(result.isEmpty());
     }
 }

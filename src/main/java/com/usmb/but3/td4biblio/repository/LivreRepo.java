@@ -9,6 +9,6 @@ import com.usmb.but3.td4biblio.entity.Livre;
 public interface LivreRepo extends JpaRepository<Livre, Integer> {
     List<Livre> findByTitreLivreContainingIgnoreCase(String titre);
     
-    @Query("SELECT l FROM Livre l WHERE l.idEditeur = :idEditeur")
+    @Query("SELECT l FROM Livre l WHERE l.idEditeur.id = :idEditeur")
     List<Livre> findByIdEditeur(@Param("idEditeur") Integer idEditeur);
 }
