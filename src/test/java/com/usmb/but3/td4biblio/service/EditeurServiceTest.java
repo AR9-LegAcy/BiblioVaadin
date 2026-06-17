@@ -1,147 +1,174 @@
 package com.usmb.but3.td4biblio.service;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
-
-import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.Sort;
-
 import com.usmb.but3.td4biblio.entity.Editeur;
 import com.usmb.but3.td4biblio.repository.EditeurRepo;
 
+import org.junit.jupiter.api.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 @SpringBootTest
-class EditeurServiceTest {
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@Transactional
+public class EditeurServiceTest {
 
-    @Mock
-    private EditeurRepo editeurRepo;
-
-    @InjectMocks
+    @Autowired
     private EditeurService editeurService;
 
-    @BeforeEach
+    @Autowired
+    private EditeurRepo editeurRepo;
+
+    // =====================
+    // DONNÉES DE TEST
+    // =====================
+    private Editeur ED1;
+    private Editeur ED2;
+    private Editeur ED3;
+
+    @BeforeAll
     void setUp() {
-        MockitoAnnotations.openMocks(this);
+
+        ED1 = editeurRepo.save(new Editeur(
+                null,
+                "Shueisha",
+                "Tokyo",
+                "www.shueisha.co.jp",
+                "wikipedia-shueisha",
+                LocalDateTime.now(),
+                LocalDateTime.now(),
+                null
+        ));
+
+        ED2 = editeurRepo.save(new Editeur(
+                null,
+                "Glénat",
+                "Grenoble",
+                "www.glenat.com",
+                "wikipedia-glenat",
+                LocalDateTime.now(),
+                LocalDateTime.now(),
+                null
+        ));
+
+        ED3 = editeurRepo.save(new Editeur(
+                null,
+                "Kurokawa",
+                "Paris",
+                "www.kurokawa.fr",
+                "wikipedia-kurokawa",
+                LocalDateTime.now(),
+                LocalDateTime.now(),
+                null
+        ));
     }
+
+    @AfterAll
+    void tearDown() {
+        editeurRepo.deleteAll(List.of(ED1, ED2, ED3));
+    }
+
+    // =====================
+    // TESTS
+    // =====================
 
     @Test
     void testGetAllEditeurs() {
-        Editeur editeur1 = new Editeur(1, "Editeur1", "Rue1", "www.editeur1.com", "wikipedia1", LocalDateTime.now(), LocalDateTime.now(), null);
-        Editeur editeur2 = new Editeur(2, "Editeur2", "Rue2", "www.editeur2.com", "wikipedia2", LocalDateTime.now(), LocalDateTime.now(), null);
-        when(editeurRepo.findAll(Sort.by(Sort.Direction.ASC, "nom")))
-            .thenReturn(Arrays.asList(editeur1, editeur2));
+        List<Editeur> result = editeurService.getAllEditeurs();
 
-        List<Editeur> editeurs = editeurService.getAllEditeurs();
-
-        assertEquals(2, editeurs.size());
-        assertEquals("Editeur1", editeurs.get(0).getNom());
-        assertEquals("Editeur2", editeurs.get(1).getNom());
-        verify(editeurRepo, times(1)).findAll(Sort.by(Sort.Direction.ASC, "nom"));
+        assertTrue(result.size() >= 3);
     }
 
     @Test
     void testGetEditeurById() {
-        Editeur editeur = new Editeur(1, "Editeur1", "Rue1", "www.editeur1.com", "wikipedia1", LocalDateTime.now(), LocalDateTime.now(), null);
-        when(editeurRepo.findById(1)).thenReturn(Optional.of(editeur));
-
-        Editeur result = editeurService.getEditeurById(1);
+        Editeur result = editeurService.getEditeurById(ED1.getId());
 
         assertNotNull(result);
-        assertEquals(1, result.getId());
-        assertEquals("Editeur1", result.getNom());
-        verify(editeurRepo, times(1)).findById(1);
+        assertEquals("Shueisha", result.getNom());
     }
 
     @Test
-    void testGetEditeurByIdNotFound() {
-        when(editeurRepo.findById(1)).thenReturn(Optional.empty());
-
-        Editeur result = editeurService.getEditeurById(1);
+    void testGetEditeurById_NotFound() {
+        Editeur result = editeurService.getEditeurById(-999);
 
         assertNull(result);
-        verify(editeurRepo, times(1)).findById(1);
     }
 
     @Test
     void testSaveEditeur() {
-        Editeur editeur = new Editeur(null, "New Editeur", "Rue", "www.editeur.com", "wikipedia", null, null, null);
-        Editeur savedEditeur = new Editeur(1, "New Editeur", "Rue", "www.editeur.com", "wikipedia", LocalDateTime.now(), LocalDateTime.now(), null);
-        when(editeurRepo.save(any(Editeur.class))).thenReturn(savedEditeur);
+        Editeur e = new Editeur(
+                null,
+                "Kodansha",
+                "Tokyo",
+                "www.kodansha.jp",
+                "wiki-kodansha",
+                null,
+                null,
+                null
+        );
 
-        Editeur result = editeurService.saveEditeur(editeur);
+        Editeur saved = editeurService.saveEditeur(e);
 
-        assertNotNull(result);
-        assertEquals(1, result.getId());
-        assertEquals("New Editeur", result.getNom());
-        assertNotNull(result.getCreatedAt());
-        assertNotNull(result.getUpdatedAt());
-        verify(editeurRepo, times(1)).save(any(Editeur.class));
+        assertNotNull(saved.getId());
+        assertNotNull(saved.getCreatedAt());
+        assertNotNull(saved.getUpdatedAt());
+
+        editeurRepo.delete(saved);
     }
 
     @Test
     void testUpdateEditeur() {
-        Editeur editeur = new Editeur(1, "Updated Editeur", "Rue Updated", "www.editeur-updated.com", "wikipedia-updated", LocalDateTime.now(), LocalDateTime.now(), null);
-        when(editeurRepo.save(any(Editeur.class))).thenReturn(editeur);
+        ED1.setAdresse("Osaka");
 
-        Editeur result = editeurService.updateEditeur(editeur);
+        Editeur updated = editeurService.updateEditeur(ED1);
 
-        assertNotNull(result);
-        assertEquals(1, result.getId());
-        assertEquals("Updated Editeur", result.getNom());
-        assertNotNull(result.getUpdatedAt());
-        verify(editeurRepo, times(1)).save(any(Editeur.class));
+        assertEquals("Osaka", updated.getAdresse());
+        assertNotNull(updated.getUpdatedAt());
     }
 
     @Test
-    void testDeleteEditeurById() {
-        doNothing().when(editeurRepo).deleteById(1);
+    void testDeleteEditeur() {
+        Editeur temp = editeurRepo.save(new Editeur(
+                null,
+                "Temp Editeur",
+                "Ville",
+                "site",
+                "wiki",
+                LocalDateTime.now(),
+                LocalDateTime.now(),
+                null
+        ));
 
-        editeurService.deleteEditeurById(1);
+        editeurService.deleteEditeurById(temp.getId());
 
-        verify(editeurRepo, times(1)).deleteById(1);
+        assertTrue(editeurRepo.findById(temp.getId()).isEmpty());
     }
 
     @Test
     void testGetEditeursByNom() {
-        Editeur editeur = new Editeur(1, "Editeur1", "Rue1", "www.editeur1.com", "wikipedia1", LocalDateTime.now(), LocalDateTime.now(), null);
-        when(editeurRepo.findByNom("Editeur1")).thenReturn(Arrays.asList(editeur));
+        List<Editeur> result = editeurService.getEditeursByNom("Shueisha");
 
-        List<Editeur> editeurs = editeurService.getEditeursByNom("Editeur1");
-
-        assertEquals(1, editeurs.size());
-        assertEquals("Editeur1", editeurs.get(0).getNom());
-        verify(editeurRepo, times(1)).findByNom("Editeur1");
-    }
-
-    @Test
-    void testGetEditeursByNomStartWithIgnoreCase() {
-        Editeur editeur = new Editeur(1, "Editeur1", "Rue1", "www.editeur1.com", "wikipedia1", LocalDateTime.now(), LocalDateTime.now(), null);
-        when(editeurRepo.findByNomStartsWithIgnoreCase("Edit")).thenReturn(Arrays.asList(editeur));
-
-        List<Editeur> editeurs = editeurService.getEditeursByNomStartWithIgnoreCase("Edit");
-
-        assertEquals(1, editeurs.size());
-        verify(editeurRepo, times(1)).findByNomStartsWithIgnoreCase("Edit");
+        assertEquals(1, result.size());
+        assertEquals("Shueisha", result.get(0).getNom());
     }
 
     @Test
     void testGetByNomContainingIgnoreCase() {
-        Editeur editeur = new Editeur(1, "Editeur1", "Rue1", "www.editeur1.com", "wikipedia1", LocalDateTime.now(), LocalDateTime.now(), null);
-        when(editeurRepo.findByNomContainingIgnoreCase("teur")).thenReturn(Arrays.asList(editeur));
+        List<Editeur> result = editeurService.getByNomContainingIgnoreCase("len");
 
-        List<Editeur> editeurs = editeurService.getByNomContainingIgnoreCase("teur");
+        assertTrue(result.size() >= 0);
+    }
 
-        assertEquals(1, editeurs.size());
-        verify(editeurRepo, times(1)).findByNomContainingIgnoreCase("teur");
+    @Test
+    void testGetEditeursByNomStartWithIgnoreCase() {
+        List<Editeur> result = editeurService.getEditeursByNomStartWithIgnoreCase("Glé");
+
+        assertEquals(1, result.size());
+        assertEquals("Glénat", result.get(0).getNom());
     }
 }

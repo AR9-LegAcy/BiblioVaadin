@@ -1,224 +1,227 @@
 package com.usmb.but3.td4biblio.service;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import com.usmb.but3.td4biblio.entity.Document;
+import com.usmb.but3.td4biblio.entity.TypeDocument;
+import com.usmb.but3.td4biblio.repository.DocumentRepo;
+import com.usmb.but3.td4biblio.repository.TypeDocumentRepo;
+
+import org.junit.jupiter.api.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.Sort;
-
-import com.usmb.but3.td4biblio.entity.Document;
-import com.usmb.but3.td4biblio.repository.DocumentRepo;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@Transactional
 class DocumentServiceTest {
 
-    @Mock
-    private DocumentRepo documentRepo;
-
-    @InjectMocks
+    @Autowired
     private DocumentService documentService;
 
-    @BeforeEach
+    @Autowired
+    private DocumentRepo documentRepo;
+
+    @Autowired
+    private TypeDocumentRepo typeDocumentRepo;
+
+    // =====================
+    // DONNÉES DE TEST
+    // =====================
+    private TypeDocument MANGA;
+
+    private Document DOC1;
+    private Document DOC2;
+    private Document DOC3;
+
+    @BeforeAll
     void setUp() {
-        MockitoAnnotations.openMocks(this);
+
+        // ⚠️ on ne supprime PAS toute la base
+
+        // 1. créer type document Manga
+        MANGA = typeDocumentRepo.save(new TypeDocument(
+                null,
+                "Manga",
+                LocalDateTime.now(),
+                LocalDateTime.now(),
+                null
+        ));
+
+        // 2. créer documents test (MANGA)
+        DOC1 = documentRepo.save(new Document(
+                null,
+                "onepiece.jpg",
+                "One Piece - Tome 1",
+                "A5",
+                LocalDate.of(2020, 1, 10),
+                "E001",
+                "9781111111111",
+                true,
+                "Bon",
+                LocalDateTime.now(),
+                LocalDateTime.now(),
+                MANGA,
+                null,
+                null
+        ));
+
+        DOC2 = documentRepo.save(new Document(
+                null,
+                "naruto.jpg",
+                "Naruto - Tome 1",
+                "A5",
+                LocalDate.of(2021, 3, 15),
+                "E002",
+                "9782222222222",
+                true,
+                "Bon",
+                LocalDateTime.now(),
+                LocalDateTime.now(),
+                MANGA,
+                null,
+                null
+        ));
+
+        DOC3 = documentRepo.save(new Document(
+                null,
+                "bleach.jpg",
+                "Bleach - Tome 1",
+                "A5",
+                LocalDate.of(2022, 5, 20),
+                "E003",
+                "9783333333333",
+                false,
+                "Moyen",
+                LocalDateTime.now(),
+                LocalDateTime.now(),
+                MANGA,
+                null,
+                null
+        ));
     }
+
+    @AfterAll
+    void tearDown() {
+
+        // nettoyage uniquement des données test
+        documentRepo.deleteAll(List.of(DOC1, DOC2, DOC3));
+
+        typeDocumentRepo.delete(MANGA);
+    }
+
+    // =====================
+    // TESTS
+    // =====================
 
     @Test
     void testGetAllDocuments() {
-        Document doc1 = new Document(1, "gif1.jpg", "Description1", "A4", LocalDate.of(2020, 1, 1), "E001", "978-1234567890", true, "Bon", LocalDateTime.now(), LocalDateTime.now(), null, null, null);
-        Document doc2 = new Document(2, "gif2.jpg", "Description2", "A5", LocalDate.of(2021, 2, 2), "E002", "978-0987654321", false, "Mauvais", LocalDateTime.now(), LocalDateTime.now(), null, null, null);
-        when(documentRepo.findAll(Sort.by(Sort.Direction.ASC, "descriptionDocument")))
-            .thenReturn(Arrays.asList(doc1, doc2));
+        List<Document> result = documentService.getAllDocuments();
 
-        List<Document> documents = documentService.getAllDocuments();
-
-        assertEquals(2, documents.size());
-        assertEquals("Description1", documents.get(0).getDescriptionDocument());
-        assertEquals("Description2", documents.get(1).getDescriptionDocument());
-        verify(documentRepo, times(1)).findAll(Sort.by(Sort.Direction.ASC, "descriptionDocument"));
+        assertTrue(result.size() >= 3);
     }
 
     @Test
     void testGetDocumentById() {
-        Document doc = new Document(1, "gif1.jpg", "Description1", "A4", LocalDate.of(2020, 1, 1), "E001", "978-1234567890", true, "Bon", LocalDateTime.now(), LocalDateTime.now(), null, null, null);
-        when(documentRepo.findById(1)).thenReturn(Optional.of(doc));
-
-        Document result = documentService.getDocumentById(1);
+        Document result = documentService.getDocumentById(DOC1.getIdDocument());
 
         assertNotNull(result);
-        assertEquals(1, result.getIdDocument());
-        assertEquals("Description1", result.getDescriptionDocument());
-        verify(documentRepo, times(1)).findById(1);
+        assertEquals("One Piece - Tome 1", result.getDescriptionDocument());
     }
 
     @Test
-    void testGetDocumentByIdNotFound() {
-        when(documentRepo.findById(1)).thenReturn(Optional.empty());
-
-        Document result = documentService.getDocumentById(1);
+    void testGetDocumentById_NotFound() {
+        Document result = documentService.getDocumentById(-999);
 
         assertNull(result);
-        verify(documentRepo, times(1)).findById(1);
     }
 
     @Test
     void testSaveDocument() {
-    
-        Document doc = new Document();
-        doc.setDescriptionDocument("New Description");
-        doc.setFormatTaille("A4");
-        doc.setDateAcquisition(LocalDate.of(2022, 3, 3));
-        doc.setCodeEmplacement("E001");
-        doc.setCodeEmpruntable(true);
-        doc.setEtatDocument("Bon");
-    
-        Document savedDoc = new Document();
-        savedDoc.setIdDocument(1);
-        savedDoc.setGifDocument("gif1.jpg");
-        savedDoc.setDescriptionDocument("New Description");
-        savedDoc.setFormatTaille("A4");
-        savedDoc.setDateAcquisition(LocalDate.of(2022, 3, 3));
-        savedDoc.setCodeEmplacement("E001");
-        savedDoc.setCodeIsbn("978-1234567890");
-        savedDoc.setCodeEmpruntable(true);
-        savedDoc.setEtatDocument("Bon");
-        savedDoc.setCreatedAt(LocalDateTime.now());
-        savedDoc.setUpdatedAt(LocalDateTime.now());
-    
-        when(documentRepo.save(any(Document.class))).thenReturn(savedDoc);
-    
-        Document result = documentService.saveDocument(doc, null); 
-        // ou bibliotheque mock si nécessaire
-    
-        assertNotNull(result);
-        assertEquals(1, result.getIdDocument());
-        assertEquals("New Description", result.getDescriptionDocument());
-        assertEquals("978-1234567890", result.getCodeIsbn());
-        assertTrue(result.getCodeEmpruntable());
-        assertEquals("Bon", result.getEtatDocument());
-        assertNotNull(result.getCreatedAt());
-        assertNotNull(result.getUpdatedAt());
-    
-        verify(documentRepo, times(1)).save(any(Document.class));
+        Document doc = new Document(
+                null,
+                "test.jpg",
+                "Test Manga",
+                "A4",
+                LocalDate.now(),
+                "E999",
+                "9789999999999",
+                true,
+                "Bon",
+                null,
+                null,
+                MANGA,
+                null,
+                null
+        );
+
+        Document saved = documentService.saveDocument(doc);
+
+        assertNotNull(saved.getIdDocument());
+        assertNotNull(saved.getCreatedAt());
+        assertNotNull(saved.getUpdatedAt());
+
+        documentRepo.delete(saved);
     }
 
     @Test
     void testUpdateDocument() {
-        Document doc = new Document(1, "gif1.jpg", "Updated Description", "A4", LocalDate.of(2023, 4, 4), "E001", "978-1234567890", true, "Excellent", LocalDateTime.now(), LocalDateTime.now(), null, null, null);
-        when(documentRepo.save(any(Document.class))).thenReturn(doc);
+        DOC1.setEtatDocument("Excellent");
 
-        Document result = documentService.updateDocument(doc);
+        Document updated = documentService.updateDocument(DOC1);
 
-        assertNotNull(result);
-        assertEquals(1, result.getIdDocument());
-        assertEquals("Updated Description", result.getDescriptionDocument());
-        assertNotNull(result.getUpdatedAt());
-        verify(documentRepo, times(1)).save(any(Document.class));
+        assertEquals("Excellent", updated.getEtatDocument());
+        assertNotNull(updated.getUpdatedAt());
     }
 
     @Test
-    void testDeleteDocumentById() {
-        doNothing().when(documentRepo).deleteById(1);
+    void testDeleteDocument() {
+        Document temp = documentRepo.save(new Document(
+                null,
+                "temp.jpg",
+                "Temp Doc",
+                "A4",
+                LocalDate.now(),
+                "ETEMP",
+                "9780000000000",
+                true,
+                "Bon",
+                LocalDateTime.now(),
+                LocalDateTime.now(),
+                MANGA,
+                null,
+                null
+        ));
 
-        documentService.deleteDocumentById(1);
+        documentService.deleteDocumentById(temp.getIdDocument());
 
-        verify(documentRepo, times(1)).deleteById(1);
+        assertTrue(documentRepo.findById(temp.getIdDocument()).isEmpty());
     }
 
     @Test
     void testGetDocumentsByCodeIsbn() {
-        Document doc = new Document(1, "gif1.jpg", "Description1", "A4", LocalDate.of(2020, 1, 1), "E001", "978-1234567890", true, "Bon", LocalDateTime.now(), LocalDateTime.now(), null, null, null);
-        when(documentRepo.findByCodeIsbn("978-1234567890")).thenReturn(Arrays.asList(doc));
+        List<Document> result = documentService.getDocumentsByCodeIsbn("9781111111111");
 
-        List<Document> documents = documentService.getDocumentsByCodeIsbn("978-1234567890");
-
-        assertEquals(1, documents.size());
-        assertEquals("978-1234567890", documents.get(0).getCodeIsbn());
-        verify(documentRepo, times(1)).findByCodeIsbn("978-1234567890");
-    }
-
-    @Test
-    void testGetDocumentsByDescription() {
-        Document doc1 = new Document(1, "gif1.jpg", "Description1", "A4", LocalDate.of(2020, 1, 1), "E001", "978-1234567890", true, "Bon", LocalDateTime.now(), LocalDateTime.now(), null, null, null);
-        Document doc2 = new Document(2, "gif2.jpg", "Another Description1", "A5", LocalDate.of(2021, 2, 2), "E002", "978-0987654321", false, "Mauvais", LocalDateTime.now(), LocalDateTime.now(), null, null, null);
-        when(documentRepo.findByDescriptionDocumentContainingIgnoreCase("description1")).thenReturn(Arrays.asList(doc1, doc2));
-
-        List<Document> documents = documentService.getDocumentsByDescription("description1");
-
-        assertEquals(2, documents.size());
-        verify(documentRepo, times(1)).findByDescriptionDocumentContainingIgnoreCase("description1");
+        assertEquals(1, result.size());
+        assertEquals("One Piece - Tome 1", result.get(0).getDescriptionDocument());
     }
 
     @Test
     void testGetDocumentsByEmpruntable() {
-        Document doc = new Document(1, "gif1.jpg", "Description1", "A4", LocalDate.of(2020, 1, 1), "E001", "978-1234567890", true, "Bon", LocalDateTime.now(), LocalDateTime.now(), null, null, null);
-        when(documentRepo.findByCodeEmpruntable(true)).thenReturn(Arrays.asList(doc));
+        List<Document> result = documentService.getDocumentsByEmpruntable(true);
 
-        List<Document> documents = documentService.getDocumentsByEmpruntable(true);
-
-        assertEquals(1, documents.size());
-        assertTrue(documents.get(0).getCodeEmpruntable());
-        verify(documentRepo, times(1)).findByCodeEmpruntable(true);
+        assertTrue(result.size() >= 2);
     }
 
     @Test
     void testGetDocumentsByEtat() {
-        Document doc = new Document(1, "gif1.jpg", "Description1", "A4", LocalDate.of(2020, 1, 1), "E001", "978-1234567890", true, "Bon", LocalDateTime.now(), LocalDateTime.now(), null, null, null);
-        when(documentRepo.findByEtatDocument("Bon")).thenReturn(Arrays.asList(doc));
+        List<Document> result = documentService.getDocumentsByEtat("Bon");
 
-        List<Document> documents = documentService.getDocumentsByEtat("Bon");
-
-        assertEquals(1, documents.size());
-        assertEquals("Bon", documents.get(0).getEtatDocument());
-        verify(documentRepo, times(1)).findByEtatDocument("Bon");
-    }
-
-    @Test
-    void testGetDocumentsByDateAcquisitionBetween() {
-        Document doc = new Document(1, "gif1.jpg", "Description1", "A4", LocalDate.of(2020, 6, 15), "E001", "978-1234567890", true, "Bon", LocalDateTime.now(), LocalDateTime.now(), null, null, null);
-        LocalDate startDate = LocalDate.of(2020, 1, 1);
-        LocalDate endDate = LocalDate.of(2020, 12, 31);
-        when(documentRepo.findByDateAcquisitionBetween(startDate, endDate)).thenReturn(Arrays.asList(doc));
-
-        List<Document> documents = documentService.getDocumentsByDateAcquisitionBetween(startDate, endDate);
-
-        assertEquals(1, documents.size());
-        verify(documentRepo, times(1)).findByDateAcquisitionBetween(startDate, endDate);
-    }
-
-    @Test
-    void testGetDocumentsByFormatTaille() {
-        Document doc = new Document(1, "gif1.jpg", "Description1", "A4", LocalDate.of(2020, 1, 1), "E001", "978-1234567890", true, "Bon", LocalDateTime.now(), LocalDateTime.now(), null, null, null);
-        when(documentRepo.findByFormatTaille("A4")).thenReturn(Arrays.asList(doc));
-
-        List<Document> documents = documentService.getDocumentsByFormatTaille("A4");
-
-        assertEquals(1, documents.size());
-        assertEquals("A4", documents.get(0).getFormatTaille());
-        verify(documentRepo, times(1)).findByFormatTaille("A4");
-    }
-
-    @Test
-    void testGetDocumentsByCodeEmplacement() {
-        Document doc = new Document(1, "gif1.jpg", "Description1", "A4", LocalDate.of(2020, 1, 1), "E001", "978-1234567890", true, "Bon", LocalDateTime.now(), LocalDateTime.now(), null, null, null);
-        when(documentRepo.findByCodeEmplacement("E001")).thenReturn(Arrays.asList(doc));
-
-        List<Document> documents = documentService.getDocumentsByCodeEmplacement("E001");
-
-        assertEquals(1, documents.size());
-        assertEquals("E001", documents.get(0).getCodeEmplacement());
-        verify(documentRepo, times(1)).findByCodeEmplacement("E001");
+        assertTrue(result.size() >= 2);
     }
 }

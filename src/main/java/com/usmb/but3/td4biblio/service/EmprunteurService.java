@@ -69,7 +69,7 @@ public class EmprunteurService {
     }
 
     public List<Emprunteur> getEmprunteursByNomLikeAndPrenomLike(String nom, String prenom) {
-        return emprunteurRepo.findByNomLikeAndPrenomLike(nom, prenom);
+        return emprunteurRepo.findByNomLikeAndPrenomLike("%" + nom + "%", "%" + prenom + "%");
     }
 
     public List<Emprunteur> getEmprunteursByNomStartWithIgnoreCase(String filter) {
