@@ -56,7 +56,6 @@ public class EvenementView extends VerticalLayout {
                 add(actions, grid, editor);
 
                 grid.setColumns(
-                                "id",
                                 "titre",
                                 "description",
                                 "dateDebut",
@@ -97,6 +96,9 @@ public class EvenementView extends VerticalLayout {
                                 editor.setVisible(false);
                                 listEvenements(filter.getValue());
                         });
+                        editor.setCancelHandler(() -> {
+                                grid.deselectAll();
+                            });
                 }
                 listEvenements(null);
         }

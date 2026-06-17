@@ -80,7 +80,7 @@ public class EvenementEditor extends VerticalLayout implements KeyNotifier {
 
         save.addClickListener(e -> save());
         delete.addClickListener(e -> delete());
-        cancel.addClickListener(e -> editEvenement(evenement));
+        cancel.addClickListener(e -> cancel());
 
         addKeyPressListener(Key.ENTER, e -> save());
 
@@ -122,7 +122,7 @@ public class EvenementEditor extends VerticalLayout implements KeyNotifier {
             evenement = e;
         }
 
-        cancel.setVisible(persisted);
+        cancel.setVisible(true);
 
         // Bind bean
         binder.setBean(evenement);
@@ -147,5 +147,21 @@ public class EvenementEditor extends VerticalLayout implements KeyNotifier {
 
     public void setChangeHandler(ChangeHandler h) {
         changeHandler = h;
+    }
+    void cancel() {
+        setVisible(false);
+        if (cancelHandler != null) {
+            cancelHandler.onCancel();
+        }
+    }
+
+    public interface CancelHandler {
+        void onCancel();
+    }
+
+    private CancelHandler cancelHandler;
+
+    public void setCancelHandler(CancelHandler cancelHandler) {
+        this.cancelHandler = cancelHandler;
     }
 }
