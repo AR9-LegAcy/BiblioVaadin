@@ -21,7 +21,7 @@ import com.usmb.but3.td4biblio.repository.*;
 @SpringBootTest
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Transactional
-class EmprunterServiceTest {
+public class EmprunterServiceTest {
 
     @Autowired
     private EmprunterService emprunterService;

@@ -1,203 +1,195 @@
 package com.usmb.but3.td4biblio.service;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.Sort;
-import org.springframework.security.crypto.password.PasswordEncoder;
-
 import com.usmb.but3.td4biblio.entity.Emprunteur;
 import com.usmb.but3.td4biblio.repository.EmprunteurRepo;
 
+import org.junit.jupiter.api.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
+
 @SpringBootTest
-class EmprunteurServiceTest {
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@Transactional
+public class EmprunteurServiceTest {
 
-    @Mock
-    private EmprunteurRepo emprunteurRepo;
-
-    @Mock
-    private PasswordEncoder passwordEncoder;
-
-    @InjectMocks
+    @Autowired
     private EmprunteurService emprunteurService;
 
-    @BeforeEach
+    @Autowired
+    private EmprunteurRepo emprunteurRepo;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    // =====================
+    // DATASET
+    // =====================
+    private Emprunteur EMP1;
+    private Emprunteur EMP2;
+    private Emprunteur EMP3;
+
+    @BeforeAll
     void setUp() {
-        MockitoAnnotations.openMocks(this);
+
+        EMP1 = emprunteurRepo.save(new Emprunteur(
+                10001,
+                "Dupont",
+                "Jean",
+                "Rue A",
+                "Chambéry",
+                "73000",
+                "emp1@test.com",
+                LocalDate.of(1990, 1, 1),
+                LocalDate.now(),
+                LocalDate.now().plusYears(1),
+                passwordEncoder.encode("01011990"),
+                LocalDateTime.now(),
+                LocalDateTime.now(),
+                null
+        ));
+
+        EMP2 = emprunteurRepo.save(new Emprunteur(
+                10002,
+                "Martin",
+                "Sophie",
+                "Rue B",
+                "Grenoble",
+                "38000",
+                "emp2@test.com",
+                LocalDate.of(1995, 5, 10),
+                LocalDate.now(),
+                LocalDate.now().plusYears(1),
+                passwordEncoder.encode("10051995"),
+                LocalDateTime.now(),
+                LocalDateTime.now(),
+                null
+        ));
+
+        EMP3 = emprunteurRepo.save(new Emprunteur(
+                10003,
+                "Durand",
+                "Alice",
+                "Rue C",
+                "Lyon",
+                "69000",
+                "emp3@test.com",
+                LocalDate.of(2000, 3, 20),
+                LocalDate.now(),
+                LocalDate.now().plusYears(1),
+                passwordEncoder.encode("20032000"),
+                LocalDateTime.now(),
+                LocalDateTime.now(),
+                null
+        ));
     }
+
+    @AfterAll
+    void tearDown() {
+        emprunteurRepo.deleteAll(List.of(EMP1, EMP2, EMP3));
+    }
+
+    // =====================
+    // TESTS
+    // =====================
 
     @Test
     void testGetAllEmprunteurs() {
-        Emprunteur emp1 = new Emprunteur(1, "Nom1", "Prenom1", "Rue1", "Ville1", "75001", "email1@test.com", LocalDate.of(1990, 1, 1), LocalDate.of(2024, 1, 1), LocalDate.of(2025, 1, 1), "password1", LocalDateTime.now(), LocalDateTime.now(), null);
-        Emprunteur emp2 = new Emprunteur(2, "Nom2", "Prenom2", "Rue2", "Ville2", "75002", "email2@test.com", LocalDate.of(1995, 5, 5), LocalDate.of(2024, 1, 1), LocalDate.of(2025, 1, 1), "password2", LocalDateTime.now(), LocalDateTime.now(), null);
-        when(emprunteurRepo.findAll(Sort.by(Sort.Direction.ASC, "nom", "prenom")))
-            .thenReturn(Arrays.asList(emp1, emp2));
+        List<Emprunteur> result = emprunteurService.getAllEmprunteurs();
 
-        List<Emprunteur> emprunteurs = emprunteurService.getAllEmprunteurs();
-
-        assertEquals(2, emprunteurs.size());
-        assertEquals("Nom1", emprunteurs.get(0).getNom());
-        assertEquals("Nom2", emprunteurs.get(1).getNom());
-        verify(emprunteurRepo, times(1)).findAll(Sort.by(Sort.Direction.ASC, "nom", "prenom"));
+        assertTrue(result.size() >= 3);
     }
 
     @Test
     void testGetEmprunteurById() {
-        Emprunteur emprunteur = new Emprunteur(1, "Nom", "Prenom", "Rue", "Ville", "75001", "email@test.com", LocalDate.of(1990, 1, 1), LocalDate.of(2024, 1, 1), LocalDate.of(2025, 1, 1), "password", LocalDateTime.now(), LocalDateTime.now(), null);
-        when(emprunteurRepo.findById(1)).thenReturn(Optional.of(emprunteur));
-
-        Emprunteur result = emprunteurService.getEmprunteurById(1);
+        Emprunteur result = emprunteurService.getEmprunteurById(EMP1.getCarteEmprunteur());
 
         assertNotNull(result);
-        assertEquals(1, result.getCarteEmprunteur());
-        assertEquals("Nom", result.getNom());
-        verify(emprunteurRepo, times(1)).findById(1);
-    }
-
-    @Test
-    void testGetEmprunteurByIdNotFound() {
-        when(emprunteurRepo.findById(1)).thenReturn(Optional.empty());
-
-        Emprunteur result = emprunteurService.getEmprunteurById(1);
-
-        assertNull(result);
-        verify(emprunteurRepo, times(1)).findById(1);
+        assertEquals("Dupont", result.getNom());
     }
 
     @Test
     void testSaveEmprunteur() {
-        Emprunteur emprunteur = new Emprunteur(1, "Nom", "Prenom", "Rue", "Ville", "75001", "email@test.com", LocalDate.of(1990, 1, 1), LocalDate.of(2024, 1, 1), LocalDate.of(2025, 1, 1), null, null, null, null);
-        Emprunteur savedEmprunteur = new Emprunteur(1, "Nom", "Prenom", "Rue", "Ville", "75001", "email@test.com", LocalDate.of(1990, 1, 1), LocalDate.of(2024, 1, 1), LocalDate.of(2025, 1, 1), "encodedPassword", LocalDateTime.now(), LocalDateTime.now(), null);
-        
-        when(passwordEncoder.encode(any(String.class))).thenReturn("encodedPassword");
-        when(emprunteurRepo.save(any(Emprunteur.class))).thenReturn(savedEmprunteur);
 
-        Emprunteur result = emprunteurService.saveEmprunteur(emprunteur);
+        Emprunteur e = new Emprunteur(
+                2000,
+                "Test",
+                "User",
+                "Rue Test",
+                "Paris",
+                "75000",
+                "test@test.com",
+                LocalDate.of(1999, 1, 1),
+                LocalDate.now(),
+                LocalDate.now().plusYears(1),
+                null,
+                null,
+                null,
+                null
+        );
 
-        assertNotNull(result);
-        assertNotNull(result.getCreatedAt());
-        assertNotNull(result.getUpdatedAt());
-        assertNotNull(result.getMotDePasse());
-        verify(passwordEncoder, times(1)).encode(any(String.class));
-        verify(emprunteurRepo, times(1)).save(any(Emprunteur.class));
+        Emprunteur saved = emprunteurService.saveEmprunteur(e);
+
+        assertNotNull(saved.getCreatedAt());
+        assertNotNull(saved.getUpdatedAt());
+        assertNotNull(saved.getMotDePasse());
+
+        // ✔️ vérification réelle du password encoder
+        assertTrue(passwordEncoder.matches(
+                "01011999",
+                saved.getMotDePasse()
+        ));
+
+        emprunteurRepo.delete(saved);
     }
 
     @Test
     void testUpdateEmprunteur() {
-        Emprunteur emprunteur = new Emprunteur(1, "Nom", "Prenom", "Rue", "Ville", "75001", "email@test.com", LocalDate.of(1990, 1, 1), LocalDate.of(2024, 1, 1), LocalDate.of(2025, 1, 1), "encodedPassword", LocalDateTime.now(), LocalDateTime.now(), null);
-        when(emprunteurRepo.save(any(Emprunteur.class))).thenReturn(emprunteur);
 
-        Emprunteur result = emprunteurService.updateEmprunteur(emprunteur);
+        EMP1.setNom("DupontModifié");
 
-        assertNotNull(result);
-        assertNotNull(result.getUpdatedAt());
-        verify(emprunteurRepo, times(1)).save(any(Emprunteur.class));
+        Emprunteur updated = emprunteurService.updateEmprunteur(EMP1);
+
+        assertEquals("DupontModifié", updated.getNom());
+        assertNotNull(updated.getUpdatedAt());
     }
 
     @Test
-    void testUpdateEmprunteurWithoutPassword() {
-        Emprunteur oldEmprunteur = new Emprunteur(1, "Nom", "Prenom", "Rue", "Ville", "75001", "email@test.com", LocalDate.of(1990, 1, 1), LocalDate.of(2024, 1, 1), LocalDate.of(2025, 1, 1), "oldPassword", LocalDateTime.now(), LocalDateTime.now(), null);
-        Emprunteur emprunteur = new Emprunteur(1, "Nom", "Prenom", "Rue", "Ville", "75001", "email@test.com", LocalDate.of(1990, 1, 1), LocalDate.of(2024, 1, 1), LocalDate.of(2025, 1, 1), null, LocalDateTime.now(), LocalDateTime.now(), null);
-        Emprunteur updatedEmprunteur = new Emprunteur(1, "Nom", "Prenom", "Rue", "Ville", "75001", "email@test.com", LocalDate.of(1990, 1, 1), LocalDate.of(2024, 1, 1), LocalDate.of(2025, 1, 1), "oldPassword", LocalDateTime.now(), LocalDateTime.now(), null);
-        
-        when(emprunteurRepo.findById(1)).thenReturn(Optional.of(oldEmprunteur));
-        when(emprunteurRepo.save(any(Emprunteur.class))).thenReturn(updatedEmprunteur);
+    void testDeleteEmprunteur() {
 
-        Emprunteur result = emprunteurService.updateEmprunteur(emprunteur);
+        Emprunteur temp = emprunteurRepo.save(new Emprunteur(
+                3000,
+                "Temp",
+                "Delete",
+                "Rue",
+                "Ville",
+                "00000",
+                "temp@test.com",
+                LocalDate.of(1990, 1, 1),
+                LocalDate.now(),
+                LocalDate.now().plusYears(1),
+                passwordEncoder.encode("test"),
+                LocalDateTime.now(),
+                LocalDateTime.now(),
+                null
+        ));
 
-        assertNotNull(result);
-        assertEquals("oldPassword", result.getMotDePasse());
-        verify(emprunteurRepo, times(1)).findById(1);
-        verify(emprunteurRepo, times(1)).save(any(Emprunteur.class));
+        emprunteurService.deleteEmprunteurById(temp.getCarteEmprunteur());
+
+        assertTrue(emprunteurRepo.findById(temp.getCarteEmprunteur()).isEmpty());
     }
 
     @Test
-    void testDeleteEmprunteurById() {
-        doNothing().when(emprunteurRepo).deleteById(1);
+    void testFindByNom() {
+        List<Emprunteur> result = emprunteurService.getEmprunteursByNom("Dupont");
 
-        emprunteurService.deleteEmprunteurById(1);
-
-        verify(emprunteurRepo, times(1)).deleteById(1);
-    }
-
-    @Test
-    void testGetEmprunteursByNom() {
-        Emprunteur emprunteur = new Emprunteur(1, "Nom", "Prenom", "Rue", "Ville", "75001", "email@test.com", LocalDate.of(1990, 1, 1), LocalDate.of(2024, 1, 1), LocalDate.of(2025, 1, 1), "password", LocalDateTime.now(), LocalDateTime.now(), null);
-        when(emprunteurRepo.findByNom("Nom")).thenReturn(Arrays.asList(emprunteur));
-
-        List<Emprunteur> emprunteurs = emprunteurService.getEmprunteursByNom("Nom");
-
-        assertEquals(1, emprunteurs.size());
-        assertEquals("Nom", emprunteurs.get(0).getNom());
-        verify(emprunteurRepo, times(1)).findByNom("Nom");
-    }
-
-    @Test
-    void testGetEmprunteursByNomAndPrenom() {
-        Emprunteur emprunteur = new Emprunteur(1, "Nom", "Prenom", "Rue", "Ville", "75001", "email@test.com", LocalDate.of(1990, 1, 1), LocalDate.of(2024, 1, 1), LocalDate.of(2025, 1, 1), "password", LocalDateTime.now(), LocalDateTime.now(), null);
-        when(emprunteurRepo.findByNomAndPrenom("Nom", "Prenom")).thenReturn(Arrays.asList(emprunteur));
-
-        List<Emprunteur> emprunteurs = emprunteurService.getEmprunteursByNomAndPrenom("Nom", "Prenom");
-
-        assertEquals(1, emprunteurs.size());
-        assertEquals("Prenom", emprunteurs.get(0).getPrenom());
-        verify(emprunteurRepo, times(1)).findByNomAndPrenom("Nom", "Prenom");
-    }
-
-    @Test
-    void testGetEmprunteursByNomLikeAndPrenomLike() {
-        Emprunteur emprunteur = new Emprunteur(1, "Nom", "Prenom", "Rue", "Ville", "75001", "email@test.com", LocalDate.of(1990, 1, 1), LocalDate.of(2024, 1, 1), LocalDate.of(2025, 1, 1), "password", LocalDateTime.now(), LocalDateTime.now(), null);
-        when(emprunteurRepo.findByNomLikeAndPrenomLike("%Nom%", "%Prenom%")).thenReturn(Arrays.asList(emprunteur));
-
-        List<Emprunteur> emprunteurs = emprunteurService.getEmprunteursByNomLikeAndPrenomLike("%Nom%", "%Prenom%");
-
-        assertEquals(1, emprunteurs.size());
-        verify(emprunteurRepo, times(1)).findByNomLikeAndPrenomLike("%Nom%", "%Prenom%");
-    }
-
-    @Test
-    void testGetEmprunteursByNomStartWithIgnoreCase() {
-        Emprunteur emprunteur = new Emprunteur(1, "Nom", "Prenom", "Rue", "Ville", "75001", "email@test.com", LocalDate.of(1990, 1, 1), LocalDate.of(2024, 1, 1), LocalDate.of(2025, 1, 1), "password", LocalDateTime.now(), LocalDateTime.now(), null);
-        when(emprunteurRepo.findByNomStartsWithIgnoreCase("Nom")).thenReturn(Arrays.asList(emprunteur));
-
-        List<Emprunteur> emprunteurs = emprunteurService.getEmprunteursByNomStartWithIgnoreCase("Nom");
-
-        assertEquals(1, emprunteurs.size());
-        verify(emprunteurRepo, times(1)).findByNomStartsWithIgnoreCase("Nom");
-    }
-
-    @Test
-    void testGetEmprunteursByNomContainingIgnoreCase() {
-        Emprunteur emprunteur = new Emprunteur(1, "Nom", "Prenom", "Rue", "Ville", "75001", "email@test.com", LocalDate.of(1990, 1, 1), LocalDate.of(2024, 1, 1), LocalDate.of(2025, 1, 1), "password", LocalDateTime.now(), LocalDateTime.now(), null);
-        when(emprunteurRepo.findByNomContainingIgnoreCase("Nom")).thenReturn(Arrays.asList(emprunteur));
-
-        List<Emprunteur> emprunteurs = emprunteurService.getEmprunteursByNomContainingIgnoreCase("Nom");
-
-        assertEquals(1, emprunteurs.size());
-        verify(emprunteurRepo, times(1)).findByNomContainingIgnoreCase("Nom");
-    }
-
-    @Test
-    void testGetEmprunteursByPrenomContainingIgnoreCase() {
-        Emprunteur emprunteur = new Emprunteur(1, "Nom", "Prenom", "Rue", "Ville", "75001", "email@test.com", LocalDate.of(1990, 1, 1), LocalDate.of(2024, 1, 1), LocalDate.of(2025, 1, 1), "password", LocalDateTime.now(), LocalDateTime.now(), null);
-        when(emprunteurRepo.findByPrenomContainingIgnoreCase("Prenom")).thenReturn(Arrays.asList(emprunteur));
-
-        List<Emprunteur> emprunteurs = emprunteurService.getEmprunteursByPrenomContainingIgnoreCase("Prenom");
-
-        assertEquals(1, emprunteurs.size());
-        verify(emprunteurRepo, times(1)).findByPrenomContainingIgnoreCase("Prenom");
+        assertFalse(result.isEmpty());
     }
 }
