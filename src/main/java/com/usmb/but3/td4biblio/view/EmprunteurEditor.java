@@ -1,5 +1,6 @@
 package com.usmb.but3.td4biblio.view;
 
+import java.time.LocalDate;
 import java.util.Random;
 
 import org.springframework.context.annotation.Scope;
@@ -62,6 +63,15 @@ public class EmprunteurEditor extends VerticalLayout implements KeyNotifier {
 
         // bind using naming convention
         binder.bindInstanceFields(this);
+        debutAbonnement.addValueChangeListener(event -> {
+
+            LocalDate dateDebut = event.getValue();
+
+            if (dateDebut != null && expirationAbonnement.getValue() == null) {
+                expirationAbonnement.setValue(dateDebut.plusYears(1));
+            }
+
+        });
 
         // Configure and style components
         setSpacing(true);
