@@ -46,7 +46,6 @@ public class EmprunterView extends VerticalLayout {
 
         grid.setHeight("300px");
         grid.setColumns("idDocument", "carteEmprunteur", "dateEmprunt", "dateRetourPrevue", "dateRetourReelle", "prolongationEmprunt");
-        grid.getColumnByKey("idDocument").setWidth("50px").setFlexGrow(0);
 
         filter.setPlaceholder("Filtrer par nom ou prénom");
 
@@ -66,6 +65,9 @@ public class EmprunterView extends VerticalLayout {
         editor.setChangeHandler(() -> {
             editor.setVisible(false);
             listEmprunts(filter.getValue());
+        });
+        editor.setCancelHandler(() -> {
+            grid.deselectAll();
         });
 
         // Initialize listing

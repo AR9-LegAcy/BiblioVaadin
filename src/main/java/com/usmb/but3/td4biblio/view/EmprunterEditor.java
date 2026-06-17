@@ -75,7 +75,7 @@ public class EmprunterEditor extends VerticalLayout implements KeyNotifier {
 
         save.addClickListener(e -> save());
         delete.addClickListener(e -> delete());
-        cancel.addClickListener(e -> editEmprunter(emprunter));
+        cancel.addClickListener(e -> cancel());
 
         addKeyPressListener(Key.ENTER, e -> save());
         setVisible(false);
@@ -136,5 +136,21 @@ public class EmprunterEditor extends VerticalLayout implements KeyNotifier {
 
     public interface ChangeHandler {
         void onChange();
+    }
+    void cancel() {
+        setVisible(false);
+        if (cancelHandler != null) {
+            cancelHandler.onCancel();
+        }
+    }
+
+    public interface CancelHandler {
+        void onCancel();
+    }
+
+    private CancelHandler cancelHandler;
+
+    public void setCancelHandler(CancelHandler cancelHandler) {
+        this.cancelHandler = cancelHandler;
     }
 }
