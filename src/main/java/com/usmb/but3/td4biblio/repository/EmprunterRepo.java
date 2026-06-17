@@ -14,4 +14,6 @@ public interface EmprunterRepo extends JpaRepository<Emprunter, EmprunterId> {
     List<Emprunter> findByCarteEmprunteur(Emprunteur carteEmprunteur);
 
     List<Emprunter> findByIdDocument(Document idDocument);
+
+    void deleteByIdDocument_IdDocument(Integer idDocument);
 }

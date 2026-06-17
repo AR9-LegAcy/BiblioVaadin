@@ -12,11 +12,15 @@ import com.usmb.but3.td4biblio.entity.Bibliotheque;
 import com.usmb.but3.td4biblio.entity.Document;
 import com.usmb.but3.td4biblio.entity.Livre;
 import com.usmb.but3.td4biblio.entity.Stocker;
+import com.usmb.but3.td4biblio.entity.StockerId;
 import com.usmb.but3.td4biblio.entity.TypeDocument;
 import com.usmb.but3.td4biblio.repository.DocumentRepo;
+import com.usmb.but3.td4biblio.repository.EmprunterRepo;
 import com.usmb.but3.td4biblio.repository.LivreRepo;
 import com.usmb.but3.td4biblio.repository.StockerRepo;
+import com.usmb.but3.td4biblio.security.SessionManager;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -27,6 +31,7 @@ public class LivreService {
     private final DocumentRepo documentRepo;
     private final StockerRepo stockerRepo;
     private final IsbnGeneratorService isbnGeneratorService;
+    private final EmprunterRepo emprunterRepo;
 
     public List<Livre> getAllLivres() {
         return livreRepo.findAll(Sort.by(Sort.Direction.ASC, "titreLivre"));
@@ -80,8 +85,25 @@ public class LivreService {
         return livreRepo.save(livre);
     }
 
+    @Transactional
     public void deleteLivreById(Integer id) {
-        livreRepo.deleteById(id);
+
+        Livre livre = livreRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Livre introuvable"));
+
+        Integer documentId = livre.getDocument().getIdDocument();
+        Integer bibliothequeId = SessionManager.getBibliothecaire()
+                .getBibliotheque()
+                .getId();
+
+        // 1. supprimer emprunts liés
+        emprunterRepo.deleteByIdDocument_IdDocument(documentId);
+
+        // 2. supprimer stocker (clé composite)
+        stockerRepo.deleteById(new StockerId(bibliothequeId, documentId));
+
+        // 3. supprimer livre (cascade document OK)
+        livreRepo.delete(livre);
     }
 
     public List<Livre> getByTitreContainingIgnoreCase(String titre) {
