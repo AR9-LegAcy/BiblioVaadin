@@ -119,7 +119,7 @@ public class BibliothecaireEditor extends VerticalLayout implements KeyNotifier 
         binder.setBean(bibliothecaire);
 
         setVisible(true);
-        prenom.focus();
+        pseudo.focus();
     }
 
     public void setChangeHandler(ChangeHandler h) {
