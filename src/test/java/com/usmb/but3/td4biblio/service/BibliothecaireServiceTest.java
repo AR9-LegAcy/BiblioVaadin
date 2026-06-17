@@ -181,7 +181,7 @@ public class BibliothecaireServiceTest {
 
         bibliothecaireService.deleteBibliothecaireByPseudo("test_user2");
 
-        assertTrue(bibliothecaireRepo.findByPseudo("test_user2").isEmpty());
+        assertNull(bibliothecaireRepo.findByPseudo("test_user2"));
 
         bibliothecairesCree.remove(BIB2);
     }

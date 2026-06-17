@@ -53,7 +53,7 @@ public class BibliothecaireServiceMockTest {
     void testGetBibliothecaireByPseudo() {
         // Arrange
         Bibliothecaire bib = new Bibliothecaire("admin1", "Dupont", "Jean", "10 rue de Paris", "Paris", "75001", "jean@example.com", LocalDate.of(1990, 5, 15), null, null, null, null);
-        when(bibliothecaireRepo.findByPseudo("admin1")).thenReturn(List.of(bib));
+        when(bibliothecaireRepo.findByPseudo("admin1")).thenReturn(bib);
 
         // Act
         Bibliothecaire result = bibliothecaireService.getBibliothecaireByPseudo("admin1");
