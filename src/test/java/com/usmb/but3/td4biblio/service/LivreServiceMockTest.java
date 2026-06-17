@@ -16,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Sort;
 
+import com.usmb.but3.td4biblio.entity.Bibliotheque;
 import com.usmb.but3.td4biblio.entity.Livre;
 import com.usmb.but3.td4biblio.repository.LivreRepo;
 
@@ -109,11 +110,13 @@ public class LivreServiceMockTest {
     void testSaveLivre() {
         // Arrange
         Livre livre = new Livre();
-        livre.setIdDocument(1);
         livre.setTitreLivre("Le Petit Prince");
         livre.setNbPages(96);
         livre.setDatePublication(LocalDate.of(1943, 4, 6));
-
+    
+        Bibliotheque bibliotheque = new Bibliotheque();
+        bibliotheque.setId(1);
+    
         Livre savedLivre = new Livre(
                 1,
                 "Le Petit Prince",
@@ -123,18 +126,16 @@ public class LivreServiceMockTest {
                 LocalDateTime.now(),
                 null,
                 null);
-
+    
         when(livreRepo.save(any(Livre.class))).thenReturn(savedLivre);
-
+    
         // Act
-        Livre result = livreService.saveLivre(livre);
-
+        Livre result = livreService.saveLivre(livre, bibliotheque);
+    
         // Assert
         assertThat(result).isNotNull();
         assertThat(result.getIdDocument()).isEqualTo(1);
-        assertThat(result.getCreatedAt()).isNotNull();
-        assertThat(result.getUpdatedAt()).isNotNull();
-
+    
         verify(livreRepo, times(1)).save(any(Livre.class));
     }
 
@@ -153,6 +154,9 @@ public class LivreServiceMockTest {
                 null,
                 null);
 
+        Bibliotheque bibliotheque = new Bibliotheque();
+        bibliotheque.setId(1);
+
         Livre savedLivre = new Livre(
                 1,
                 "Le Petit Prince",
@@ -166,7 +170,7 @@ public class LivreServiceMockTest {
         when(livreRepo.save(any(Livre.class))).thenReturn(savedLivre);
 
         // Act
-        Livre result = livreService.saveLivre(livre);
+        Livre result = livreService.saveLivre(livre, bibliotheque);
 
         // Assert
         assertThat(result.getCreatedAt()).isEqualTo(createdAt);

@@ -1,9 +1,11 @@
 package com.usmb.but3.td4biblio.service;
 
+import com.usmb.but3.td4biblio.entity.Bibliotheque;
 import com.usmb.but3.td4biblio.entity.Document;
 import com.usmb.but3.td4biblio.entity.Editeur;
 import com.usmb.but3.td4biblio.entity.Livre;
 import com.usmb.but3.td4biblio.entity.TypeDocument;
+import com.usmb.but3.td4biblio.repository.BibliothequeRepo;
 import com.usmb.but3.td4biblio.repository.DocumentRepo;
 import com.usmb.but3.td4biblio.repository.EditeurRepo;
 import com.usmb.but3.td4biblio.repository.LivreRepo;
@@ -26,20 +28,24 @@ import static org.junit.jupiter.api.Assertions.*;
 public class LivreServiceTest {
 
     @Autowired
+    private BibliothequeRepo bibliothequeRepo;
+    
+    @Autowired
     private LivreService livreService;
-
+    
     @Autowired
     private LivreRepo livreRepo;
-
+    
     @Autowired
     private DocumentRepo documentRepo;
-
+    
     @Autowired
     private TypeDocumentRepo typeDocumentRepo;
-
+    
     @Autowired
     private EditeurRepo editeurRepo;
-
+    
+    private Bibliotheque bibliotheque;
     private TypeDocument typeDocument;
     private Editeur editeur;
     private Document document1;
@@ -50,6 +56,22 @@ public class LivreServiceTest {
 
     @BeforeAll
     void setUp() {
+
+        // =====================
+        // BIBLIOTHEQUE
+        // =====================
+        bibliotheque = bibliothequeRepo.save(new Bibliotheque(
+                null,
+                "BIB TEST",
+                "Lyon",
+                "Rue test",
+                "69000",
+                "9h-18h",
+                null,
+                null,
+                null,
+                null
+        ));
 
         // =====================
         // TYPE DOCUMENT
@@ -185,12 +207,12 @@ public class LivreServiceTest {
                 editeur,
                 document1
         );
-
-        Livre saved = livreService.saveLivre(l);
-
+    
+        Livre saved = livreService.saveLivre(l, bibliotheque);
+    
         assertNotNull(saved.getCreatedAt());
         assertNotNull(saved.getUpdatedAt());
-
+    
         livreRepo.delete(saved);
     }
 
