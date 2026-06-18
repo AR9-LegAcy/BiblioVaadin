@@ -3,8 +3,10 @@ package com.usmb.but3.td4biblio.view;
 import com.usmb.but3.td4biblio.entity.Document;
 import com.usmb.but3.td4biblio.security.SessionManager;
 import com.usmb.but3.td4biblio.service.DocumentService;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -26,6 +28,7 @@ import org.springframework.util.StringUtils;
 public class DocumentView extends VerticalLayout {
 
     private final DocumentService documentService;
+
     private final Grid<Document> grid;
     private final TextField filter;
     private final Button addNewBtn;
@@ -34,6 +37,7 @@ public class DocumentView extends VerticalLayout {
     private final boolean isBib = SessionManager.isBibliothecaire();
 
     public DocumentView(DocumentService documentService, DocumentEditor editor) {
+
         this.documentService = documentService;
         this.editor = editor;
 
@@ -49,38 +53,75 @@ public class DocumentView extends VerticalLayout {
         grid.setHeight("300px");
 
         // ---------------- Colonnes ----------------
-        grid.addColumn(Document::getCodeIsbn).setHeader("ISBN");
-        grid.addColumn(Document::getDescriptionDocument).setHeader("Description");
-        grid.addColumn(Document::getCodeEmpruntable).setHeader("Empruntable");
-        grid.addColumn(Document::getEtatDocument).setHeader("État");
 
-        // 👉 NOUVEAU : type document
+        grid.addColumn(Document::getCodeIsbn)
+                .setHeader("ISBN");
+
+        grid.addColumn(Document::getDescriptionDocument)
+                .setHeader("Description");
+
+        grid.addColumn(doc ->
+                Boolean.TRUE.equals(doc.getCodeEmpruntable()) ? "Oui" : "Non")
+                .setHeader("Empruntable");
+
+        grid.addColumn(Document::getEtatDocument)
+                .setHeader("État");
+
         grid.addColumn(doc ->
                 doc.getTypeDocument() != null
                         ? doc.getTypeDocument().getNomTypeDocument()
-                        : ""
-        ).setHeader("Type de document");
+                        : "")
+                .setHeader("Type de document");
 
-        grid.addColumn(Document::getDateAcquisition).setHeader("Date acquisition");
-        grid.addColumn(Document::getFormatTaille).setHeader("Format / Taille");
-        grid.addColumn(Document::getCodeEmplacement).setHeader("Emplacement");
+        grid.addColumn(Document::getDateAcquisition)
+                .setHeader("Date acquisition");
 
-        // ---------------- Filter ----------------
+        grid.addColumn(Document::getFormatTaille)
+                .setHeader("Format / Taille");
+
+        grid.addColumn(Document::getCodeEmplacement)
+                .setHeader("Emplacement");
+
+        // ---------------- Bouton Informations Livre ----------------
+
+        grid.addComponentColumn(doc -> {
+
+            if (doc.getTypeDocument() != null
+                    && "Livre".equalsIgnoreCase(doc.getTypeDocument().getNomTypeDocument())) {
+
+                Button infoBtn = new Button(
+                        "Informations",
+                        VaadinIcon.BOOK.create());
+
+                infoBtn.addClickListener(event -> {
+                    // À adapter selon ta route Livre
+                    UI.getCurrent().navigate("livre/detail/" + doc.getIdDocument());
+                });
+
+                return infoBtn;
+            }
+
+            return new Span();
+
+        }).setHeader("Informations Livre");
+
+        // ---------------- Filtre ----------------
+
         filter.setPlaceholder("Filtrer par ISBN ou description");
         filter.setValueChangeMode(ValueChangeMode.LAZY);
         filter.addValueChangeListener(e -> listDocuments(e.getValue()));
 
-        // ---------------- Bibliothécaire ----------------
+        // ---------------- Gestion bibliothécaire ----------------
+
         if (isBib) {
+
             addNewBtn.getStyle().set("visibility", "visible");
 
-            grid.asSingleSelect().addValueChangeListener(e ->
-                    editor.editDocument(e.getValue())
-            );
+            grid.asSingleSelect().addValueChangeListener(
+                    e -> editor.editDocument(e.getValue()));
 
-            addNewBtn.addClickListener(e ->
-                    editor.editDocument(new Document())
-            );
+            addNewBtn.addClickListener(
+                    e -> editor.editDocument(new Document()));
 
             editor.setChangeHandler(() -> {
                 editor.setVisible(false);
@@ -94,6 +135,7 @@ public class DocumentView extends VerticalLayout {
     }
 
     void listDocuments(String filterText) {
+
         if (StringUtils.hasText(filterText)) {
             grid.setItems(documentService.getDocumentsByDescription(filterText));
         } else {
