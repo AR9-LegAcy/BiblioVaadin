@@ -235,12 +235,12 @@ public final class MainView extends Main {
         btnRow.setAlignItems(com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment.CENTER);
         btnRow.getStyle().set("gap", "0.75rem").set("flex-wrap", "wrap");
 
-        var btnRecherche = new Button("Rechercher un livre", new Icon(VaadinIcon.SEARCH));
+        var btnRecherche = new Button("Rechercher un document", new Icon(VaadinIcon.SEARCH));
         btnRecherche.addThemeVariants(ButtonVariant.LUMO_PRIMARY, ButtonVariant.LUMO_LARGE);
         btnRecherche.getStyle()
                 .set("background", "#fff").set("color", "#1E3A8A")
                 .set("font-weight", "600").set("border-radius", "0.5rem");
-        btnRecherche.addClickListener(e -> UI.getCurrent().navigate("livre"));
+        btnRecherche.addClickListener(e -> UI.getCurrent().navigate("document"));
 
         if (SessionManager.isLoggedIn()) {
             var btnLogout = new Button("Se déconnecter", new Icon(VaadinIcon.SIGN_OUT));

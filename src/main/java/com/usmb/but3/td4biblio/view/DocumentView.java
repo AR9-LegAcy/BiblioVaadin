@@ -18,6 +18,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Set;
 
 @Component
 @Scope("prototype")
@@ -33,7 +34,6 @@ public class DocumentView extends VerticalLayout {
     private final TextField searchValue = new TextField();
     private final ComboBox<String> critere = new ComboBox<>();
     private final ComboBox<String> mode = new ComboBox<>();
-    
 
     private final Button addNewBtn = new Button("Ajouter", VaadinIcon.PLUS.create());
 
@@ -41,49 +41,74 @@ public class DocumentView extends VerticalLayout {
 
     private final boolean isBib = SessionManager.isBibliothecaire();
 
+    // TYPES AUTORISÉS POUR AFFICHER LE BOUTON INFO LIVRE
+    private static final Set<String> TYPES_INFO_LIVRE = Set.of(
+            "Roman",
+            "Bande dessinée",
+            "Revue scientifique",
+            "Manuel scolaire"
+    );
+
     public DocumentView(DocumentService documentService, DocumentEditor editor) {
         this.documentService = documentService;
         this.editor = editor;
-        
+
         // ---------------- GRID ----------------
-        grid.addColumn(Document::getCodeIsbn).setHeader("ISBN");
-        grid.addColumn(Document::getDescriptionDocument).setHeader("Description");
+        grid.addColumn(Document::getCodeIsbn)
+                .setHeader("ISBN")
+                .setSortable(true);
+
+        grid.addColumn(Document::getDescriptionDocument)
+                .setHeader("Description")
+                .setSortable(true);
+
         grid.addColumn(d -> Boolean.TRUE.equals(d.getCodeEmpruntable()) ? "Oui" : "Non")
-                .setHeader("Empruntable");
-        grid.addColumn(Document::getEtatDocument).setHeader("État");
+                .setHeader("Empruntable")
+                .setSortable(true);
+
+        grid.addColumn(Document::getEtatDocument)
+                .setHeader("État")
+                .setSortable(true);
 
         grid.addColumn(d -> d.getTypeDocument() != null
                         ? d.getTypeDocument().getNomTypeDocument()
                         : "")
-                .setHeader("Type");
+                .setHeader("Type")
+                .setSortable(true);
 
-        grid.addColumn(Document::getDateAcquisition).setHeader("Acquisition");
+        grid.addColumn(Document::getDateAcquisition)
+                .setHeader("Acquisition")
+                .setSortable(true);
 
-        // bouton Livre
+        // ---------------- BOUTON INFO LIVRE (MODIFIÉ UNIQUEMENT ICI) ----------------
         grid.addComponentColumn(doc -> {
 
-            if (doc.getTypeDocument() != null &&
-                    "Livre".equalsIgnoreCase(doc.getTypeDocument().getNomTypeDocument())) {
+            String type = doc.getTypeDocument() != null
+                    ? doc.getTypeDocument().getNomTypeDocument()
+                    : null;
 
-                Button btn = new Button("Livre", VaadinIcon.BOOK.create());
+            if (type != null && TYPES_INFO_LIVRE.contains(type)) {
+
+                Button btn = new Button("Info livre", VaadinIcon.INFO_CIRCLE.create());
 
                 btn.addClickListener(e ->
                         getUI().ifPresent(ui ->
-                                ui.navigate("livre/" + doc.getIdDocument())
+                                ui.navigate("livre/detail/" + doc.getIdDocument())
                         )
                 );
 
                 return btn;
             }
 
-            return new Button();
+            return null;
+
         }).setHeader("Info Livre");
 
         // ---------------- SEARCH UI ----------------
         critere.setItems("Titre", "Type", "Auteur", "Bibliothèque");
         critere.setValue("Titre");
         critere.setAllowCustomValue(false);
-        
+
         mode.setItems("Égal à", "Contient", "Débute par");
         mode.setValue("Contient");
         mode.setAllowCustomValue(false);
@@ -92,7 +117,6 @@ public class DocumentView extends VerticalLayout {
         searchValue.setValueChangeMode(ValueChangeMode.LAZY);
 
         searchValue.addValueChangeListener(e -> refresh());
-
         critere.addValueChangeListener(e -> refresh());
         mode.addValueChangeListener(e -> refresh());
 
