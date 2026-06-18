@@ -43,24 +43,24 @@ public class LivreService {
 
     public Livre saveLivre(Livre livre, Bibliotheque bibliotheque) {
 
-        // 1. créer Document
+        // Créer Document
         Document doc = new Document();
 
-        // 🔥 génération ISBN propre (format métier)
+        // Génération ISBN propre (format métier)
         doc.setCodeIsbn(isbnGeneratorService.generateNextIsbn());
 
         doc.setCodeEmpruntable(true);
         doc.setDateAcquisition(LocalDate.now());
         doc.setEtatDocument("NEUF");
 
-        // type = LIVRE (id = 1)
+        // Type = LIVRE (id = 1)
         TypeDocument td = new TypeDocument();
         td.setIdTypeDocument(1);
         doc.setTypeDocument(td);
 
         Document savedDoc = documentRepo.save(doc);
 
-        // 2. créer Livre lié
+        // Créer Livre lié
         livre.setDocument(savedDoc);
         livre.setCreatedAt(LocalDateTime.now());
         livre.setUpdatedAt(LocalDateTime.now());
@@ -69,7 +69,7 @@ public class LivreService {
         doc.setUpdatedAt(LocalDateTime.now());
         Livre savedLivre = livreRepo.save(livre);
 
-        // 3. STOCKER dans bibliothèque du bibliothécaire
+        // STOCKER dans bibliothèque du bibliothécaire
         Stocker s = new Stocker();
         s.setIdBibliotheque(bibliotheque.getId());
         s.setIdDocument(savedDoc.getIdDocument());
@@ -96,13 +96,13 @@ public class LivreService {
                 .getBibliotheque()
                 .getId();
 
-        // 1. supprimer emprunts liés
+        // Supprimer emprunts liés
         emprunterRepo.deleteByIdDocument_IdDocument(documentId);
 
-        // 2. supprimer stocker (clé composite)
+        // Supprimer stocker (clé composite)
         stockerRepo.deleteById(new StockerId(bibliothequeId, documentId));
 
-        // 3. supprimer livre (cascade document OK)
+        // Supprimer livre (cascade document OK)
         livreRepo.delete(livre);
     }
 
