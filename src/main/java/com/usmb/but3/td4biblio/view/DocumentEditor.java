@@ -87,6 +87,20 @@ public class DocumentEditor extends VerticalLayout implements KeyNotifier {
                 "Hors service");
         etatDocument.setAllowCustomValue(false);
 
+        etatDocument.addValueChangeListener(event -> {
+            String etat = event.getValue();
+
+            boolean horsPret = "Abîmé".equals(etat)
+                    || "Hors service".equals(etat);
+
+            if (horsPret) {
+                codeEmpruntable.setValue(false);
+                codeEmpruntable.setEnabled(false);
+            } else {
+                codeEmpruntable.setEnabled(true);
+            }
+        });
+
         /* -------- Type document -------- */
         typeDocument.setItems(typeDocumentService.getAllTypeDocuments());
         typeDocument.setItemLabelGenerator(TypeDocument::getNomTypeDocument);
@@ -132,16 +146,20 @@ public class DocumentEditor extends VerticalLayout implements KeyNotifier {
         if (document != null) {
             try {
                 binder.writeBean(document);
-
+    
+                if ("Abîmé".equals(document.getEtatDocument())
+                        || "Hors service".equals(document.getEtatDocument())) {
+                    document.setCodeEmpruntable(false);
+                }
+    
                 Bibliotheque bib = SessionManager.getBibliothecaire().getBibliotheque();
-
                 documentService.saveDocument(document, bib);
-
+    
                 if (changeHandler != null)
                     changeHandler.onChange();
-
+    
                 setVisible(false);
-
+    
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -174,6 +192,18 @@ public class DocumentEditor extends VerticalLayout implements KeyNotifier {
         }
 
         binder.setBean(this.document);
+
+        String etat = this.document.getEtatDocument();
+
+        boolean horsPret = "Abîmé".equals(etat)
+                || "Hors service".equals(etat);
+
+        if (horsPret) {
+            codeEmpruntable.setValue(false);
+            codeEmpruntable.setEnabled(false);
+        } else {
+            codeEmpruntable.setEnabled(true);
+        }
 
         setVisible(true);
 

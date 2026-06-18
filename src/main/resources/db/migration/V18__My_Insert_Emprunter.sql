@@ -1,8 +1,7 @@
 INSERT INTO biblio.EMPRUNTER (ID_DOCUMENT, CARTE_EMPRUNTEUR, DATE_EMPRUNT, DATE_RETOUR_PREVUE, DATE_RETOUR_REELLE, PROLONGATION_EMPRUNT, CREATED_AT_EMPRUNTER, UPDATED_AT_EMPRUNTER) VALUES
-    (2, 1000000001, '2024-06-01', '2024-06-22', '2024-06-20', 0,    CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),  -- L'Étranger      -> Claire (rendu)
-    (4, 1000000002, '2024-06-05', '2024-06-26', NULL,          0,    CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),  -- Harry Potter    -> Julien (en cours)
-    (7, 1000000003, '2024-05-10', '2024-05-31', '2024-06-03', 0,    CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),  -- 3 Mousquetaires -> Emma   (rendu en retard)
-    (8, 1000000004, '2024-06-10', '2024-07-01', NULL,          0,    CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),  -- Boule de Suif   -> Thomas (en cours)
-    (3, 1000000005, '2024-04-01', '2024-04-22', '2024-04-21', 0,    CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),  -- Astérix         -> Léa    (rendu)
-    (1, 1000000006, '2024-06-12', '2024-07-03', NULL,          14,   CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);  -- Les Misérables  -> Marc   (prolongé)
+    (2, 1000000001, '2026-06-12', '2026-07-03', NULL, 0,    CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),  -- L'Étranger      -> Claire (rendu)
+    (7, 1000000003, '2026-04-01', '2026-04-22', '2026-04-22', 0,    CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),  -- 3 Mousquetaires -> Emma   (rendu en retard)
+    (8, 1000000004, '2026-06-01', '2026-06-22', '2026-06-18',          0,    CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),  -- Boule de Suif   -> Thomas (en cours)
+    (3, 1000000005, '2024-05-10', '2024-05-31', '2026-06-03', 0,    CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),  -- Astérix         -> Léa    (rendu)
+    (1, 1000000006, '2026-06-10', '2026-07-01', NULL,          14,   CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);  -- Les Misérables  -> Marc   (prolongé)
 
