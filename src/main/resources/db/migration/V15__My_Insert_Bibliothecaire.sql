@@ -1,14 +1,7 @@
-INSERT INTO biblio.BIBLIOTHECAIRE
-(PSEUDO_BIBLIOTHECAIRE, ID_BIBLIOTHEQUE, NOM_BIBLIOTHECAIRE, PRENOM_BIBLIOTHECAIRE,
- ADRESSE_RUE_BIBLIOTHECAIRE, ADRESSE_VILLE_BIBLIOTHECAIRE, ADRESSE_CODEPOSTAL_BIBLIOTHECAIRE,
- EMAIL_BIBLIOTHECAIRE, DATE_NAISSANCE_BIBLIOTHECAIRE, MOT_DE_PASSE,
- CREATED_AT_BIBLIOTHECAIRE)
-VALUES
-('admin_annecy', 1, 'Martin', 'Claire',
- '1 rue Royale', 'Annecy', '74000',
- 'claire.annecy@biblio.fr', '1990-05-12', 'admin123', CURRENT_DATE),
-
-('admin_lyon', 2, 'Durand', 'Paul',
- '10 rue Bellecour', 'Lyon', '69002',
- 'paul.lyon@biblio.fr', '1985-11-20', 'admin123', CURRENT_DATE);
+INSERT INTO biblio.BIBLIOTHECAIRE (PSEUDO_BIBLIOTHECAIRE, ID_BIBLIOTHEQUE, NOM_BIBLIOTHECAIRE, PRENOM_BIBLIOTHECAIRE, ADRESSE_RUE_BIBLIOTHECAIRE, ADRESSE_VILLE_BIBLIOTHECAIRE, ADRESSE_CODEPOSTAL_BIBLIOTHECAIRE, EMAIL_BIBLIOTHECAIRE, DATE_NAISSANCE_BIBLIOTHECAIRE, MOT_DE_PASSE, CREATED_AT_BIBLIOTHECAIRE, UPDATED_AT_BIBLIOTHECAIRE) VALUES
+    ('jdupont',   1, 'Dupont',   'Jean',    '3 Rue des Lilas',        'Lyon',     '69001', 'jean.dupont@biblio-lyon.fr',   '1985-03-12', '$2a$10$FY5KpLo9Cp4RsHDeuug8sOhPb4K4IiM4iWpUVHKPE3L7f4VLaI4U2', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('mmartin',   2, 'Martin',   'Marie',   '8 Chemin des Roses',     'Grenoble', '38000', 'marie.martin@mediatheque.fr',  '1990-07-22', '$2a$10$LBDje8VWBdEA/ngNeSNxC.kTYBtPfkclrus078aWGnwGSAkxAKGe6', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('pleblanc',  3, 'Leblanc',  'Pierre',  '15 Avenue des Alpes',    'Chambéry', '73000', 'p.leblanc@bib-chambery.fr',    '1978-11-05', '$2a$10$eKeqZwdkRkIccdPFFlxfj.z4SfQGkDkrGq59lf7CjFYFs.yUHG1Rq', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('sberard',   4, 'Bérard',   'Sophie',  '22 Rue du Lac',          'Annecy',   '74000', 'sophie.berard@media-annecy.fr','1995-01-30', '$2a$10$7ceGRVpmQYAphwcfTngrjOAX3Q631t4lGasE0Ow.F4dvEy19Thdo2', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('lmoreau',   5, 'Moreau',   'Lucas',   '9 Impasse de l''Université','Grenoble','38400','l.moreau@bu-grenoble.fr',     '1988-09-14', '$2a$10$xi659TkIMOdZVZPflRFSv.4OrOHVd7KiFDvQMIMHQQvW5oiVyI8f6', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
 
