@@ -4,8 +4,10 @@ import com.usmb.but3.td4biblio.entity.Livre;
 import com.usmb.but3.td4biblio.security.SessionManager;
 import com.usmb.but3.td4biblio.service.EditeurService;
 import com.usmb.but3.td4biblio.service.LivreService;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -38,42 +40,51 @@ public class LivreView extends VerticalLayout {
         this.livreService = livreService;
         this.editeurService = editeurService;
 
-        // Passe les services à l'éditeur
-        this.editor = new LivreEditor(livreService, editeurService);
-
-        this.grid = new Grid<>(Livre.class);
-        this.filter = new TextField();
+        this.editor   = new LivreEditor(livreService, editeurService);
+        this.grid     = new Grid<>(Livre.class);
+        this.filter   = new TextField();
         this.addNewBtn = new Button("Ajouter un livre", VaadinIcon.PLUS.create());
         addNewBtn.getStyle().set("visibility", "hidden");
-        
-        // Construction de la mise en page
+
         HorizontalLayout actions = new HorizontalLayout(filter, addNewBtn);
         add(actions, grid, editor);
-        
+
         grid.setHeight("300px");
-        grid.setColumns( "titreLivre", "nbPages", "datePublication");
-        grid.addColumn(livre -> livre.getIdEditeur() != null ? livre.getIdEditeur().getNom() : "Aucun")
-        .setHeader("Éditeur");
-        
-        
+        grid.setColumns("titreLivre", "nbPages", "datePublication");
+        grid.addColumn(livre -> livre.getIdEditeur() != null
+                ? livre.getIdEditeur().getNom() : "Aucun")
+            .setHeader("Éditeur");
+
         filter.setPlaceholder("Filtrer par titre");
         filter.setValueChangeMode(ValueChangeMode.LAZY);
         filter.addValueChangeListener(e -> listLivres(e.getValue()));
-        
-        if (isBib) {
-            addNewBtn.getStyle().set("visibility", "visible");
-            grid.asSingleSelect().addValueChangeListener(e -> editor.editLivre(e.getValue()));
-            
-            addNewBtn.addClickListener(e -> editor.editLivre(new Livre()));
 
+        if (isBib) {
+            // ── Bibliothécaire : comportement d'édition inchangé ─────────
+            addNewBtn.getStyle().set("visibility", "visible");
+            grid.asSingleSelect().addValueChangeListener(
+                    e -> editor.editLivre(e.getValue()));
+            addNewBtn.addClickListener(e -> editor.editLivre(new Livre()));
             editor.setChangeHandler(() -> {
                 editor.setVisible(false);
                 listLivres(filter.getValue());
             });
-            editor.setCancelHandler(() -> {
-                grid.deselectAll();
+            editor.setCancelHandler(() -> grid.deselectAll());
+
+        } else {
+            // ── Emprunteur / non connecté : clic → page détail ───────────
+            grid.addThemeVariants(GridVariant.LUMO_ROW_STRIPES);
+            // Curseur pointeur pour indiquer que la ligne est cliquable
+            grid.getStyle().set("cursor", "pointer");
+
+            grid.addItemClickListener(event -> {
+                Livre livre = event.getItem();
+                if (livre != null) {
+                    UI.getCurrent().navigate("livre/detail/" + livre.getIdDocument());
+                }
             });
         }
+
         listLivres(null);
     }
 
