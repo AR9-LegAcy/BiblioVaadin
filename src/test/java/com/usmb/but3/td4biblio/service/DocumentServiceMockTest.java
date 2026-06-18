@@ -4,14 +4,20 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Sort;
 
+import com.usmb.but3.td4biblio.entity.Bibliothecaire;
 import com.usmb.but3.td4biblio.entity.Bibliotheque;
 import com.usmb.but3.td4biblio.entity.Document;
 import com.usmb.but3.td4biblio.entity.Stocker;
+import com.usmb.but3.td4biblio.entity.StockerId;
 import com.usmb.but3.td4biblio.repository.DocumentRepo;
+import com.usmb.but3.td4biblio.repository.EmprunterRepo;
 import com.usmb.but3.td4biblio.repository.StockerRepo;
+import com.usmb.but3.td4biblio.security.SessionManager;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -30,6 +36,9 @@ public class DocumentServiceMockTest {
 
     @Mock
     private IsbnGeneratorService isbnGeneratorService;
+
+    @Mock
+    private EmprunterRepo emprunterRepo;
 
     @Mock
     private StockerRepo stockerRepo;
@@ -153,11 +162,31 @@ public class DocumentServiceMockTest {
 
     @Test
     void testDeleteDocumentById() {
-        // Act
-        documentService.deleteDocumentById(1);
-
-        // Assert
-        verify(documentRepo, times(1)).deleteById(1);
+    
+        Document doc = new Document();
+        doc.setIdDocument(1);
+    
+        when(documentRepo.findById(1))
+                .thenReturn(Optional.of(doc));
+    
+        try (MockedStatic<SessionManager> sessionMock =
+                     Mockito.mockStatic(SessionManager.class)) {
+                    
+            Bibliotheque bibliotheque = new Bibliotheque();
+            bibliotheque.setId(1);
+                    
+            Bibliothecaire bibliothecaire = new Bibliothecaire();
+            bibliothecaire.setBibliotheque(bibliotheque);
+                    
+            sessionMock.when(SessionManager::getBibliothecaire)
+                    .thenReturn(bibliothecaire);
+                    
+            documentService.deleteDocumentById(1);
+                    
+            verify(emprunterRepo).deleteByIdDocument_IdDocument(1);
+            verify(stockerRepo).deleteById(any(StockerId.class));
+            verify(documentRepo).delete(doc);
+        }
     }
 
     @Test

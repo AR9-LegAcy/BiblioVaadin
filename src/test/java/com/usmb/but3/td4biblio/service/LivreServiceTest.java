@@ -1,5 +1,26 @@
 package com.usmb.but3.td4biblio.service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+
+import org.junit.jupiter.api.AfterAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.usmb.but3.td4biblio.entity.Bibliothecaire;
 import com.usmb.but3.td4biblio.entity.Bibliotheque;
 import com.usmb.but3.td4biblio.entity.Document;
 import com.usmb.but3.td4biblio.entity.Editeur;
@@ -10,19 +31,9 @@ import com.usmb.but3.td4biblio.repository.DocumentRepo;
 import com.usmb.but3.td4biblio.repository.EditeurRepo;
 import com.usmb.but3.td4biblio.repository.LivreRepo;
 import com.usmb.but3.td4biblio.repository.TypeDocumentRepo;
+import com.vaadin.flow.server.VaadinSession;
 
-import org.junit.jupiter.api.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
-
-@SpringBootTest
+@SpringBootTest(properties = {"spring.flyway.enabled=false"})
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Transactional
 public class LivreServiceTest {
@@ -53,6 +64,24 @@ public class LivreServiceTest {
 
     private Livre livre1;
     private Livre livre2;
+
+    @BeforeEach
+    void mockVaadinSession() {
+    
+        Bibliotheque biblio = bibliotheque; // déjà créé en DB
+    
+        Bibliothecaire mockUser = new Bibliothecaire();
+        mockUser.setPseudo("admin_test");
+        mockUser.setNom("TEST");
+        mockUser.setPrenom("TEST");
+        mockUser.setBibliotheque(biblio); // ⭐ IMPORTANT
+    
+        VaadinSession session = mock(VaadinSession.class);
+        VaadinSession.setCurrent(session);
+    
+        when(session.getAttribute(anyString()))
+                .thenReturn(mockUser);
+    }
 
     @BeforeAll
     void setUp() {
@@ -108,7 +137,7 @@ public class LivreServiceTest {
                 "PDF",
                 LocalDate.now(),
                 "A1",
-                "ISBN-001",
+                "9780000000001",
                 true,
                 "BON",
                 LocalDateTime.now(),
@@ -125,7 +154,7 @@ public class LivreServiceTest {
                 "PDF",
                 LocalDate.now(),
                 "A2",
-                "ISBN-002",
+                "9780000000002",
                 true,
                 "BON",
                 LocalDateTime.now(),
@@ -228,19 +257,23 @@ public class LivreServiceTest {
 
     @Test
     void testDeleteLivre() {
+
+        // ARRANGE
         Livre temp = livreRepo.save(new Livre(
                 null,
                 "Temp Livre",
                 100,
                 LocalDate.now(),
-                null,
-                null,
+                LocalDateTime.now(),
+                LocalDateTime.now(),
                 editeur,
                 document1
         ));
 
+        // ACT
         livreService.deleteLivreById(temp.getIdDocument());
 
+        // ASSERT
         assertTrue(livreRepo.findById(temp.getIdDocument()).isEmpty());
     }
 

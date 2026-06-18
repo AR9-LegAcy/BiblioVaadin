@@ -1,23 +1,32 @@
 package com.usmb.but3.td4biblio.service;
 
-import com.usmb.but3.td4biblio.entity.*;
-import com.usmb.but3.td4biblio.repository.*;
-
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.AfterAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestInstance.Lifecycle;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 
-@SpringBootTest
+import com.usmb.but3.td4biblio.entity.Auteur;
+import com.usmb.but3.td4biblio.entity.Classer;
+import com.usmb.but3.td4biblio.entity.TypeAuteur;
+import com.usmb.but3.td4biblio.repository.AuteurRepo;
+import com.usmb.but3.td4biblio.repository.ClasserRepo;
+import com.usmb.but3.td4biblio.repository.TypeAuteurRepo;
+
+@SpringBootTest(properties = {"spring.flyway.enabled=false"})
 @Transactional
+@TestInstance(Lifecycle.PER_CLASS)
 public class AuteurServiceTest {
 
     @Autowired
@@ -41,8 +50,8 @@ public class AuteurServiceTest {
 
     private Auteur MARTIN;
     private Auteur DURAND;
-    private Auteur DUMAS;
-    private Auteur ZOLA;
+    private Auteur BAUDELAIRE;
+    private Auteur SARTRE;
 
     private TypeAuteur ROMAN;
     private TypeAuteur POESIE;
@@ -93,26 +102,26 @@ public class AuteurServiceTest {
                 null
         ));
 
-        DUMAS = auteurRepo.save(new Auteur(
+        BAUDELAIRE = auteurRepo.save(new Auteur(
                 null,
-                "Dumas",
-                "Alexandre",
-                LocalDate.of(1802, 7, 24),
-                LocalDate.of(1870, 12, 5),
+                "Baudelaire",
+                "Charles",
+                LocalDate.of(1821, 4, 9),
+                LocalDate.of(1867, 8, 31),
                 "France",
-                "Villers-Cotterêts",
+                "Paris",
                 "Française",
                 null,
                 null,
                 null
         ));
 
-        ZOLA = auteurRepo.save(new Auteur(
+        SARTRE = auteurRepo.save(new Auteur(
                 null,
-                "Zola",
-                "Émile",
-                LocalDate.of(1840, 4, 2),
-                LocalDate.of(1902, 9, 29),
+                "Sartre",
+                "Jean-Paul",
+                LocalDate.of(1905, 6, 21),
+                LocalDate.of(1980, 4, 15),
                 "France",
                 "Paris",
                 "Française",
@@ -123,16 +132,16 @@ public class AuteurServiceTest {
 
         auteursCree.add(MARTIN);
         auteursCree.add(DURAND);
-        auteursCree.add(DUMAS);
-        auteursCree.add(ZOLA);
+        auteursCree.add(BAUDELAIRE);
+        auteursCree.add(SARTRE);
 
         // =========================
         // CLASSER (LIENS)
         // =========================
         classersCree.add(classerRepo.save(new Classer(null, null, MARTIN, ROMAN)));
         classersCree.add(classerRepo.save(new Classer(null, null, DURAND, POESIE)));
-        classersCree.add(classerRepo.save(new Classer(null, null, DUMAS, ROMAN)));
-        classersCree.add(classerRepo.save(new Classer(null, null, ZOLA, ROMAN)));
+        classersCree.add(classerRepo.save(new Classer(null, null, BAUDELAIRE, ROMAN)));
+        classersCree.add(classerRepo.save(new Classer(null, null, SARTRE, ROMAN)));
     }
 
     // =========================
@@ -154,7 +163,7 @@ public class AuteurServiceTest {
     void testGetAllAuteurs() {
         List<Auteur> result = auteurService.getAllAuteurs();
 
-        assertEquals(7, result.size());
+        assertEquals(12, result.size());
     }
 
     @Test
@@ -208,7 +217,7 @@ public class AuteurServiceTest {
 
     @Test
     void testDeleteAuteur() {
-        Integer id = ZOLA.getId();
+        Integer id = SARTRE.getId();
 
         auteurService.deleteAuteurById(id);
 
@@ -225,9 +234,9 @@ public class AuteurServiceTest {
 
     @Test
     void testGetByNomAndPrenom() {
-        List<Auteur> result = auteurService.getAuteursByNomAndPrenom("Dumas", "Alexandre");
+        List<Auteur> result = auteurService.getAuteursByNomAndPrenom("Baudelaire", "Charles");
 
         assertEquals(1, result.size());
-        assertEquals(DUMAS.getId(), result.get(0).getId());
+        assertEquals(BAUDELAIRE.getId(), result.get(0).getId());
     }
 }

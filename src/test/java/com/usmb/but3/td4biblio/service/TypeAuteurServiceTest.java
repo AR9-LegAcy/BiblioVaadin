@@ -1,11 +1,14 @@
 package com.usmb.but3.td4biblio.service;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 import java.time.LocalDateTime;
 import java.util.List;
 
 import org.junit.jupiter.api.AfterAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -16,7 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.usmb.but3.td4biblio.entity.TypeAuteur;
 import com.usmb.but3.td4biblio.repository.TypeAuteurRepo;
 
-@SpringBootTest
+@SpringBootTest(properties = {"spring.flyway.enabled=false"})
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Transactional
 class TypeAuteurServiceTest {
@@ -36,7 +39,7 @@ class TypeAuteurServiceTest {
         auteur = typeAuteurRepo.save(
             new TypeAuteur(
                 null,
-                "Auteur",
+                "Biographe",
                 LocalDateTime.now(),
                 LocalDateTime.now()
             )
@@ -45,7 +48,7 @@ class TypeAuteurServiceTest {
         illustrateur = typeAuteurRepo.save(
             new TypeAuteur(
                 null,
-                "Illustrateur",
+                "Ghostwriter",
                 LocalDateTime.now(),
                 LocalDateTime.now()
             )
@@ -70,7 +73,7 @@ class TypeAuteurServiceTest {
                 typeAuteurService.getTypeAuteurById(auteur.getId());
 
         assertNotNull(result);
-        assertEquals("Auteur", result.getNom());
+        assertEquals("Biographe", result.getNom());
     }
 
     @Test
@@ -144,7 +147,7 @@ class TypeAuteurServiceTest {
     void testGetTypeAuteursByNom() {
 
         List<TypeAuteur> result =
-                typeAuteurService.getTypeAuteursByNom("Auteur");
+                typeAuteurService.getTypeAuteursByNom("Biographe");
 
         assertFalse(result.isEmpty());
     }
@@ -162,7 +165,7 @@ class TypeAuteurServiceTest {
     void testGetTypeAuteursByNomLike() {
 
         List<TypeAuteur> result =
-                typeAuteurService.getTypeAuteursByNomLike("%uteur%");
+                typeAuteurService.getTypeAuteursByNomLike("%iogra%");
 
         assertFalse(result.isEmpty());
     }

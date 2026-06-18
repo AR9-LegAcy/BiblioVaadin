@@ -8,19 +8,21 @@ import com.usmb.but3.td4biblio.repository.BibliothequeRepo;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.TestInstance.Lifecycle;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest
+@SpringBootTest(properties = {"spring.flyway.enabled=false"})
 @Transactional
+@TestInstance(Lifecycle.PER_CLASS)
 public class BibliothecaireServiceTest {
 
     @Autowired
@@ -38,9 +40,6 @@ public class BibliothecaireServiceTest {
     // =========================
     // TRACKING TEST DATA
     // =========================
-    private final List<Bibliothecaire> bibliothecairesCree = new ArrayList<>();
-    private final List<Bibliotheque> bibliothequesCree = new ArrayList<>();
-
     private Bibliothecaire BIB1;
     private Bibliothecaire BIB2;
 
@@ -67,8 +66,6 @@ public class BibliothecaireServiceTest {
                 null,
                 null
         ));
-
-        bibliothequesCree.add(BIBLIO1);
 
         // =========================
         // BIBLIOTHECAIRES TEST
@@ -102,9 +99,6 @@ public class BibliothecaireServiceTest {
                 null,
                 BIBLIO1
         ));
-
-        bibliothecairesCree.add(BIB1);
-        bibliothecairesCree.add(BIB2);
     }
 
     // =========================
@@ -112,9 +106,11 @@ public class BibliothecaireServiceTest {
     // =========================
     @AfterAll
     void tearDown() {
+        bibliothecaireRepo.deleteAll(List.of(BIB1, BIB2));
+        bibliothecaireRepo.flush();
 
-        bibliothecaireRepo.deleteAll(bibliothecairesCree);
-        bibliothequeRepo.deleteAll(bibliothequesCree);
+        bibliothequeRepo.delete(BIBLIO1);
+        bibliothequeRepo.flush();
     }
 
     // =========================
@@ -156,8 +152,6 @@ public class BibliothecaireServiceTest {
 
         Bibliothecaire saved = bibliothecaireService.saveBibliothecaire(b);
 
-        bibliothecairesCree.add(saved);
-
         assertNotNull(saved.getMotDePasse());
         assertTrue(passwordEncoder.matches(
                 LocalDate.of(1992, 3, 15).format(java.time.format.DateTimeFormatter.ofPattern("ddMMyyyy")),
@@ -182,8 +176,6 @@ public class BibliothecaireServiceTest {
         bibliothecaireService.deleteBibliothecaireByPseudo("test_user2");
 
         assertNull(bibliothecaireRepo.findByPseudo("test_user2"));
-
-        bibliothecairesCree.remove(BIB2);
     }
 
     @Test

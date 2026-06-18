@@ -13,7 +13,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest
+@SpringBootTest(properties = {"spring.flyway.enabled=false"})
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Transactional
 public class BibliothequeServiceTest {
@@ -79,7 +79,7 @@ public class BibliothequeServiceTest {
 
     @AfterAll
     void tearDown() {
-        // 🔥 Nettoyage uniquement des données créées par les tests
+        // Nettoyage uniquement des données créées par les tests
         bibliothequeRepo.deleteAll(List.of(BIBLIO1, BIBLIO2, BIBLIO3));
     }
 

@@ -17,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.usmb.but3.td4biblio.entity.*;
 import com.usmb.but3.td4biblio.repository.*;
 
-@SpringBootTest
+@SpringBootTest(properties = {"spring.flyway.enabled=false"})
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Transactional
 public class EmprunterServiceTest {

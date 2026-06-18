@@ -13,7 +13,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest
+@SpringBootTest(properties = {"spring.flyway.enabled=false"})
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @Transactional
 class TypeEvenementServiceTest {
