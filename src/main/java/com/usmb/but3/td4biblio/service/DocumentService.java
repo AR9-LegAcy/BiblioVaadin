@@ -9,11 +9,15 @@ import org.springframework.stereotype.Service;
 
 import com.usmb.but3.td4biblio.entity.Bibliotheque;
 import com.usmb.but3.td4biblio.entity.Document;
+import com.usmb.but3.td4biblio.entity.Livre;
 import com.usmb.but3.td4biblio.entity.Stocker;
 import com.usmb.but3.td4biblio.entity.StockerId;
 import com.usmb.but3.td4biblio.entity.TypeDocument;
+import com.usmb.but3.td4biblio.repository.BibliothequeRepo;
 import com.usmb.but3.td4biblio.repository.DocumentRepo;
+import com.usmb.but3.td4biblio.repository.EcrireRepo;
 import com.usmb.but3.td4biblio.repository.EmprunterRepo;
+import com.usmb.but3.td4biblio.repository.LivreRepo;
 import com.usmb.but3.td4biblio.repository.StockerRepo;
 import com.usmb.but3.td4biblio.security.SessionManager;
 
@@ -27,7 +31,9 @@ public class DocumentService {
     private final IsbnGeneratorService isbnGeneratorService;
     private final StockerRepo stockerRepo;
     private final EmprunterRepo emprunterRepo;
-
+    private final LivreRepo livreRepo;
+    private final EcrireRepo ecrireRepo;
+    private final BibliothequeRepo bibliothequeRepo;
 
     public List<Document> getAllDocuments() {
         return documentRepo.findAll(Sort.by(Sort.Direction.ASC, "descriptionDocument"));
@@ -132,5 +138,77 @@ public class DocumentService {
 
     public List<Document> getDocumentsByCodeEmplacement(String codeEmplacement) {
         return documentRepo.findByCodeEmplacement(codeEmplacement);
+    }
+
+    public List<Document> searchDocuments(String critere, String mode, String value) {
+
+        List<Document> all = getAllDocuments();
+
+        if (value == null || value.isBlank()) {
+            return all;
+        }
+
+        return all.stream()
+                .filter(d -> match(d, critere, mode, value))
+                .toList();
+    }
+
+    private boolean match(Document d, String critere, String mode, String value) {
+
+        String source = "";
+
+        switch (critere) {
+
+            case "Titre" -> {
+
+                Livre livre = livreRepo.findById(d.getIdDocument()).orElse(null);
+
+                source = (livre != null) ? livre.getTitreLivre() : "";
+            }
+
+            case "Type" -> {
+
+                source = (d.getTypeDocument() != null)
+                        ? d.getTypeDocument().getNomTypeDocument()
+                        : "";
+            }
+
+            case "Auteur" -> {
+
+                Livre livre = livreRepo.findById(d.getIdDocument()).orElse(null);
+
+                if (livre != null) {
+
+                    var ecritures = ecrireRepo.findByIdDocument(livre);
+
+                    source = ecritures.stream()
+                            .map(e -> e.getIdAuteur().getPrenom() + " " + e.getIdAuteur().getNom())
+                            .reduce("", (a, b) -> a + " " + b);
+                }
+            }
+
+            case "Bibliothèque" -> {
+
+                var stockages = stockerRepo.findByIdDocument(d.getIdDocument());
+
+                source = stockages.stream()
+                        .map(s -> bibliothequeRepo.findById(s.getIdBibliotheque())
+                                .map(b -> b.getNom())
+                                .orElse(""))
+                        .reduce("", (a, b) -> a + " " + b);
+            }
+        }
+
+        source = source.toLowerCase();
+        value = value.toLowerCase();
+
+        return switch (mode) {
+
+            case "Égal à" -> source.equals(value);
+
+            case "Débute par" -> source.startsWith(value);
+
+            default -> source.contains(value);
+        };
     }
 }
