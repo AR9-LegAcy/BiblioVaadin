@@ -1,6 +1,6 @@
 INSERT INTO biblio.EVENEMENT (ID_TYPE_EVENEMENT, ID_BIBLIOTHEQUE, TITRE_EVENEMENT, DESCRIPTION_EVENEMENT, DATE_DEBUT, DATE_FIN, CREATED_AT_EVENEMENT, UPDATED_AT_EVENEMENT) VALUES
-    (1, 1, 'Conférence Victor Hugo',           'Présentation de l''œuvre de Victor Hugo',          '2024-09-15', '2024-09-15', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (2, 2, 'Atelier polar jeunesse',            'Atelier d''écriture policière pour les 10-14 ans', '2024-10-05', '2024-10-05', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (3, 3, 'Exposition BD franco-belge',        'Exposition sur la BD franco-belge des années 60',  '2024-11-01', '2024-11-30', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (4, 4, 'Dédicace auteurs locaux',           'Rencontre et dédicace avec des auteurs savoyards', '2024-10-20', '2024-10-20', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
-    (5, 5, 'Club de lecture - Zola',            'Discussion autour de Germinal d''Émile Zola',      '2024-09-28', '2024-09-28', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+    (1, 1, 'Conférence Victor Hugo',           'Présentation de l''œuvre de Victor Hugo',          '2026-06-15', '2026-06-20', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    (2, 2, 'Atelier polar jeunesse',            'Atelier d''écriture policière pour les 10-14 ans', '2026-10-05', '2026-10-05', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    (3, 3, 'Exposition BD franco-belge',        'Exposition sur la BD franco-belge des années 60',  '2026-11-01', '2026-11-30', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    (4, 4, 'Dédicace auteurs locaux',           'Rencontre et dédicace avec des auteurs savoyards', '2026-10-20', '2026-10-20', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    (5, 5, 'Club de lecture - Zola',            'Discussion autour de Germinal d''Émile Zola',      '2026-09-28', '2026-09-28', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
